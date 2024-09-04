@@ -1,0 +1,11 @@
+# Variables de entorno
+.env
+
+# Archivos de node
+node_modules/
+
+# Base de datos
+/postgres
+
+# Build de producción
+/dist
