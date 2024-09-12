@@ -1,5 +1,7 @@
 import express, { Router } from 'express'
 import cors from 'cors'
+import { ExceptionHandlerMiddleware } from '@presentation/middlewares'
+import { NotFoundException } from '@/domain/errors/exceptions'
 
 type Mode = 'development' | 'production'
 
@@ -30,6 +32,14 @@ export class Server {
 
     //* Routes
     this.app.use(this.routes)
+
+    //* Routes error handling
+    this.app.use((req, res, next) => {
+      new NotFoundException()
+    })
+
+    // * Error filter handler
+    this.app.use(ExceptionHandlerMiddleware.handle)
 
     this.app.listen(this.port, () => {
       if (this.mode === 'development')

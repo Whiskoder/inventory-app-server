@@ -13,13 +13,17 @@
       "@/*": ["src/*"],
       "@config/*": ["src/config/*"],
       "@core/*": ["src/core/*"],
-      "@presentation/*": ["src/presentation/*"]
+      "@presentation/*": ["src/presentation/*"],
+      "@domain/*": ["src/domain/*"],
+      "@db/*": ["src/databases/*"]
     },
     "resolveJsonModule": true, // Allow importing .json files
     "rootDir": "./src",
     "skipLibCheck": true, // Skip type checking of all declaration files (*.d.ts)
     "strict": true, // Enable all strict type-checking options
-    "target": "es2016" // Compile to latest ECMAScript version
+    "target": "es2016", // Compile to latest ECMAScript version
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

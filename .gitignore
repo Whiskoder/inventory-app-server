@@ -9,3 +9,5 @@ node_modules/
 
 # Build de producción
 /dist
+
+migrations/
