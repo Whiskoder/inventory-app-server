@@ -5,7 +5,8 @@ import { RegisterUserDto, LoginUserDto } from '@domain/dtos/auth'
 import {
   BadRequestException,
   InternalServerErrorException,
-} from '@/domain/errors'
+} from '@domain/errors'
+import { HTTPResponseDto } from '@domain/dtos/shared'
 // import { EmailService } from '@presentation/services'
 
 export class AuthService {
@@ -40,8 +41,8 @@ export class AuthService {
     if (!token)
       throw new InternalServerErrorException('Unable to generate token')
 
-    //! Send user entity to avoid sending password in response
-    return { user: userEntity, token }
+    //* Send user entity to avoid sending password in response
+    return HTTPResponseDto.created(undefined, { user: userEntity, token })
   }
 
   public async loginUser(loginUserDto: LoginUserDto) {
@@ -67,7 +68,10 @@ export class AuthService {
     if (!token)
       throw new InternalServerErrorException('Unable to generate token')
 
-    //! Send user entity to avoid sending password in response
-    return { user: userEntity, token }
+    //* Send user entity to avoid sending password in response
+    return HTTPResponseDto.ok(undefined, {
+      user: userEntity,
+      token,
+    })
   }
 }

@@ -13,8 +13,8 @@ export class AuthController {
   ) => {
     try {
       const dto = await LoginUserDto.create(req.body)
-      const user = await this.authService.loginUser(dto)
-      res.json(user)
+      const response = await this.authService.loginUser(dto)
+      res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
@@ -28,8 +28,8 @@ export class AuthController {
   ) => {
     try {
       const dto = await RegisterUserDto.create(req.body)
-      const user = await this.authService.registerUser(dto)
-      res.json(user)
+      const response = await this.authService.registerUser(dto)
+      res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }

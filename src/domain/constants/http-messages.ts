@@ -1,5 +1,8 @@
 export class HTTPMessages {
-  static readonly OK: string = 'OK'
+  static readonly OK: string = 'Success'
+  static readonly ACCEPTED: string = 'Accepted'
+  static readonly NO_CONTENT: string = 'No Content'
+  static readonly PARTIAL_CONTENT: string = 'Partial Content'
   static readonly CREATED: string = 'Created'
   static readonly BAD_REQUEST: string = 'Bad Request'
   static readonly UNAUTHORIZED: string = 'Unauthorized'

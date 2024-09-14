@@ -1,11 +1,11 @@
-import { BadRequestException } from '@/domain/errors'
 import { HTTPStatusCode } from '@domain/enums/http'
 import { IHTTPError } from '@domain/extensions'
 import { isArray, ValidationError } from 'class-validator'
 import { Request, Response, NextFunction } from 'express'
 
 export class ExceptionHandlerMiddleware {
-  public static isValidationError(error: IHTTPError, res: Response): boolean {
+  // This method get class-validator validation errors and send them to the client in a structured format.
+  private static isValidationError(error: IHTTPError, res: Response): boolean {
     if (!isArray(error)) return false
 
     const constraints = error.reduce((message: string[], err) => {
@@ -20,15 +20,19 @@ export class ExceptionHandlerMiddleware {
     if (constraints.length < 0) return false
 
     const statusCode = HTTPStatusCode.BadRequest
-    const statusCodeName = HTTPStatusCode[statusCode]
 
     res.status(statusCode).send({
       statusCode,
-      error: statusCodeName,
+      error: ExceptionHandlerMiddleware.getHTTPMessage(statusCode),
       message: constraints,
     })
 
     return true
+  }
+
+  private static getHTTPMessage(statusCode: number): string {
+    // This regex will add a space between lowercase and uppercase letters
+    return HTTPStatusCode[statusCode].replace(/([a-z])([A-Z])/g, '$1 $2')
   }
 
   public static handle = (
@@ -37,26 +41,29 @@ export class ExceptionHandlerMiddleware {
     res: Response,
     _next: NextFunction
   ) => {
+    // Check if error origin is from class-validator
     if (ExceptionHandlerMiddleware.isValidationError(error, res)) return
+
+    // 23505 code is throw when a duplicate key is found in the database
     if (error?.code === '23505') {
       const statusCode = HTTPStatusCode.BadRequest
-      const statusCodeName = HTTPStatusCode[statusCode]
       res.status(statusCode).send({
         statusCode,
-        error: statusCodeName,
+        error: ExceptionHandlerMiddleware.getHTTPMessage(statusCode),
         message: error?.detail || 'Duplicate entry',
       })
       return
     }
 
     const statusCode = error.statusCode || 500
-    const statusCodeName = HTTPStatusCode[statusCode]
 
+    // Avoid sending stack trace to client in production
     const message =
       statusCode === 500
         ? 'Internal Server Error'
         : error.message || 'Something went wrong'
 
+    // TODO: Implement winston logger
     console.log({
       req: {
         method: req.method,
@@ -72,8 +79,10 @@ export class ExceptionHandlerMiddleware {
       error,
     })
 
-    return res
-      .status(statusCode)
-      .send({ statusCode, error: statusCodeName, message })
+    return res.status(statusCode).send({
+      statusCode,
+      error: ExceptionHandlerMiddleware.getHTTPMessage(statusCode),
+      message,
+    })
   }
 }

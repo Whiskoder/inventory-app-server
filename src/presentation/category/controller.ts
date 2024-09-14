@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 import { CategoryService } from '@presentation/services'
 import { CreateCategoryDto, UpdateCategoryDto } from '@domain/dtos/category'
 import { CreatePaginationDto } from '@domain/dtos/shared'
-import { plainToClass, plainToInstance } from 'class-transformer'
 
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -15,8 +14,8 @@ export class CategoryController {
   ) => {
     try {
       const dto = await CreateCategoryDto.create(req.body)
-      const category = await this.categoryService.createCategory(dto)
-      res.json(category)
+      const response = await this.categoryService.createCategory(dto)
+      res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
@@ -30,8 +29,8 @@ export class CategoryController {
   ) => {
     try {
       const dto = await CreatePaginationDto.create(req.query)
-      const categories = await this.categoryService.getAllCategories(dto)
-      res.json(categories)
+      const response = await this.categoryService.getAllCategories(dto)
+      res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
@@ -45,8 +44,9 @@ export class CategoryController {
   ) => {
     try {
       const id = +req.params.id
-      const categories = await this.categoryService.getCategoryById(id)
-      res.json(categories)
+      const response = await this.categoryService.getCategoryById(id)
+      console.log('xd')
+      res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
@@ -61,8 +61,8 @@ export class CategoryController {
     try {
       const id = +req.params.id
       const dto = await UpdateCategoryDto.create(req.body)
-      const category = await this.categoryService.updateCategory(id, dto)
-      res.json(category)
+      const response = await this.categoryService.updateCategory(id, dto)
+      res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
@@ -76,8 +76,8 @@ export class CategoryController {
   ) => {
     try {
       const id = +req.params.id
-      const category = await this.categoryService.deleteCategory(id)
-      res.json(category)
+      const response = await this.categoryService.deleteCategory(id)
+      res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
