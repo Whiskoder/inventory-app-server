@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { UnauthorizedException } from '@domain/errors'
+import { ForbiddenException, UnauthorizedException } from '@domain/errors'
 import { JWT } from '@config/plugins'
 import { AppDataSource } from '@db/datasources'
 import { User } from '@db/models'

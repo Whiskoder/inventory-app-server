@@ -1,6 +1,7 @@
 import createError from 'http-errors'
 import { HTTPStatusCode } from '@/domain/enums/http/http-status-codes.enum'
 import { HTTPMessages } from '@domain/constants/http-messages'
+import { create } from 'domain'
 
 export class BadRequestException {
   constructor(message = HTTPMessages.BAD_REQUEST) {
@@ -11,6 +12,12 @@ export class BadRequestException {
 export class UnauthorizedException {
   constructor(message = HTTPMessages.UNAUTHORIZED) {
     throw createError(HTTPStatusCode.Unauthorized, message)
+  }
+}
+
+export class ForbiddenException {
+  constructor(message = HTTPMessages.FORBIDDEN) {
+    throw createError(HTTPStatusCode.Forbidden, message)
   }
 }
 

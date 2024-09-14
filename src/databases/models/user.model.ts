@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import { Order } from '@db/models'
-
-type Role = 'admin' | 'manager' | 'warehouseman' | 'accountant' | 'user'
+import { Role } from '@config/roles'
 
 @Entity({ name: 'users' })
 export class User {

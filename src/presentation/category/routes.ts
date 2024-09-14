@@ -3,7 +3,8 @@ import { CategoryController } from '@presentation/category/controller'
 import { CategoryService } from '@presentation/services'
 import { AppDataSource } from '@db/datasources'
 import { Category } from '@db/models'
-import { AuthMiddleware } from '@presentation/middlewares'
+import { AuthMiddleware, RoleMiddleware } from '@presentation/middlewares'
+import { Action, Resource } from '@config/roles'
 
 export class CategoryRoutes {
   static get routes(): Router {
@@ -13,9 +14,16 @@ export class CategoryRoutes {
     const categoryService = new CategoryService(categoryRepository)
     const controller = new CategoryController(categoryService)
 
-    // TODO: create a middleware for authorization role based
+    const resource = Resource.CATEGORY
+
+    // TODO: Simplify the process to add roles and permissions
+    // TODO: Refactor and move to AuthMiddleware
     router.use(AuthMiddleware.validateToken)
-    router.post('', controller.createCategory)
+    router.post(
+      '',
+      [RoleMiddleware.checkPermission(resource, Action.CREATE)],
+      controller.createCategory
+    )
     router.get('', controller.getAllCategories)
     router.get('/:id', controller.getCategoryById)
     router.put('/:id', controller.updateCategory)

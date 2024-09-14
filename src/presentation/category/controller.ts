@@ -45,7 +45,6 @@ export class CategoryController {
     try {
       const id = +req.params.id
       const response = await this.categoryService.getCategoryById(id)
-      console.log('xd')
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
