@@ -44,10 +44,13 @@ Modificar las variables de entorno según corresponda
 
 # Dependencias de desarrollo
 
+- [@types/bcrypt](https://www.npmjs.com/package/@types/bcrypt) - Tipado de bcryptjs para typescript
 - [@types/cors](https://www.npmjs.com/package/@types/cors) - Tipado de cors para typescript
 - [@types/express](https://www.npmjs.com/package/@types/express) - Tipado de Express para typescript
+- [@types/http-errors](https://www.npmjs.com/package/@types/http-errors) - Tipado de http-erros para typescript
 - [@types/jest](https://www.npmjs.com/package/@types/jest) - Tipado de jest para typescript
 - [@types/node](https://www.npmjs.com/package/@types/node) - Tipado de Node.js para typescript
+- [@types/nodemailer](https://www.npmjs.com/package/@types/nodemailer) - Tipado de nodemailer para typescript
 - [@types/supertest](https://www.npmjs.com/package/@types/supertest) - Tipado de supertest para typescript
 - [jest](https://jestjs.io/) - Librearía para testing
 - [rimraf](https://www.npmjs.com/package/rimraf) - Elimina archivos y directorios
@@ -59,10 +62,16 @@ Modificar las variables de entorno según corresponda
 
 # Dependencias de producción
 
+- [bcryptjs](https://www.npmjs.com/package/bcrypt) - Librería para encriptar información, se usa para evitar guardar las contraseñas de los usuarios de manera plana
+- [class-transformer](https://www.npmjs.com/package/class-transformer) - Transforma los datos enviadas en las peticiones
+- [class-validator](https://www.npmjs.com/package/class-validator) - Valida que los datos enviados en las peticiones sean los solicitados
 - [cors](https://www.npmjs.com/package/cors) - Middleware para habilitar CORS
 - [dotenv](https://www.npmjs.com/package/dotenv) - Carga variables de entorno desde un archivo .env
 - [env-var](https://www.npmjs.com/package/env-var) - Valida y verifica las variables de entorno
 - [express](https://www.npmjs.com/package/express) - Proporciona métodos y propiedades para manejar las solicitudes HTTP entrantes y generar respuestas.
+- [http-errors](https://www.npmjs.com/package/http-errors) - Facilita la creación de errores HTTP de manera más dinamica
+- [jose](https://www.npmjs.com/package/jose) - Librería con funciones para JWT
+- [nodemailer](https://www.npmjs.com/package/nodemailer) - Cliente para conectarse a servicios SMTP y envío de correos
 - [pg](https://www.npmjs.com/package/pg) - Cliente de PostgreSQL para Node.js
 - [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) - Proporciona metadatos de diseño para clases, propiedades y métodos
 - [typeorm](https://www.npmjs.com/package/typeorm) - ORM para Node.js
