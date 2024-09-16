@@ -3,7 +3,7 @@ import { CategoryController } from '@presentation/category/controller'
 import { CategoryService } from '@presentation/services'
 import { AppDataSource } from '@db/datasources'
 import { Category } from '@db/models'
-import { AuthMiddleware, RoleMiddleware } from '@presentation/middlewares'
+import { AuthMiddleware } from '@presentation/middlewares'
 import { Action, Resource } from '@config/roles'
 
 export class CategoryRoutes {
@@ -21,7 +21,7 @@ export class CategoryRoutes {
     router.use(AuthMiddleware.validateToken)
     router.post(
       '',
-      [RoleMiddleware.checkPermission(resource, Action.CREATE)],
+      [AuthMiddleware.checkPermission(resource, Action.CREATE)],
       controller.createCategory
     )
     router.get('', controller.getAllCategories)
