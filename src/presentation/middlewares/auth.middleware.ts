@@ -3,6 +3,7 @@ import { ForbiddenException, UnauthorizedException } from '@domain/errors'
 import { JWT } from '@config/plugins'
 import { AppDataSource } from '@db/datasources'
 import { User } from '@db/models'
+import { Action, Resource, RoleConfig } from '@config/roles'
 
 export class AuthMiddleware {
   public static async validateToken(
@@ -34,6 +35,24 @@ export class AuthMiddleware {
       next()
     } catch (e) {
       next(e)
+    }
+  }
+
+  public static checkPermission = (resource: Resource, action: Action) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+      const user = res.locals.user as User
+
+      user.roles.forEach((role) => {
+        const hasPermission =
+          RoleConfig[role].permissions[resource].includes(action)
+
+        if (!hasPermission)
+          throw new ForbiddenException(
+            'You do not have permission to perform this action'
+          )
+
+        next()
+      })
     }
   }
 }
