@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
     "baseUrl": "./",
     "esModuleInterop": true, // Enables emit interoperability between CommonJS and ES Modules
     "forceConsistentCasingInFileNames": true,
-    "lib": ["DOM", "ESNext"], // Include typings for DOM and latest ECMAScript features
-    "module": "commonjs", // Use ES modules
+    "lib": ["DOM", "ES2022"], // Include typings for DOM and latest ECMAScript features
+    "module": "CommonJS", // Use ES modules
     "moduleResolution": "node", // Use Node.js module resolution mechanism
     "noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statement
     "noImplicitReturns": true, // Report error when not all code paths in function return a value
@@ -21,7 +23,7 @@
     "rootDir": "./src",
     "skipLibCheck": true, // Skip type checking of all declaration files (*.d.ts)
     "strict": true, // Enable all strict type-checking options
-    "target": "es2016", // Compile to latest ECMAScript version
+    "target": "ES2022", // Compile to latest ECMAScript version
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },

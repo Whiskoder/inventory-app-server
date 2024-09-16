@@ -1,1 +1,1 @@
-export * from '@/databases/datasources/app.datasource'
+export * from '@db/datasources/app.datasource'

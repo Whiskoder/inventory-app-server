@@ -111,3 +111,4 @@ Modificar las variables de entorno según corresponda
 
 - `test:coverage`: `jest --coverage`
   - `jest --coverage` : Ejecuta las pruebas y muestra el coverage
+

@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm'
 import { envs } from '@config/plugins'
+import { join } from 'node:path'
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -10,7 +11,7 @@ export const AppDataSource = new DataSource({
   database: envs.DB_NAME,
   synchronize: envs.NODE_ENV === 'development' ? true : false,
   logging: envs.NODE_ENV === 'development' ? false : false,
-  entities: ['src/databases/models/*.model.ts'],
-  migrations: ['src/databases/migrations/*.ts'],
+  entities: [join(__dirname, '/src/databases/models', '*.model.ts')],
+  migrations: [join(__dirname, '/src/databases/migrations', '*.ts')],
   subscribers: [],
 })
