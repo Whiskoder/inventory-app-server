@@ -16,19 +16,37 @@ export class CategoryRoutes {
 
     const resource = Resource.CATEGORY
 
-    // TODO: Simplify the process to add roles and permissions
-    // TODO: Refactor and move to AuthMiddleware
     router.use(AuthMiddleware.validateToken)
+
     router.post(
       '',
       [AuthMiddleware.checkPermission(resource, Action.CREATE)],
       controller.createCategory
     )
-    router.get('', controller.getAllCategories)
-    router.get('/:id', controller.getCategoryById)
-    router.put('/:id', controller.updateCategory)
-    router.delete('/:id', controller.deleteCategory)
 
+    router.get(
+      '',
+      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      controller.getAllCategories
+    )
+
+    router.get(
+      '/:id',
+      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      controller.getCategoryById
+    )
+
+    router.put(
+      '/:id',
+      [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
+      controller.updateCategory
+    )
+
+    router.delete(
+      '/:id',
+      [AuthMiddleware.checkPermission(resource, Action.DELETE)],
+      controller.deleteCategory
+    )
     return router
   }
 }

@@ -3,10 +3,17 @@ import { isArray, ValidationError } from 'class-validator'
 
 import { HTTPStatusCode } from '@core/enums/http'
 import { IHTTPError } from '@core/extensions'
+import { AppLogger } from '../logger/app-logger'
+
+const logger = AppLogger.create('ExceptionHandler')
 
 export class ExceptionHandlerMiddleware {
   // This method get class-validator validation errors and send them to the client in a structured format.
-  private static isValidationError(error: IHTTPError, res: Response): boolean {
+  private static isValidationError(
+    error: IHTTPError,
+    req: Request,
+    res: Response
+  ): boolean {
     if (!isArray(error)) return false
 
     const constraints = error.reduce((message: string[], err) => {
@@ -43,7 +50,7 @@ export class ExceptionHandlerMiddleware {
     _next: NextFunction
   ) => {
     // Check if error origin is from class-validator
-    if (ExceptionHandlerMiddleware.isValidationError(error, res)) return
+    if (ExceptionHandlerMiddleware.isValidationError(error, req, res)) return
 
     // 23505 code is throw when a duplicate key is found in the database
     if (error?.code === '23505') {
@@ -64,21 +71,11 @@ export class ExceptionHandlerMiddleware {
         ? 'Internal Server Error'
         : error.message || 'Something went wrong'
 
-    // TODO: Implement winston logger
-    console.log({
-      req: {
-        method: req.method,
-        url: req.originalUrl,
-        body: req.body,
-        query: req.query,
-        params: req.params,
-      },
-      res: {
-        statusCode: res.statusCode,
-        message,
-      },
-      error,
-    })
+    if (statusCode >= 500) {
+      logger.error(error.stack)
+    } else {
+      logger.httpError(req, res, error)
+    }
 
     return res.status(statusCode).send({
       statusCode,

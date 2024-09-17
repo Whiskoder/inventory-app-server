@@ -1,10 +1,6 @@
 import { Repository } from 'typeorm'
 
-import {
-  CreatePaginationDto,
-  HTTPResponseDto,
-  PaginationDto,
-} from '@modules/shared/dtos'
+import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
 import { BadRequestException, NotFoundException } from '@core/errors'
 import { Category } from '@modules/category/models'
 import { CreateCategoryDto, UpdateCategoryDto } from '@modules/category/dtos'
@@ -26,8 +22,8 @@ export class CategoryService {
     })
   }
 
-  public async getAllCategories(createPaginationDto: CreatePaginationDto) {
-    const { limit, skip, page: currentPage } = createPaginationDto
+  public async getAllCategories(paginationDto: PaginationDto) {
+    const { limit, skip, page: currentPage } = paginationDto
     const [categories, totalItems] = await this.categoryRepository.findAndCount(
       {
         take: limit,
@@ -35,10 +31,14 @@ export class CategoryService {
       }
     )
 
-    const pagination = new PaginationDto({ limit, currentPage, totalItems })
+    const pagination = PaginationDto.calculate({
+      limit,
+      currentPage,
+      totalItems,
+    })
 
     if (!totalItems) throw new NotFoundException('No categories found')
-    if (totalItems < createPaginationDto.skip)
+    if (totalItems < paginationDto.skip)
       throw new BadRequestException(
         `Page out of range, total pages: ${pagination.totalPages} `
       )

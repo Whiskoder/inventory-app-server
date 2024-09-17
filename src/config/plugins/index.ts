@@ -1,3 +1,5 @@
 export * from '@config/plugins/envs.plugin'
 export * from '@config/plugins/bcrypt.plugin'
 export * from '@config/plugins/jwt.plugin'
+export * from '@config/plugins/logger-transport.plugin'
+export * from '@config/plugins/logger.plugin'

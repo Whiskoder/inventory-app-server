@@ -43,17 +43,16 @@ export class AuthMiddleware {
     return (req: Request, res: Response, next: NextFunction) => {
       const user = res.locals.user as User
 
-      user.roles.forEach((role) => {
-        const hasPermission =
-          RoleConfig[role].permissions[resource].includes(action)
+      const hasPermission = user.roles.find((role) =>
+        RoleConfig[role].permissions[resource].includes(action)
+      )
 
-        if (!hasPermission)
-          throw new ForbiddenException(
-            'You do not have permission to perform this action'
-          )
+      if (!hasPermission)
+        throw new ForbiddenException(
+          'You do not have permission to perform this action'
+        )
 
-        next()
-      })
+      next()
     }
   }
 }

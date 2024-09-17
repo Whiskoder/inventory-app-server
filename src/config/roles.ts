@@ -37,6 +37,6 @@ export const RoleConfig: IRoleConfig = {
     permissions: { [Resource.CATEGORY]: [] },
   },
   user: {
-    permissions: { [Resource.CATEGORY]: ['create'] },
+    permissions: { [Resource.CATEGORY]: [] },
   },
 }

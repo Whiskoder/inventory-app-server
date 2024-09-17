@@ -57,7 +57,9 @@ export class JWT {
     return token
   }
 
-  public async verifyToken<T>(opts: VerifyTokenOptions): Promise<T | null> {
+  public async verifyToken<T>(
+    opts: VerifyTokenOptions
+  ): Promise<T | undefined> {
     const {
       token,
       issuer = 'urn:example:issuer',
@@ -71,7 +73,7 @@ export class JWT {
       })
       return payload as T
     } catch (error) {
-      return null
+      return undefined
     }
   }
 }

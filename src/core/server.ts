@@ -6,10 +6,7 @@ import {
   RoutesFilterMiddleware,
 } from '@core/middlewares'
 
-type Mode = 'development' | 'production'
-
 interface Options {
-  mode: Mode
   port: number
   routes: Router
 }
@@ -18,12 +15,10 @@ export class Server {
   public readonly app = express()
 
   private serverListener?: Server
-  private readonly mode: Mode
   private readonly port: number
   private readonly routes: Router
 
   constructor(options: Options) {
-    this.mode = options.mode
     this.port = options.port
     this.routes = options.routes
   }
@@ -41,11 +36,7 @@ export class Server {
 
     //* Error filter handler
     this.app.use(ExceptionHandlerMiddleware.handle)
-
-    this.app.listen(this.port, () => {
-      if (this.mode === 'development')
-        console.log(`Server running on http://localhost:${this.port}`)
-    })
+    this.app.listen(this.port)
   }
 
   public async close() {
