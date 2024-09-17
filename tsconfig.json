@@ -15,9 +15,7 @@
       "@/*": ["src/*"],
       "@config/*": ["src/config/*"],
       "@core/*": ["src/core/*"],
-      "@presentation/*": ["src/presentation/*"],
-      "@domain/*": ["src/domain/*"],
-      "@db/*": ["src/databases/*"]
+      "@modules/*": ["src/modules/*"]
     },
     "resolveJsonModule": true, // Allow importing .json files
     "rootDir": "./src",

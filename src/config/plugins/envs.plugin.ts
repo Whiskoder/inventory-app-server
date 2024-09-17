@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import { get } from 'env-var'
-import { JWT } from './jwt.plugin'
 
 export const envs = {
   DB_HOST: get('DB_HOST').required().asString(),

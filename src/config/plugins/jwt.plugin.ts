@@ -1,5 +1,6 @@
-import { InternalServerErrorException } from '@domain/errors'
 import { jwtVerify, SignJWT } from 'jose'
+
+import { InternalServerErrorException } from '@core/errors'
 
 interface GenerateTokenOptions {
   payload: any

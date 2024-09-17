@@ -1,9 +1,10 @@
 import express, { Router } from 'express'
 import cors from 'cors'
+
 import {
   ExceptionHandlerMiddleware,
   RoutesFilterMiddleware,
-} from '@presentation/middlewares'
+} from '@core/middlewares'
 
 type Mode = 'development' | 'production'
 

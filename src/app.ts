@@ -1,7 +1,7 @@
+import { AppDataSource } from '@core/datasources'
+import { AppRoutes } from '@core/routes'
 import { envs, JWT } from '@config/plugins'
 import { Server } from '@core/server'
-import { AppRoutes } from '@core/routes'
-import { AppDataSource } from '@db/datasources'
 ;(async () => {
   main()
 })()

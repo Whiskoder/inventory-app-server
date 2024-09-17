@@ -1,6 +1,7 @@
 import { Router } from 'express'
-import { AuthRoutes } from '@presentation/auth/routes'
-import { CategoryRoutes } from '@presentation/category/routes'
+
+import { AuthRoutes } from '@modules/auth'
+import { CategoryRoutes } from '@modules/category'
 
 export class AppRoutes {
   static get routes(): Router {
