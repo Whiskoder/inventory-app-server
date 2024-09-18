@@ -3,20 +3,55 @@ import { Router } from 'express'
 import { AppDataSource } from '@core/datasources'
 import { Product } from '@modules/product/models'
 import { ProductController, ProductService } from '@modules/product'
+import { Resource, Action } from '@config/roles'
+import { AuthMiddleware } from '@core/middlewares'
+import { Category } from '@modules/category/models'
 
 export class ProductRoutes {
   static get routes(): Router {
     const router = Router()
 
     const productRepository = AppDataSource.getRepository(Product)
-    const productService = new ProductService(productRepository)
+    const categoryRepository = AppDataSource.getRepository(Category)
+    const productService = new ProductService(
+      productRepository,
+      categoryRepository
+    )
     const controller = new ProductController(productService)
 
-    // router.post('', controller.createCategory)
-    // router.get('', controller.getAllCategories)
-    // router.put('/:id', controller.updateCategory)
-    // router.delete('/:id', controller.deleteCategory)
+    const resource = Resource.PRODUCT
 
+    router.use(AuthMiddleware.validateToken)
+
+    router.post(
+      '',
+      [AuthMiddleware.checkPermission(resource, Action.CREATE)],
+      controller.createProduct
+    )
+
+    router.get(
+      '',
+      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      controller.getAllProducts
+    )
+
+    router.get(
+      '/:id',
+      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      controller.getProductById
+    )
+
+    router.put(
+      '/:id',
+      [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
+      controller.updateProduct
+    )
+
+    router.delete(
+      '/:id',
+      [AuthMiddleware.checkPermission(resource, Action.DELETE)],
+      controller.deleteProduct
+    )
     return router
   }
 }

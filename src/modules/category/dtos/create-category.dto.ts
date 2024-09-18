@@ -1,14 +1,9 @@
-import {
-  IsString,
-  MaxLength,
-  MinLength,
-  validateOrReject,
-} from 'class-validator'
+import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
+import { IsString, Length, validateOrReject } from 'class-validator'
 
 export class CreateCategoryDto {
   @IsString()
-  @MinLength(1)
-  @MaxLength(100)
+  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
   name!: string
 
   public static async create(obj: {

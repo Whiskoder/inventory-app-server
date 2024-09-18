@@ -30,4 +30,7 @@ export class User {
 
   @OneToMany(() => Order, (order) => order.user)
   orders?: Order[]
+
+  @Column('boolean', { default: true })
+  isActive!: boolean
 }

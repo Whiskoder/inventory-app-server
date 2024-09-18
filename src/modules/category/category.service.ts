@@ -8,12 +8,18 @@ import { CreateCategoryDto, UpdateCategoryDto } from '@modules/category/dtos'
 export class CategoryService {
   constructor(private readonly categoryRepository: Repository<Category>) {}
 
-  public async createCategory(createCategoryDto: CreateCategoryDto) {
-    const isExistingCategory = await this.categoryRepository.findOne({
-      where: { name: createCategoryDto.name },
-    })
-    if (isExistingCategory)
-      throw new BadRequestException('Category already exists')
+  public async createCategory(
+    createCategoryDto: CreateCategoryDto
+  ): Promise<HTTPResponseDto> {
+    const isExistingCategory = await this.categoryRepository.update(
+      { name: createCategoryDto.name, isActive: false },
+      { isActive: true }
+    )
+
+    if (isExistingCategory.affected === 1)
+      return HTTPResponseDto.accepted(
+        `Category ${createCategoryDto.name} already exists`
+      )
 
     const category = await this.categoryRepository.save(createCategoryDto)
 
@@ -22,12 +28,15 @@ export class CategoryService {
     })
   }
 
-  public async getAllCategories(paginationDto: PaginationDto) {
+  public async getAllCategories(
+    paginationDto: PaginationDto
+  ): Promise<HTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
     const [categories, totalItems] = await this.categoryRepository.findAndCount(
       {
         take: limit,
         skip,
+        where: { isActive: true },
       }
     )
 
@@ -46,8 +55,18 @@ export class CategoryService {
     return HTTPResponseDto.ok(undefined, { categories, pagination })
   }
 
-  public async getCategoryById(id: number) {
-    const category = await this.categoryRepository.findOne({ where: { id } })
+  public async getCategoryByTerm(term: string): Promise<HTTPResponseDto> {
+    let category
+    if (Number(term)) {
+      category = await this.categoryRepository.findOne({
+        where: { id: +term, isActive: true },
+      })
+    } else {
+      category = await this.categoryRepository.findOne({
+        where: { name: term.toLowerCase(), isActive: true },
+      })
+    }
+
     if (!category) throw new NotFoundException('Category not found')
     return HTTPResponseDto.ok(undefined, { categories: [category] })
   }
@@ -55,24 +74,26 @@ export class CategoryService {
   public async updateCategory(
     id: number,
     updateCategoryDto: UpdateCategoryDto
-  ) {
-    const isExistingCategory = await this.categoryRepository.findOne({
-      where: { id },
-    })
-    if (!isExistingCategory) throw new NotFoundException('Category not found')
+  ): Promise<HTTPResponseDto> {
+    const updateCategory = await this.categoryRepository.update(
+      { isActive: true, id },
+      updateCategoryDto
+    )
 
-    await this.categoryRepository.update(id, updateCategoryDto)
+    if (!updateCategory.affected)
+      throw new NotFoundException('Category not found')
 
     return HTTPResponseDto.ok('Category updated successfully')
   }
 
-  // TODO: disable category instead of deleting
-  public async deleteCategory(id: number) {
-    const deleteCategory = await this.categoryRepository.delete(id)
+  public async deleteCategory(id: number): Promise<HTTPResponseDto> {
+    const deleteCategory = await this.categoryRepository.update(id, {
+      isActive: false,
+    })
 
     if (!deleteCategory.affected)
       throw new NotFoundException('Category not found')
 
-    return HTTPResponseDto.noContent('Category deleted successfully')
+    return HTTPResponseDto.noContent()
   }
 }

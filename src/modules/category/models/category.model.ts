@@ -4,6 +4,8 @@ import {
   Column,
   OneToMany,
   ManyToMany,
+  BeforeUpdate,
+  BeforeInsert,
 } from 'typeorm'
 
 import { Product } from '@modules/product/models'
@@ -24,4 +26,22 @@ export class Category {
     nullable: true,
   })
   providers?: Provider[]
+
+  @Column('boolean', { default: true, select: false })
+  isActive!: boolean
+
+  normalizeStrings() {
+    this.name = this.name.trim().toLowerCase()
+  }
+
+  @BeforeInsert()
+  async beforeInsert() {
+    console.log('before insert')
+    this.name = this.name.trim().toLowerCase()
+  }
+
+  @BeforeUpdate()
+  beforeUpdate() {
+    this.normalizeStrings()
+  }
 }

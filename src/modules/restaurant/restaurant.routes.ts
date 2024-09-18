@@ -1,52 +1,48 @@
 import { Router } from 'express'
 
-import { CategoryService, CategoryController } from '@modules/category'
-import { AppDataSource } from '@core/datasources'
-import { Category } from '@modules/category/models'
-import { AuthMiddleware } from '@core/middlewares'
 import { Action, Resource } from '@config/roles'
+import { AppDataSource } from '@core/datasources'
+import { AuthMiddleware } from '@core/middlewares'
+import { Restaurant } from '@modules/restaurant/models'
+import { RestaurantService, RestaurantController } from '@modules/restaurant'
 
-export class CategoryRoutes {
+export class RestaurantRoutes {
   static get routes(): Router {
     const router = Router()
 
-    const categoryRepository = AppDataSource.getRepository(Category)
-    const categoryService = new CategoryService(categoryRepository)
-    const controller = new CategoryController(categoryService)
+    const restaurantRepository = AppDataSource.getRepository(Restaurant)
+    const restaurantService = new RestaurantService(restaurantRepository)
+    const controller = new RestaurantController(restaurantService)
 
-    const resource = Resource.CATEGORY
-
+    const resource = Resource.RESTAURANT
     router.use(AuthMiddleware.validateToken)
 
     router.post(
       '',
       [AuthMiddleware.checkPermission(resource, Action.CREATE)],
-      controller.createCategory
+      controller.createRestaurant
     )
-
     router.get(
       '',
       [AuthMiddleware.checkPermission(resource, Action.READ)],
       controller.getAllCategories
     )
-
     router.get(
       '/:term',
       [AuthMiddleware.checkPermission(resource, Action.READ)],
-      controller.getCategoryByTerm
+      controller.getRestaurantByTerm
     )
-
     router.put(
       '/:id',
       [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
-      controller.updateCategory
+      controller.updateRestaurant
     )
-
     router.delete(
       '/:id',
       [AuthMiddleware.checkPermission(resource, Action.DELETE)],
-      controller.deleteCategory
+      controller.deleteRestaurant
     )
+
     return router
   }
 }

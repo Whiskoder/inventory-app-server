@@ -16,10 +16,12 @@ import { Provider } from '@modules/provider/models'
 
 @Entity({ name: 'products' })
 export class Product {
-  @Column('numeric')
+  @Column('numeric', { unique: true })
   barCode!: number
 
-  @ManyToOne(() => Category, (category) => category.products)
+  @ManyToOne(() => Category, (category) => category.products, {
+    nullable: false,
+  })
   @JoinColumn()
   category!: Category
 
@@ -29,7 +31,7 @@ export class Product {
   @Column('text')
   measureUnit!: string
 
-  @Column('text')
+  @Column('text', { unique: true })
   name!: string
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.product, {

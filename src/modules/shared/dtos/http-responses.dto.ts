@@ -44,15 +44,10 @@ export class HTTPResponseDto {
     )
   }
 
-  public static noContent(
-    message?: string,
-    data?: HTTPResponseData
-  ): HTTPResponseDto {
+  public static noContent(): HTTPResponseDto {
     return new HTTPResponseDto(
       HTTPStatusCode.NoContent,
-      HTTPMessages.NO_CONTENT,
-      message,
-      data
+      HTTPMessages.NO_CONTENT
     )
   }
 

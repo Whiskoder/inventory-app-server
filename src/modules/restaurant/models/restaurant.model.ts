@@ -10,9 +10,12 @@ export class Restaurant {
   @Column('text', { nullable: true })
   location?: string
 
-  @Column('text')
+  @Column('text', { unique: true })
   name!: string
 
   @OneToMany(() => Order, (order) => order.restaurant, { nullable: true })
   orders?: Order[]
+
+  @Column('boolean', { default: true, select: false })
+  isActive!: boolean
 }

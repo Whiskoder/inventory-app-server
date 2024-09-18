@@ -63,6 +63,16 @@ export class ExceptionHandlerMiddleware {
       return
     }
 
+    // 23502 code is throw when a null value is found in a column that does not allow null values
+    if (error?.code === '23502') {
+      const statusCode = HTTPStatusCode.BadRequest
+      res.status(statusCode).send({
+        statusCode,
+        error: ExceptionHandlerMiddleware.getHTTPMessage(statusCode),
+        message: 'Null value found',
+      })
+    }
+
     const statusCode = error.statusCode || 500
 
     // Avoid sending stack trace to client in production
@@ -72,6 +82,7 @@ export class ExceptionHandlerMiddleware {
         : error.message || 'Something went wrong'
 
     if (statusCode >= 500) {
+      // console.log(error)
       logger.error(error.stack)
     } else {
       logger.httpError(req, res, error)
