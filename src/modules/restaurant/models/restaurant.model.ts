@@ -1,4 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
 
 import { Order } from '@modules/order/models'
 
@@ -18,4 +25,19 @@ export class Restaurant {
 
   @Column('boolean', { default: true, select: false })
   isActive!: boolean
+
+  normalizeStrings() {
+    this.name = this.name.toLowerCase().trim()
+    this.location = this.location?.toLocaleLowerCase().trim()
+  }
+
+  @BeforeInsert()
+  async beforeInsert() {
+    this.normalizeStrings()
+  }
+
+  @BeforeUpdate()
+  async beforeUpdate() {
+    this.normalizeStrings()
+  }
 }

@@ -7,6 +7,7 @@ import {
 } from '@modules/restaurant/dtos'
 import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
 import { BadRequestException, NotFoundException } from '@core/errors'
+import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
 
 export class RestaurantService {
   constructor(private readonly restaurantRepository: Repository<Restaurant>) {}
@@ -23,11 +24,12 @@ export class RestaurantService {
       return HTTPResponseDto.accepted(
         `Restaurant ${createRestaurantDto.name} already exists`
       )
-
-    const restaurant = await this.restaurantRepository.save(createRestaurantDto)
+    const restaurantEntity =
+      this.restaurantRepository.create(createRestaurantDto)
+    await this.restaurantRepository.save(restaurantEntity)
 
     return HTTPResponseDto.created('Restaurant created succesfully', {
-      restaurants: [restaurant],
+      restaurants: [restaurantEntity],
     })
   }
 
@@ -42,17 +44,12 @@ export class RestaurantService {
         where: { isActive: true },
       })
 
-    const pagination = PaginationDto.calculate({
-      limit,
+    const pagination = CalculatePaginationUseCase.execute({
       currentPage,
+      limit,
       totalItems,
+      skip,
     })
-
-    if (!totalItems) throw new NotFoundException('No restaurants found')
-    if (totalItems < paginationDto.skip)
-      throw new BadRequestException(
-        `Page out of range, total pages: ${pagination.totalPages}`
-      )
 
     return HTTPResponseDto.ok(undefined, { restaurants, pagination })
   }
@@ -77,9 +74,11 @@ export class RestaurantService {
     id: number,
     updateRestaurantDto: UpdateRestaurantDto
   ): Promise<HTTPResponseDto> {
+    const restaurantEntity =
+      this.restaurantRepository.create(updateRestaurantDto)
     const updateRestaurant = await this.restaurantRepository.update(
       { isActive: true, id },
-      updateRestaurantDto
+      restaurantEntity
     )
 
     if (!updateRestaurant.affected)

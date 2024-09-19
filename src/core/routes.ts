@@ -7,7 +7,7 @@ import { ProductRoutes } from '@modules/product'
 
 export class AppRoutes {
   static get routes(): Router {
-    const router = Router()
+    const router = Router({ caseSensitive: false })
 
     router.use('/api/v1/auth', AuthRoutes.routes)
     router.use('/api/v1/category', CategoryRoutes.routes)

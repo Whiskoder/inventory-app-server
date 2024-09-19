@@ -8,7 +8,7 @@ import { RestaurantService, RestaurantController } from '@modules/restaurant'
 
 export class RestaurantRoutes {
   static get routes(): Router {
-    const router = Router()
+    const router = Router({ caseSensitive: false })
 
     const restaurantRepository = AppDataSource.getRepository(Restaurant)
     const restaurantService = new RestaurantService(restaurantRepository)
@@ -18,12 +18,12 @@ export class RestaurantRoutes {
     router.use(AuthMiddleware.validateToken)
 
     router.post(
-      '',
+      '/',
       [AuthMiddleware.checkPermission(resource, Action.CREATE)],
       controller.createRestaurant
     )
     router.get(
-      '',
+      '/',
       [AuthMiddleware.checkPermission(resource, Action.READ)],
       controller.getAllCategories
     )

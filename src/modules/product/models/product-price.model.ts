@@ -20,11 +20,15 @@ export class ProductPrice {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   pricePerUnit!: number
 
-  @ManyToOne(() => Product, (product) => product.productPrices)
+  @ManyToOne(() => Product, (product) => product.productPrices, {
+    eager: false,
+  })
   @JoinColumn()
   product!: Product
 
-  @ManyToOne(() => Provider, (provider) => provider.productPrices)
+  @ManyToOne(() => Provider, (provider) => provider.productPrices, {
+    eager: true,
+  })
   @JoinColumn()
   provider!: Provider
 }

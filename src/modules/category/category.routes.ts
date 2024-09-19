@@ -8,7 +8,7 @@ import { Action, Resource } from '@config/roles'
 
 export class CategoryRoutes {
   static get routes(): Router {
-    const router = Router()
+    const router = Router({ caseSensitive: false })
 
     const categoryRepository = AppDataSource.getRepository(Category)
     const categoryService = new CategoryService(categoryRepository)
@@ -19,13 +19,13 @@ export class CategoryRoutes {
     router.use(AuthMiddleware.validateToken)
 
     router.post(
-      '',
+      '/',
       [AuthMiddleware.checkPermission(resource, Action.CREATE)],
       controller.createCategory
     )
 
     router.get(
-      '',
+      '/',
       [AuthMiddleware.checkPermission(resource, Action.READ)],
       controller.getAllCategories
     )

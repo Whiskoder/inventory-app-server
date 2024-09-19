@@ -15,16 +15,17 @@ import { Product, ProductPrice } from '@modules/product/models'
 
 @Entity({ name: 'providers' })
 export class Provider {
-  @ManyToMany(() => Category, (category) => category.providers)
-  @JoinTable({ name: 'providers_categories' })
-  categories!: Category[]
+  // @ManyToMany(() => Category, (category) => category.providers)
+  // @JoinTable({ name: 'providers_categories' })
+  // categories?: Category[]
 
-  @Column('text', { nullable: true })
-  description?: string
+  // @Column('text', { nullable: true })
+  // description?: string
 
   @Column('text', { nullable: true, unique: true })
   emailAddress?: string
 
+  //! Remove this relation
   @ManyToMany(() => Equipment, (equipment) => equipment.providers, {
     nullable: true,
   })
@@ -52,9 +53,12 @@ export class Provider {
   })
   productPrices?: ProductPrice[]
 
-  @ManyToMany(() => Product, (product) => product.providers, { nullable: true })
-  products?: Product[]
+  // @ManyToMany(() => Product, (product) => product.providers)
+  // products?: Product[]
 
   @Column('text')
   rfc!: string
+
+  @Column('boolean', { default: true, select: false })
+  isActive!: boolean
 }

@@ -11,7 +11,7 @@ export const AppDataSource = new DataSource({
   password: envs.DB_PASS,
   database: envs.DB_NAME,
   synchronize: envs.NODE_ENV === 'development' ? true : false,
-  ssl: true,
+  // ssl: true,
   logging: envs.NODE_ENV === 'development' ? false : false,
   entities: [join(__dirname, '../../modules/**/**/*.model.ts')],
   migrations: [join(__dirname, '../migrations', '*.ts')],

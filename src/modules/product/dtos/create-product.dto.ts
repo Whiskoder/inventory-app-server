@@ -1,9 +1,9 @@
 import { plainToInstance, Type } from 'class-transformer'
 import {
   IsEnum,
-  IsIn,
   IsInt,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   Length,
@@ -12,11 +12,12 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@/core/constants'
+import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
 import { MeasureUnit } from '@core/enums'
 
 export class CreateProductDto {
   @Type(() => Number)
+  @IsOptional()
   @IsInt()
   @Min(10000)
   @Max(99999)
@@ -35,6 +36,7 @@ export class CreateProductDto {
   @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
   name!: string
 
+  @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
@@ -43,7 +45,7 @@ export class CreateProductDto {
   public static async create(obj: {
     [key: string]: any
   }): Promise<CreateProductDto> {
-    const { barCode, categoryId, measureUnit, name, stock = 0 } = obj || {}
+    const { barCode, categoryId, measureUnit, name, stock } = obj || {}
     const dto = plainToInstance(CreateProductDto, {
       barCode,
       categoryId,

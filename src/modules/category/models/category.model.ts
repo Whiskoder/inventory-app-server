@@ -19,13 +19,11 @@ export class Category {
   @Column('text', { unique: true })
   name!: string
 
-  @OneToMany(() => Product, (product) => product.category, { nullable: true })
+  @OneToMany(() => Product, (product) => product.category)
   products?: Product[]
 
-  @ManyToMany(() => Provider, (provider) => provider.categories, {
-    nullable: true,
-  })
-  providers?: Provider[]
+  // @ManyToMany(() => Provider, (provider) => provider.categories)
+  // providers?: Provider[]
 
   @Column('boolean', { default: true, select: false })
   isActive!: boolean
@@ -36,12 +34,11 @@ export class Category {
 
   @BeforeInsert()
   async beforeInsert() {
-    console.log('before insert')
-    this.name = this.name.trim().toLowerCase()
+    this.normalizeStrings()
   }
 
   @BeforeUpdate()
-  beforeUpdate() {
+  async beforeUpdate() {
     this.normalizeStrings()
   }
 }

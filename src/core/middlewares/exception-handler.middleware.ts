@@ -71,6 +71,8 @@ export class ExceptionHandlerMiddleware {
         error: ExceptionHandlerMiddleware.getHTTPMessage(statusCode),
         message: 'Null value found',
       })
+      logger.httpError(req, res, error)
+      return
     }
 
     const statusCode = error.statusCode || 500

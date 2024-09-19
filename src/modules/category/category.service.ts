@@ -4,6 +4,7 @@ import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
 import { BadRequestException, NotFoundException } from '@core/errors'
 import { Category } from '@modules/category/models'
 import { CreateCategoryDto, UpdateCategoryDto } from '@modules/category/dtos'
+import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
 
 export class CategoryService {
   constructor(private readonly categoryRepository: Repository<Category>) {}
@@ -21,10 +22,11 @@ export class CategoryService {
         `Category ${createCategoryDto.name} already exists`
       )
 
-    const category = await this.categoryRepository.save(createCategoryDto)
+    const categoryEntity = this.categoryRepository.create(createCategoryDto)
+    await this.categoryRepository.save(categoryEntity)
 
     return HTTPResponseDto.created('Category created succesfully', {
-      categories: [category],
+      categories: [categoryEntity],
     })
   }
 
@@ -40,23 +42,19 @@ export class CategoryService {
       }
     )
 
-    const pagination = PaginationDto.calculate({
-      limit,
+    const pagination = CalculatePaginationUseCase.execute({
       currentPage,
+      limit,
       totalItems,
+      skip,
     })
-
-    if (!totalItems) throw new NotFoundException('No categories found')
-    if (totalItems < paginationDto.skip)
-      throw new BadRequestException(
-        `Page out of range, total pages: ${pagination.totalPages} `
-      )
 
     return HTTPResponseDto.ok(undefined, { categories, pagination })
   }
 
   public async getCategoryByTerm(term: string): Promise<HTTPResponseDto> {
     let category
+
     if (Number(term)) {
       category = await this.categoryRepository.findOne({
         where: { id: +term, isActive: true },
@@ -75,9 +73,10 @@ export class CategoryService {
     id: number,
     updateCategoryDto: UpdateCategoryDto
   ): Promise<HTTPResponseDto> {
+    const categoryEntity = this.categoryRepository.create(updateCategoryDto)
     const updateCategory = await this.categoryRepository.update(
       { isActive: true, id },
-      updateCategoryDto
+      categoryEntity
     )
 
     if (!updateCategory.affected)
