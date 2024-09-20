@@ -9,9 +9,17 @@ export enum Resource {
   CATEGORY = 'category',
   RESTAURANT = 'restaurant',
   PRODUCT = 'product',
+  PROVIDER = 'provider',
+  ORDER = 'order',
 }
 
-export type Role = 'admin' | 'manager' | 'warehouseman' | 'accountant' | 'user'
+export enum Role {
+  ADMIN = 'admin',
+  MANAGER = 'manager',
+  WAREHOUSEMAN = 'warehouseman',
+  ACCOUNTANT = 'accountant',
+  USER = 'user',
+}
 
 type IRoleConfig = {
   [key in Role]: {
@@ -27,6 +35,8 @@ export const RoleConfig: IRoleConfig = {
       [Resource.CATEGORY]: ['create', 'read', 'update', 'delete'],
       [Resource.RESTAURANT]: ['create', 'read', 'update', 'delete'],
       [Resource.PRODUCT]: ['create', 'read', 'update', 'delete'],
+      [Resource.PROVIDER]: ['create', 'read', 'update', 'delete'],
+      [Resource.ORDER]: ['create', 'read', 'update', 'delete'],
     },
   },
   manager: {
@@ -34,6 +44,8 @@ export const RoleConfig: IRoleConfig = {
       [Resource.CATEGORY]: [],
       [Resource.RESTAURANT]: [],
       [Resource.PRODUCT]: [],
+      [Resource.PROVIDER]: [],
+      [Resource.ORDER]: [],
     },
   },
   warehouseman: {
@@ -41,6 +53,8 @@ export const RoleConfig: IRoleConfig = {
       [Resource.CATEGORY]: [],
       [Resource.RESTAURANT]: [],
       [Resource.PRODUCT]: [],
+      [Resource.PROVIDER]: [],
+      [Resource.ORDER]: [],
     },
   },
   accountant: {
@@ -48,6 +62,8 @@ export const RoleConfig: IRoleConfig = {
       [Resource.CATEGORY]: [],
       [Resource.RESTAURANT]: [],
       [Resource.PRODUCT]: [],
+      [Resource.PROVIDER]: [],
+      [Resource.ORDER]: [],
     },
   },
   user: {
@@ -55,6 +71,8 @@ export const RoleConfig: IRoleConfig = {
       [Resource.CATEGORY]: [],
       [Resource.RESTAURANT]: [],
       [Resource.PRODUCT]: [],
+      [Resource.PROVIDER]: [],
+      [Resource.ORDER]: [],
     },
   },
 }

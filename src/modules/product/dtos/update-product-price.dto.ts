@@ -2,6 +2,7 @@ import { plainToInstance, Type } from 'class-transformer'
 import { IsNumber, Min, validateOrReject } from 'class-validator'
 
 import { BadRequestException } from '@core/errors'
+import { ErrorMessages } from '@core/enums/messages'
 
 export class UpdateProductPriceDto {
   @Type(() => Number)
@@ -17,8 +18,7 @@ export class UpdateProductPriceDto {
   public static async create(obj: {
     [key: string]: any
   }): Promise<UpdateProductPriceDto> {
-    if (!obj)
-      throw new BadRequestException('You need to update at least one property')
+    if (!obj) throw new BadRequestException(ErrorMessages.EmptyBody)
 
     const { pricePerUnit, minUnitQuantity } = obj
     const dto = plainToInstance(UpdateProductPriceDto, {

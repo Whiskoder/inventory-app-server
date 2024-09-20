@@ -38,28 +38,30 @@ export class Order {
     cascade: true,
     eager: true,
   })
-  orderItems!: OrderItem[]
+  orderItems?: OrderItem[]
 
-  @Column('text')
-  orderStatus!: string
+  @Column('integer')
+  orderStatus!: number
 
   @Column('text', { nullable: true })
   requestNotes?: string
 
-  @ManyToOne(() => Restaurant, (restaurant) => restaurant.orders)
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.orders, {
+    eager: true,
+  })
   @JoinColumn()
   restaurant!: Restaurant
 
-  @Column('integer')
+  @Column('integer', { default: 0 })
   totalItems!: number
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   totalPrice!: number
 
   @ManyToOne(() => User, (user) => user.orders)
   @JoinColumn()
   user!: User
 
-  @Column('text')
+  @Column('text', { nullable: true })
   warehouseNotes?: string
 }

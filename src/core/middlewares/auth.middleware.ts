@@ -5,6 +5,7 @@ import { AppDataSource } from '@core/datasources'
 import { ForbiddenException, UnauthorizedException } from '@core/errors'
 import { JWT } from '@config/plugins'
 import { User } from '@modules/user/models'
+import { ErrorMessages } from '@core/enums/messages'
 
 export class AuthMiddleware {
   public static async validateToken(
@@ -43,14 +44,11 @@ export class AuthMiddleware {
     return (req: Request, res: Response, next: NextFunction) => {
       const user = res.locals.user as User
 
-      const hasPermission = user.roles.find((role) =>
-        RoleConfig[role].permissions[resource].includes(action)
-      )
+      const hasPermission =
+        RoleConfig[user.role].permissions[resource].includes(action)
 
       if (!hasPermission)
-        throw new ForbiddenException(
-          'You do not have permission to perform this action'
-        )
+        throw new ForbiddenException(ErrorMessages.ForbiddenException)
 
       next()
     }

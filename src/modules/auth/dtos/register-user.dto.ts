@@ -5,20 +5,19 @@ import {
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
-  MaxLength,
-  MinLength,
+  Length,
   validateOrReject,
 } from 'class-validator'
 
+import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
+
 export class RegisterUserDto {
   @IsString()
-  @MinLength(1)
-  @MaxLength(55)
+  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
   firstName!: string
 
   @IsString()
-  @MinLength(1)
-  @MaxLength(55)
+  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
   @IsOptional()
   lastName?: string
 

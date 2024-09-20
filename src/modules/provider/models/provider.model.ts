@@ -34,10 +34,13 @@ export class Provider {
   @PrimaryGeneratedColumn()
   id!: number
 
-  @OneToMany(() => Invoice, (invoice) => invoice.provider, { nullable: true })
+  @OneToMany(() => Invoice, (invoice) => invoice.provider, {
+    nullable: true,
+    eager: true,
+  })
   invoices?: Invoice[]
 
-  @Column('text')
+  @Column('text', { unique: true })
   name!: string
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.provider, {
@@ -56,7 +59,7 @@ export class Provider {
   // @ManyToMany(() => Product, (product) => product.providers)
   // products?: Product[]
 
-  @Column('text')
+  @Column('text', { unique: true })
   rfc!: string
 
   @Column('boolean', { default: true, select: false })

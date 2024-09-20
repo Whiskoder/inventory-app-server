@@ -13,7 +13,7 @@ import {
 } from 'class-validator'
 
 import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
-import { MeasureUnit } from '@core/enums'
+import { MeasureUnit } from '@modules/product/enums'
 
 export class CreateProductDto {
   @Type(() => Number)

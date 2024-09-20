@@ -21,7 +21,9 @@ export class Invoice {
   @PrimaryGeneratedColumn()
   id!: number
 
-  @ManyToOne(() => Order, (order) => order.invoices)
+  @ManyToOne(() => Order, (order) => order.invoices, {
+    eager: false,
+  })
   @JoinColumn()
   order!: Order
 
@@ -31,7 +33,9 @@ export class Invoice {
   @Column('text', { nullable: true })
   paymentMethod?: string
 
-  @ManyToOne(() => Provider, (provider) => provider.invoices)
+  @ManyToOne(() => Provider, (provider) => provider.invoices, {
+    eager: false,
+  })
   @JoinColumn()
   provider!: Provider
 

@@ -22,15 +22,15 @@ export class User {
   @Column('numeric', { nullable: true })
   phone?: number
 
-  @Column('text')
+  @Column('text', { select: false })
   password!: string
 
-  @Column('text', { array: true, default: ['user'] })
-  roles!: Role[]
+  @Column('text', { default: Role.USER })
+  role!: Role
 
   @OneToMany(() => Order, (order) => order.user)
   orders?: Order[]
 
-  @Column('boolean', { default: true })
+  @Column('boolean', { default: true, select: false })
   isActive!: boolean
 }

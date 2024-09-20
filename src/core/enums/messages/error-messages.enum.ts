@@ -10,5 +10,6 @@ export enum ErrorMessages {
   // NotFound = 'Unable to find the requested resource!',
   // UncaughtException = 'Uncaught Exception thrown!',
   // UnhandledRejection = 'Unhandled Exception thrown!',
-  EmptyBody = '',
+  EmptyBody = 'You need to update at least one property',
+  ForbiddenException = 'You do not have permission to perform this action',
 }

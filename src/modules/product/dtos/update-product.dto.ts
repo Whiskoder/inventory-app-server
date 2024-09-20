@@ -13,8 +13,9 @@ import {
 } from 'class-validator'
 
 import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
-import { MeasureUnit } from '@core/enums'
+import { MeasureUnit } from '@modules/product/enums'
 import { BadRequestException } from '@/core/errors'
+import { ErrorMessages } from '@core/enums/messages'
 
 export class UpdateProductDto {
   @Type(() => Number)
@@ -49,8 +50,7 @@ export class UpdateProductDto {
   public static async create(obj: {
     [key: string]: any
   }): Promise<UpdateProductDto> {
-    if (!obj)
-      throw new BadRequestException('You need to update at least one property')
+    if (!obj) throw new BadRequestException(ErrorMessages.EmptyBody)
 
     const { barCode, categoryId, measureUnit, name, stock } = obj
     const dto = plainToInstance(UpdateProductDto, {

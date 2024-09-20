@@ -48,6 +48,15 @@ export class AuthService {
       where: {
         emailAddress: loginUserDto.emailAddress,
       },
+      select: [
+        'emailAddress',
+        'firstName',
+        'id',
+        'lastName',
+        'password',
+        'role',
+        'phone',
+      ],
     })
 
     if (!user) throw new BadRequestException('Invalid credentials provided')

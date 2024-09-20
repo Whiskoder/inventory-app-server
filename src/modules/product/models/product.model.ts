@@ -15,7 +15,7 @@ import { ProductPrice } from '@modules/product/models'
 
 @Entity({ name: 'products' })
 export class Product {
-  @Column('numeric', { unique: true, nullable: true })
+  @Column('integer', { unique: true, nullable: true })
   barCode!: number
 
   @ManyToOne(() => Category, (category) => category.products, {
