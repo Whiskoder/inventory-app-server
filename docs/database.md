@@ -161,56 +161,55 @@ The product price ID is required only on creating or updating item, this propert
 
 ### Order status
 
-```json
-OrderStatus: {
-	OPEN: 0,
-	PROCESSING: 1
-	DELIVERED: 2
-	COMPLETED: 3
-	CANCEL_REQUESTED: 4
-	CANCELED: 5
-	ONHOLD: 6
-	REFUNDED: 7
-	RETURNED: 8
-
+```ts
+interface OrderStatus {
+  OPEN: 0
+  PROCESSING: 1
+  DELIVERED: 2
+  COMPLETED: 3
+  CANCEL_REQUESTED: 4
+  CANCELED: 5
+  ONHOLD: 6
+  REFUNDED: 7
+  RETURNED: 8
 }
 ```
 
 ### Measure unit
 
-```json
-MeasureUnits: {
-	grams: {
-		shortName: 'gr'
-		precision: '0' // 1/1th of a gram (1)
-	},
-	kilograms: {
-		shortName: 'kg'
-		precision: '1' // 1/10th of a kilogram (0.1)
-	},
-	mililiters: {
-		shortName: 'ml'
-		precision: '0' // 1/1th of a mililiter (1)
-	},
-	liters: {
-		shortName: 'l'
-		precision: '1' // 1/10th of a liter (0.1)
-	},
-	boxes: {
-		shortName: 'box'
-		precision: '0' // 1/1th (1)
-	}
-	pieces: {
-		shortName: 'pcs'
-		precision: '0' // 1/1th (1)
-	},
-	ounces: {
-		shortName: 'oz'
-		precision: '0' // 1/1th of a ounce (1)
-	}
-	gallons: {
-		shortName: 'gal'
-		precision: '1' // 1/10th of a gallon (0.1)
-	}
+```ts
+interface MeasureUnits {
+  grams: {
+    shortName: 'gr'
+    precision: 0 // 1/1th of a gram (1)
+  }
+  kilograms: {
+    shortName: 'kg'
+    precision: 1 // 1/10th of a kilogram (0.1)
+  }
+  mililiters: {
+    shortName: 'ml'
+    precision: 0 // 1/1th of a mililiter (1)
+  }
+  liters: {
+    shortName: 'l'
+    precision: 1 // 1/10th of a liter (0.1)
+  }
+  boxes: {
+    shortName: 'box'
+    precision: 0 // 1/1th (1)
+  }
+  pieces: {
+    shortName: 'pcs'
+    precision: 0 // 1/1th (1)
+  }
+  ounces: {
+    shortName: 'oz'
+    precision: 0 // 1/1th of a ounce (1)
+  }
+  gallons: {
+    shortName: 'gal'
+    precision: 1 // 1/10th of a gallon (0.1)
+  }
 }
 ```
