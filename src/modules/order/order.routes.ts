@@ -5,7 +5,7 @@ import { AuthMiddleware } from '@core/middlewares'
 import { Order, OrderItem } from '@modules/order/models'
 import { AppDataSource } from '@core/datasources'
 import { OrderController, OrderService } from '@modules/order'
-import { Restaurant } from '@modules/restaurant/models'
+import { Branch } from '@modules/branch/models'
 
 export class OrderRoutes {
   static get routes(): Router {
@@ -13,12 +13,12 @@ export class OrderRoutes {
 
     const orderRepository = AppDataSource.getRepository(Order)
     const orderItemsRepository = AppDataSource.getRepository(OrderItem)
-    const restaurantRepository = AppDataSource.getRepository(Restaurant)
+    const branchRepository = AppDataSource.getRepository(Branch)
 
     const orderService = new OrderService(
       orderRepository,
       orderItemsRepository,
-      restaurantRepository
+      branchRepository
     )
     const controller = new OrderController(orderService)
 

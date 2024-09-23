@@ -29,8 +29,7 @@ export class OrderController {
     next: NextFunction
   ) => {
     try {
-      const dto = await PaginationDto.create(req.query)
-      const response = await this.orderService.getAllOrders(dto)
+      const response = await this.orderService.getAllOrders(res.locals.query)
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)

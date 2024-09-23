@@ -204,15 +204,15 @@ export class ProductService {
     priceId: number,
     updateProductPriceDto: UpdateProductPriceDto
   ): Promise<HTTPResponseDto> {
-    await this.checkProductPriceExists(productId, priceId)
+    // await this.checkProductPriceExists(productId, priceId)
 
-    const productPriceEntity = this.productPriceRepository.create(
-      updateProductPriceDto
-    )
-    await this.productPriceRepository.update(
-      { id: priceId },
-      productPriceEntity
-    )
+    // const productPriceEntity = this.productPriceRepository.create(
+    //   updateProductPriceDto
+    // )
+    // await this.productPriceRepository.update(
+    //   { id: priceId },
+    //   productPriceEntity
+    // )
 
     return HTTPResponseDto.ok('Product price updated successfully')
   }

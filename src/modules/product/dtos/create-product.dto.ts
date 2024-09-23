@@ -12,7 +12,7 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
+import { descriptionLength, longNameLength } from '@core/constants'
 import { MeasureUnit } from '@modules/product/enums'
 
 export class CreateProductDto {
@@ -33,7 +33,7 @@ export class CreateProductDto {
   measureUnit!: string
 
   @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+  @Length(1, longNameLength)
   name!: string
 
   @IsOptional()

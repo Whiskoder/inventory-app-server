@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { CategoryService } from '@modules/category'
 import { CreateCategoryDto, UpdateCategoryDto } from '@modules/category/dtos'
 import { PaginationDto } from '@modules/shared/dtos'
+import { FilterCategoryDto } from './dtos/filter-category.dto'
 
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -29,8 +30,11 @@ export class CategoryController {
     next: NextFunction
   ) => {
     try {
-      const dto = await PaginationDto.create(req.query)
-      const response = await this.categoryService.getAllCategories(dto)
+      const paginationDto = await PaginationDto.create(req.query)
+      const filterDto = await FilterCategoryDto.create(req.query)
+      const response = await this.categoryService.getAllCategories(
+        paginationDto
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)

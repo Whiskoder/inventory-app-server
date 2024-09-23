@@ -11,7 +11,7 @@ import { CreateOrderDto, UpdateOrderDto } from '@modules/order/dtos'
 import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
 import { Order, OrderItem } from '@modules/order/models'
 import { OrderStatus } from '@modules/order/enums'
-import { Restaurant } from '@modules/restaurant/models'
+import { Branch } from '@modules/branch/models'
 import { User } from '@modules/user/models'
 import { Role } from '@config/roles'
 import { ErrorMessages } from '@core/enums/messages'
@@ -20,32 +20,32 @@ export class OrderService {
   constructor(
     private readonly orderRepository: Repository<Order>,
     private readonly orderItemsRepository: Repository<OrderItem>,
-    private readonly restaurantRepository: Repository<Restaurant>
+    private readonly branchRepository: Repository<Branch>
   ) {}
 
   public async createOrder(
     createOrderDto: CreateOrderDto,
     userEntity: User
   ): Promise<HTTPResponseDto> {
-    const { restaurantId, ...order } = createOrderDto
+    // const { branchId, ...order } = createOrderDto
 
-    const restaurantEntity = await this.restaurantRepository.findOne({
-      where: { id: restaurantId, isActive: true },
-    })
+    // const branchEntity = await this.branchRepository.findOne({
+    //   where: { id: branchId, isActive: true },
+    // })
 
-    if (!restaurantEntity)
-      throw new BadRequestException('Restaurant provided not found')
+    // if (!branchEntity)
+    //   throw new BadRequestException('Restaurant provided not found')
 
-    const orderEntity = this.orderRepository.create({
-      ...order,
-      user: userEntity,
-      restaurant: restaurantEntity,
-      orderStatus: OrderStatus.DRAFT,
-    })
-    await this.orderRepository.save(orderEntity)
+    // const orderEntity = this.orderRepository.create({
+    //   ...order,
+    //   user: userEntity,
+    //   branch: branchEntity,
+    //   orderStatus: OrderStatus.DRAFT,
+    // })
+    // await this.orderRepository.save(orderEntity)
 
     return HTTPResponseDto.created('Order created successfully', {
-      orders: [orderEntity],
+      // orders: [orderEntity],
     })
   }
 
@@ -90,7 +90,7 @@ export class OrderService {
 
     const { nextOrderStep, cancelOrder } = updateOrderDto
 
-    const { orderStatus } = orderEntity
+    const { status: orderStatus } = orderEntity
 
     if (cancelOrder)
       return await this.cancelOrder(userEntity.role, id, orderStatus)
@@ -106,7 +106,7 @@ export class OrderService {
 
     if (!orderEntity) throw new NotFoundException('Order not found')
 
-    if (orderEntity.orderStatus !== OrderStatus.DRAFT)
+    if (orderEntity.status !== OrderStatus.DRAFT)
       throw new BadRequestException('Only draft orders can be deleted')
 
     const deleteOrder = await this.orderRepository.delete({ id })
@@ -179,7 +179,7 @@ export class OrderService {
   ): Promise<HTTPResponseDto> {
     const updateOrder = await this.orderRepository.update(
       { id: orderId },
-      { orderStatus }
+      { status: orderStatus }
     )
 
     if (!updateOrder.affected)

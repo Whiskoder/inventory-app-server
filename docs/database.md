@@ -98,6 +98,7 @@
 - `id`: number (Primary Key)
 - `name`: string (Required)
 - `description`: string (Optional)
+- `iconName`: string (Optional)
 
 ## Order entities
 
@@ -105,17 +106,17 @@
 
 #### Properties:
 
-- `id`: number (Primary Key)
-- `createdAt`: timestampz (Auto-generated)
-- `completedAt`: timestampz (Optional)
-- `deliveryDate`: timestampz (Required)
-- `status`: string (Defaults to 'OPEN')
-- `totalAmount`: number (Calculated)
-- `totalItems`: number (Calculated)
 - `branchId`: number (Foreign Key to BranchEntity)
-- `userId`: number (Foreign Key to UserEntity) (Calculated)
+- `completedAt`: timestampz (Optional)
+- `createdAt`: timestampz (Auto-generated)
+- `deliveryDate`: timestampz (Required)
+- `id`: number (Primary Key)
 - `items`: array of [OrderItem](#orderitem) (Calculated)
 - `notes`: string (Optional)
+- `status`: string (Defaults to 'OPEN')
+- `totalPriceAmount`: number (Calculated)
+- `totalItems`: number (Calculated)
+- `userId`: number (Foreign Key to UserEntity) (Calculated)
 
 ### OrderItem
 
@@ -123,15 +124,15 @@
 
 The product price ID is required only on creating or updating item, this property will be used for calculating productId, providerId and basePrice, is not a property of the entity but will be used for the calculation.
 
-- `id`: number (Primary Key)
-- `orderId`: number (Foreign Key to OrderEntity)
-- `productPriceId`: number (Foreign Key to ProductEntity)
 - `basePriceAtOrder`: number (Calculated)
-- `productId`: number (Foreign Key to ProductEntity)
-- `providerId`: number (Foreign Key to ProviderEntity)
-- `quantityRequested`: number (Required)
-- `quantityDelivered`: number (optional)
+- `id`: number (Primary Key)
 - `measurementUnit`: string (Calculated)
+- `orderId`: number (Foreign Key to OrderEntity)
+- `productId`: number (Foreign Key to ProductEntity)
+- `productPriceId`: number (Foreign Key to ProductEntity)
+- `providerId`: number (Foreign Key to ProviderEntity)
+- `quantityDelivered`: number (optional)
+- `quantityRequested`: number (Required)
 
 ## Provider entities
 
@@ -139,16 +140,63 @@ The product price ID is required only on creating or updating item, this propert
 
 #### Properties:
 
-- `id`: number (Primary Key)
-- `name`: string (Required)
-- `description`: string (Optional)
+- `cityName`: string (Optional)
 - `contactEmail`: string (Optional)
 - `contactPhone`: string (Optional)
+- `dependantLocality`: string (Optional)
+- `description`: string (Optional)
+- `id`: number (Primary Key)
+- `name`: string (Required)
+- `postalCode`: string (Optional)
 - `rfc`: string (Required)
 - `streetName`: string (Optional)
+
+## Branches entities
+
+### Branch
+
+#### Properties:
+
 - `cityName`: string (Optional)
+- `contactEmail`: string (Optional)
+- `contactPhone`: string (Optional)
 - `dependantLocality`: string (Optional)
+- `id`: number (Primary Key)
+- `name`: string (Required)
 - `postalCode`: string (Optional)
+- `streetName`: string (Optional)
+
+## Invoices entities
+
+### Invoice
+
+#### Properties:
+
+- `createdAt`: Date (Default current date)
+- `fileUrl`: string (Optional)
+- `id`: number (Primary Key)
+- `notes`: string (Optional)
+- `orderId`: number (Foreign Key to OrderEntity)
+- `paymentDate`: Date (Optional)
+- `providerId`: number (Foreign Key to ProviderEntity)
+- `totalAmount`: number (Calculated)
+- `updatedAt`: Date (Default current date)
+
+## User entities
+
+### User
+
+#### Properties:
+
+- `contactPhone`: string (Optional)
+- `createdAt`: Date (Default current date)
+- `email`: string (Required, Unique)
+- `firstName`: string (Required)
+- `id`: number (Primary Key)
+- `isActive`: boolean (Default true)
+- `lastName`: string (Required)
+- `password`: string (Required)
+- `role`: string (Required)
 
 ## Notas
 

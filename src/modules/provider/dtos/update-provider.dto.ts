@@ -8,7 +8,7 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH, RFC_REGEX } from '@core/constants'
+import { longNameLength, RFC_REGEX } from '@core/constants'
 import { plainToInstance } from 'class-transformer'
 import { BadRequestException } from '@core/errors'
 import { ErrorMessages } from '@core/enums/messages'
@@ -20,7 +20,7 @@ export class UpdateProviderDto {
 
   @IsOptional()
   @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+  @Length(1, longNameLength)
   name?: string
 
   @IsOptional()

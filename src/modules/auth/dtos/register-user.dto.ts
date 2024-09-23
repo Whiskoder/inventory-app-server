@@ -1,4 +1,3 @@
-import { plainToInstance, Type } from 'class-transformer'
 import {
   IsEmail,
   IsOptional,
@@ -9,20 +8,25 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
+import { longNameLength } from '@core/constants'
+import { plainToInstance } from 'class-transformer'
 
 export class RegisterUserDto {
-  @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-  firstName!: string
-
-  @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
   @IsOptional()
-  lastName?: string
+  @IsPhoneNumber('MX')
+  contactPhone?: string
 
   @IsEmail()
-  emailAddress!: string
+  email!: string
+
+  @IsString()
+  @Length(1, longNameLength)
+  firstName!: string
+
+  @IsOptional()
+  @IsString()
+  @Length(1, longNameLength)
+  lastName?: string
 
   @IsStrongPassword({
     minLength: 8,
@@ -33,30 +37,10 @@ export class RegisterUserDto {
   })
   password!: string
 
-  @Type(() => Number)
-  @IsOptional()
-  @IsPhoneNumber('MX')
-  phone?: number
-
   public static async create(obj: {
     [key: string]: any
   }): Promise<RegisterUserDto> {
-    const {
-      emailAddress = '',
-      firstName = '',
-      lastName,
-      password = '',
-      phone,
-    } = obj || {}
-
-    const dto = plainToInstance(RegisterUserDto, {
-      emailAddress,
-      firstName,
-      lastName,
-      password,
-      phone,
-    })
-
+    const dto = plainToInstance(RegisterUserDto, obj)
     await validateOrReject(dto)
     return dto
   }

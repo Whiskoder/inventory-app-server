@@ -1,10 +1,7 @@
 import express, { Router } from 'express'
 import cors from 'cors'
 
-import {
-  ExceptionHandlerMiddleware,
-  RoutesFilterMiddleware,
-} from '@core/middlewares'
+import { ExceptionHandlerMiddleware, FilterMiddleware } from '@core/middlewares'
 
 interface Options {
   port: number
@@ -32,7 +29,7 @@ export class Server {
     this.app.use(this.routes)
 
     //* Routes error handling
-    this.app.use(RoutesFilterMiddleware.notFoundHandler)
+    this.app.use(FilterMiddleware.invalidRoute)
 
     //* Error filter handler
     this.app.use(ExceptionHandlerMiddleware.handle)

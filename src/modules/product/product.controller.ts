@@ -34,8 +34,9 @@ export class ProductController {
     next: NextFunction
   ) => {
     try {
-      const dto = await PaginationDto.create(req.query)
-      const response = await this.productService.getAllProducts(dto)
+      const response = await this.productService.getAllProducts(
+        res.locals.query
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
@@ -116,10 +117,9 @@ export class ProductController {
   ) => {
     try {
       const productId = +req.params.productId
-      const dto = await PaginationDto.create(req.query)
       const response = await this.productService.getProductPricesByProductId(
         productId,
-        dto
+        res.locals.query
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

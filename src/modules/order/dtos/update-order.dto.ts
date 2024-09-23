@@ -15,8 +15,9 @@ import {
 
 import { ErrorMessages } from '@core/enums/messages'
 import { BadRequestException } from '@core/errors'
-import { MAX_DESCRIPTION_LENGTH, MIN_DESCRIPTION_LENGTH } from '@core/constants'
+// import { MAX_DESCRIPTION_LENGTH, MIN_DESCRIPTION_LENGTH } from '@core/constants'
 import { OrderStatus } from '../enums'
+import { descriptionLength } from '@/core/constants'
 
 export class UpdateOrderDto {
   @IsOptional()
@@ -39,7 +40,7 @@ export class UpdateOrderDto {
 
   @IsOptional()
   @IsString()
-  @Length(MIN_DESCRIPTION_LENGTH, MAX_DESCRIPTION_LENGTH)
+  @Length(1, descriptionLength)
   requestNotes?: string
 
   @Type(() => Number)
@@ -50,7 +51,7 @@ export class UpdateOrderDto {
 
   @IsOptional()
   @IsString()
-  @Length(MIN_DESCRIPTION_LENGTH, MAX_DESCRIPTION_LENGTH)
+  @Length(1, descriptionLength)
   warehouseNotes?: string
 
   public static async create(obj: {

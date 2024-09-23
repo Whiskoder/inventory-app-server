@@ -22,40 +22,41 @@ export class AuthService {
 
   public async registerUser(registerUserDto: RegisterUserDto) {
     const isExistingUser = await this.userRepository.findOne({
-      where: { emailAddress: registerUserDto.emailAddress },
+      where: { email: registerUserDto.email },
     })
 
     if (isExistingUser) throw new BadRequestException('Email already in use')
 
     const hasedPassword = bcryptAdapter.hash(registerUserDto.password)
-    const user = await this.userRepository.save({
+    const userEntity = this.userRepository.create({
       ...registerUserDto,
       password: hasedPassword,
     })
+    await this.userRepository.save(userEntity)
 
-    const token = await this.generateToken(user.id)
-    const { password, ...userEntity } = user
+    const token = await this.generateToken(userEntity.id)
+    const { password, ...user } = userEntity
 
     if (!token)
       throw new InternalServerErrorException('Unable to generate token')
 
     //* Send user entity to avoid sending password in response
-    return HTTPResponseDto.created(undefined, { user: userEntity, token })
+    return HTTPResponseDto.created(undefined, { user, token })
   }
 
   public async loginUser(loginUserDto: LoginUserDto) {
     const user = await this.userRepository.findOne({
       where: {
-        emailAddress: loginUserDto.emailAddress,
+        email: loginUserDto.email,
       },
       select: [
-        'emailAddress',
+        'email',
         'firstName',
         'id',
         'lastName',
         'password',
         'role',
-        'phone',
+        'contactPhone',
       ],
     })
 

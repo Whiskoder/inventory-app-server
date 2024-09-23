@@ -29,8 +29,9 @@ export class ProviderController {
     next: NextFunction
   ) => {
     try {
-      const dto = await PaginationDto.create(req.query)
-      const response = await this.providerService.getAllProviders(dto)
+      const response = await this.providerService.getAllProviders(
+        res.locals.query
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)

@@ -1,36 +1,75 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+} from 'typeorm'
 
 import { Order } from '@modules/order/models'
 import { Role } from '@config/roles'
+import {
+  emailLength,
+  longNameLength,
+  passwordHashSize,
+  phoneLength,
+  shortNameLength,
+} from '@/core/constants'
 
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id!: number
 
-  @Column('text')
+  @Column({
+    type: 'varchar',
+    length: phoneLength,
+    nullable: true,
+  })
+  contactPhone?: string
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt!: Date
+
+  @Column({
+    type: 'varchar',
+    length: emailLength,
+    nullable: true,
+  })
+  email?: string
+
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+  })
   firstName!: string
 
-  @Column('text', { nullable: true })
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    nullable: true,
+  })
   lastName?: string
 
-  @Column('text', {
-    unique: true,
+  @Column({
+    type: 'varchar',
+    length: passwordHashSize,
   })
-  emailAddress!: string
-
-  @Column('numeric', { nullable: true })
-  phone?: number
-
-  @Column('text', { select: false })
   password!: string
 
-  @Column('text', { default: Role.USER })
+  @Column({
+    type: 'varchar',
+    length: shortNameLength,
+    default: Role.EMPLOYEE,
+  })
   role!: Role
 
   @OneToMany(() => Order, (order) => order.user)
   orders?: Order[]
 
-  @Column('boolean', { default: true, select: false })
+  @Column({ type: 'boolean', default: true, select: false })
   isActive!: boolean
 }

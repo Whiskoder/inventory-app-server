@@ -19,11 +19,11 @@ export class Equipment {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price!: number
 
-  @ManyToMany(() => Provider, (provider) => provider.equipments, {
-    nullable: true,
-  })
-  @JoinTable({ name: 'equipments_providers' })
-  providers?: Provider[]
+  // @ManyToMany(() => Provider, (provider) => provider.equipments, {
+  //   nullable: true,
+  // })
+  // @JoinTable({ name: 'equipments_providers' })
+  // providers?: Provider[]
 
   @Column('decimal', { default: 0 })
   stock!: number

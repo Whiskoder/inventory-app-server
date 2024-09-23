@@ -14,11 +14,19 @@ export class ProductPrice {
   @PrimaryGeneratedColumn()
   id!: number
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  minUnitQuantity!: number
+  @Column({
+    type: 'decimal',
+    precision: 120,
+    scale: 2,
+  })
+  quantity!: number
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  pricePerUnit!: number
+  @Column({
+    type: 'decimal',
+    precision: 2,
+    scale: 2,
+  })
+  basePrice!: number
 
   @ManyToOne(() => Product, (product) => product.productPrices, {
     eager: false,

@@ -1,27 +1,23 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
   BeforeInsert,
   BeforeUpdate,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm'
 
-import { Invoice } from '@modules/invoice/models'
-import { OrderItem } from '@modules/order/models'
-import { ProductPrice } from '@modules/product/models'
+import { Order } from '@modules/order/models'
 import {
-  descriptionLength,
   emailLength,
   longNameLength,
-  shortNameLength,
-  rfcLength,
   phoneLength,
   postalCodeLength,
+  shortNameLength,
 } from '@core/constants'
 
-@Entity({ name: 'providers' })
-export class Provider {
+@Entity({ name: 'branches' })
+export class Branch {
   @PrimaryGeneratedColumn()
   id!: number
 
@@ -55,13 +51,6 @@ export class Provider {
 
   @Column({
     type: 'varchar',
-    length: descriptionLength,
-    nullable: true,
-  })
-  description?: string
-
-  @Column({
-    type: 'varchar',
     length: longNameLength,
     nullable: true,
   })
@@ -76,42 +65,19 @@ export class Provider {
 
   @Column({
     type: 'varchar',
-    length: rfcLength,
-  })
-  rfc!: string
-
-  @Column({
-    type: 'varchar',
     length: longNameLength,
     nullable: true,
   })
   streetName?: string
 
-  @Column({
-    type: 'boolean',
-    default: true,
-    select: false,
-  })
+  @OneToMany(() => Order, (order) => order.branch, { nullable: true })
+  orders?: Order[]
+
+  @Column('boolean', { default: true, select: false })
   isActive!: boolean
-
-  @OneToMany(() => Invoice, (invoice) => invoice.provider, {
-    eager: false,
-  })
-  invoices?: Invoice[]
-
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.provider, {
-    eager: false,
-  })
-  orderItems?: OrderItem[]
-
-  @OneToMany(() => ProductPrice, (productPrice) => productPrice.provider, {
-    eager: false,
-  })
-  productPrices?: ProductPrice[]
 
   normalizeStrings() {
     this.name = this.name.toLowerCase().trim()
-    this.description = this.description?.toLowerCase().trim()
     this.cityName = this.cityName?.toLowerCase().trim()
     this.contactEmail = this.contactEmail?.toLowerCase().trim()
     this.dependantLocality = this.dependantLocality?.toLowerCase().trim()

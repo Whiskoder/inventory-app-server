@@ -12,27 +12,33 @@ import {
 import { Category } from '@modules/category/models'
 import { OrderItem } from '@modules/order/models'
 import { ProductPrice } from '@modules/product/models'
+import { longNameLength, measurementUnitLength } from '@/core/constants'
 
 @Entity({ name: 'products' })
 export class Product {
-  @Column('integer', { unique: true, nullable: true })
-  barCode!: number
-
-  @ManyToOne(() => Category, (category) => category.products, {
-    nullable: false,
-    eager: true,
-  })
-  @JoinColumn()
-  category!: Category
-
   @PrimaryGeneratedColumn()
   id!: number
 
-  @Column('text')
-  measureUnit!: string
+  @Column({
+    type: 'varchar',
+    length: measurementUnitLength,
+    unique: true,
+  })
+  measurementUnit!: string
 
-  @Column('text', { unique: true })
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    unique: true,
+  })
   name!: string
+
+  @Column({
+    type: 'boolean',
+    default: true,
+    select: false,
+  })
+  isActive!: boolean
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.product, {
     nullable: true,
@@ -44,18 +50,16 @@ export class Product {
   })
   productPrices?: ProductPrice[]
 
-  // @ManyToMany(() => Provider, (provider) => provider.products)
-  // @JoinTable({ name: 'products_providers' })
-  // providers?: Provider[]
-
-  @Column('decimal', { default: 0 })
-  stock!: number
-
-  @Column('boolean', { default: true, select: false })
-  isActive!: boolean
+  @ManyToOne(() => Category, (category) => category.products, {
+    nullable: false,
+    eager: true,
+  })
+  @JoinColumn()
+  category!: Category
 
   normalizeStrings() {
     this.name = this.name.toLowerCase().trim()
+    this.measurementUnit = this.measurementUnit.toLowerCase().trim()
   }
 
   @BeforeInsert()

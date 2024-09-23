@@ -7,7 +7,7 @@ export enum Action {
 
 export enum Resource {
   CATEGORY = 'category',
-  RESTAURANT = 'restaurant',
+  BRANCH = 'branch',
   PRODUCT = 'product',
   PROVIDER = 'provider',
   ORDER = 'order',
@@ -18,7 +18,7 @@ export enum Role {
   MANAGER = 'manager',
   WAREHOUSEMAN = 'warehouseman',
   ACCOUNTANT = 'accountant',
-  USER = 'user',
+  EMPLOYEE = 'employee',
 }
 
 type IRoleConfig = {
@@ -33,7 +33,7 @@ export const RoleConfig: IRoleConfig = {
   admin: {
     permissions: {
       [Resource.CATEGORY]: ['create', 'read', 'update', 'delete'],
-      [Resource.RESTAURANT]: ['create', 'read', 'update', 'delete'],
+      [Resource.BRANCH]: ['create', 'read', 'update', 'delete'],
       [Resource.PRODUCT]: ['create', 'read', 'update', 'delete'],
       [Resource.PROVIDER]: ['create', 'read', 'update', 'delete'],
       [Resource.ORDER]: ['create', 'read', 'update', 'delete'],
@@ -42,7 +42,7 @@ export const RoleConfig: IRoleConfig = {
   manager: {
     permissions: {
       [Resource.CATEGORY]: [],
-      [Resource.RESTAURANT]: [],
+      [Resource.BRANCH]: [],
       [Resource.PRODUCT]: [],
       [Resource.PROVIDER]: [],
       [Resource.ORDER]: [],
@@ -51,7 +51,7 @@ export const RoleConfig: IRoleConfig = {
   warehouseman: {
     permissions: {
       [Resource.CATEGORY]: [],
-      [Resource.RESTAURANT]: [],
+      [Resource.BRANCH]: [],
       [Resource.PRODUCT]: [],
       [Resource.PROVIDER]: [],
       [Resource.ORDER]: [],
@@ -60,16 +60,16 @@ export const RoleConfig: IRoleConfig = {
   accountant: {
     permissions: {
       [Resource.CATEGORY]: [],
-      [Resource.RESTAURANT]: [],
+      [Resource.BRANCH]: [],
       [Resource.PRODUCT]: [],
       [Resource.PROVIDER]: [],
       [Resource.ORDER]: [],
     },
   },
-  user: {
+  employee: {
     permissions: {
       [Resource.CATEGORY]: [],
-      [Resource.RESTAURANT]: [],
+      [Resource.BRANCH]: [],
       [Resource.PRODUCT]: [],
       [Resource.PROVIDER]: [],
       [Resource.ORDER]: [],
