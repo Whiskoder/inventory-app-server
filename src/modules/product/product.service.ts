@@ -69,7 +69,6 @@ export class ProductService {
       currentPage,
       limit,
       totalItems,
-      skip,
     })
 
     return CreateHTTPResponseDto.ok(undefined, {
@@ -206,7 +205,6 @@ export class ProductService {
       currentPage,
       limit,
       totalItems,
-      skip,
     })
 
     const productPrices = this.plainProductPrices(result)

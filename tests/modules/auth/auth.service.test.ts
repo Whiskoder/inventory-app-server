@@ -16,29 +16,14 @@ describe('auth.service.test.ts', () => {
     authService = new AuthService(jwt, userRepository)
   })
 
-  beforeEach((done) => {
-    userRepository
-      .delete({})
-      .then(() => done())
-      .catch(done) // Pass error to done if it fails
+  beforeEach(async () => {
+    await userRepository.delete({})
   })
 
-  afterAll((done) => {
-    userRepository
-      .delete({})
-      .then(() => AppDataSource.destroy())
-      .then(() => done())
-      .catch(done) // Pass error to done if it fails
+  afterAll(async () => {
+    await userRepository.delete({})
+    await AppDataSource.destroy()
   })
-
-  // beforeEach(async () => {
-  //   await userRepository.delete({})
-  // })
-
-  // afterAll(async () => {
-  //   await userRepository.delete({})
-  //   await AppDataSource.destroy()
-  // })
 
   const testUser: RegisterUserDto = {
     contactPhone: '+522742458721',

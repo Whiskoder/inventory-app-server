@@ -10,7 +10,7 @@
     "docker:dev": "docker compose -f docker-compose.dev.yaml --env-file .env up -d",
     "docker:test": "docker compose -f docker-compose.test.yaml --env-file .env.test up -d",
     "test": "jest --detectOpenHandles",
-    "test:watch": "jest --watch",
+    "test:watch": "jest --watchAll --no-cache --clearMocks",
     "test:coverage": "jest --coverage",
     "migration:generate": "npm run typeorm migration:generate ./src/databases/migrations/migration -- -d ./src/databases/datasources/app.datasource.ts",
     "migration:run": "npm run typeorm migration:run -- -d ./src/databases/datasources/app.datasource.ts",

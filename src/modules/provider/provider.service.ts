@@ -41,7 +41,6 @@ export class ProviderService {
       currentPage,
       limit,
       totalItems,
-      skip,
     })
 
     return CreateHTTPResponseDto.ok(undefined, { providers, pagination })

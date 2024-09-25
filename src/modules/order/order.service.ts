@@ -66,7 +66,6 @@ export class OrderService {
       currentPage,
       limit,
       totalItems,
-      skip,
     })
 
     return CreateHTTPResponseDto.ok(undefined, { orders, pagination })

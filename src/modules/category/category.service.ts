@@ -45,7 +45,6 @@ export class CategoryService {
       currentPage,
       limit,
       totalItems,
-      skip,
     })
 
     return CreateHTTPResponseDto.ok(undefined, { categories, pagination })

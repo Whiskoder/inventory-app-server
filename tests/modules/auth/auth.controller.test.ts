@@ -16,30 +16,14 @@ describe('auth.controller.test.ts', () => {
     userRepository = AppDataSource.getRepository(User)
   })
 
-  // beforeEach(async () => {
-  //   await userRepository.delete({})
-  // })
-
-  // afterAll(async () => {
-  //   await userRepository.delete({})
-  //   await testServer.close()
-  //   await AppDataSource.destroy()
-  // })
-
-  beforeEach((done) => {
-    userRepository
-      .delete({})
-      .then(() => done())
-      .catch(done) // Pass error to done if it fails
+  beforeEach(async () => {
+    await userRepository.delete({})
   })
 
-  afterAll((done) => {
-    userRepository
-      .delete({})
-      .then(() => AppDataSource.destroy())
-      .then(() => testServer.close())
-      .then(() => done())
-      .catch(done) // Pass error to done if it fails
+  afterAll(async () => {
+    await userRepository.delete({})
+    await testServer.close()
+    await AppDataSource.destroy()
   })
 
   const registerUserDto: RegisterUserDto = {
@@ -55,24 +39,38 @@ describe('auth.controller.test.ts', () => {
     password: '123456Ab@',
   }
 
-  it('should register a new user and login same user', async () => {
-    // POST '/api/v1/auth/register'
+  // POST '/api/v1/auth/register'
+  it('should register a new user', async () => {
     const { body } = await request(testServer.app)
       .post('/api/v1/auth/register')
       .send(registerUserDto)
       .expect(201)
+
+    const { password, ...user } = registerUserDto
+    expect(body.data.user).toEqual(
+      expect.objectContaining({
+        ...user,
+      })
+    )
   })
 
+  // POST '/api/v1/auth/login'
   it('should login a user', async () => {
     const userEntity = userRepository.create({
       ...registerUserDto,
       password: bcryptAdapter.hash(registerUserDto.password),
     })
     await userRepository.save(userEntity)
-    // POST '/api/v1/auth/login'
-    const response = await request(testServer.app)
+    const { body } = await request(testServer.app)
       .post('/api/v1/auth/login')
       .send(loginUserDto)
       .expect(200)
+
+    const { password, ...user } = registerUserDto
+    expect(body.data.user).toEqual(
+      expect.objectContaining({
+        ...user,
+      })
+    )
   })
 })

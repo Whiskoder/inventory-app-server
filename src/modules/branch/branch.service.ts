@@ -43,7 +43,6 @@ export class BranchService {
       currentPage,
       limit,
       totalItems,
-      skip,
     })
 
     return CreateHTTPResponseDto.ok(undefined, { branches, pagination })

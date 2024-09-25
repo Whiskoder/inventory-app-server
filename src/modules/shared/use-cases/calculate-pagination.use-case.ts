@@ -4,7 +4,6 @@ export interface CalculatePaginationOpts {
   currentPage: number
   limit: number
   totalItems: number
-  skip: number
 }
 
 export class CalculatePaginationUseCase {
@@ -23,13 +22,14 @@ export class CalculatePaginationUseCase {
   }
 
   public static execute(opts: CalculatePaginationOpts) {
-    const { currentPage, limit, totalItems, skip } = opts
+    const { currentPage, limit, totalItems } = opts
 
     const constructor = CalculatePaginationUseCase
 
     const totalPages = Math.ceil(totalItems / limit)
     const nextPage = constructor.calculateNextPage(currentPage, totalPages)
     const previousPage = constructor.calculatePreviousPage(currentPage)
+    const skip = (currentPage - 1) * limit
 
     if (!totalItems) throw new NotFoundException('No items found')
     if (totalItems < skip)
