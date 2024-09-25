@@ -2,12 +2,12 @@ import { NextFunction, Request, Response } from 'express'
 
 import { ProviderService } from '@modules/provider'
 import { CreateProviderDto, UpdateProviderDto } from '@modules/provider/dtos'
-import { PaginationDto } from '@modules/shared/dtos'
+import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
 export class ProviderController {
   constructor(private readonly providerService: ProviderService) {}
 
-  //POST '/api/v1/provider'
+  //POST '/api/v1/providers/'
   public createProvider = async (
     req: Request,
     res: Response,
@@ -22,15 +22,18 @@ export class ProviderController {
     }
   }
 
-  //GET '/api/v1/provider'
+  //GET '/api/v1/providers/'
   public getAllProviders = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      const paginationDto = await CreatePaginationDto.create(req.query)
+      const sortingDto = await CreateSortingDto.create(req.query)
       const response = await this.providerService.getAllProviders(
-        res.locals.query
+        paginationDto,
+        sortingDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -38,46 +41,49 @@ export class ProviderController {
     }
   }
 
-  //GET '/api/v1/provider/:id'
-  public getProviderById = async (
+  //GET '/api/v1/providers/:term'
+  public getProviderByTerm = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const id = +req.params.id
-      const response = await this.providerService.getProviderById(id)
+      const term = req.params.term
+      const response = await this.providerService.getProviderByTerm(term)
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
   }
 
-  //PUT '/api/v1/provider/:id'
+  //PUT '/api/v1/providers/:providerId'
   public updateProvider = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const id = +req.params.id
+      const providerId = +req.params.providerId
       const dto = await UpdateProviderDto.create(req.body)
-      const response = await this.providerService.updateProvider(id, dto)
+      const response = await this.providerService.updateProvider(
+        providerId,
+        dto
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
   }
 
-  //DELETE '/api/v1/provider/:id'
+  //DELETE '/api/v1/providers/:providerId'
   public deleteProvider = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const id = +req.params.id
-      const response = await this.providerService.deleteProvider(id)
+      const providerId = +req.params.providerId
+      const response = await this.providerService.deleteProvider(providerId)
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)

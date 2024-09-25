@@ -1,7 +1,7 @@
 import { plainToInstance, Transform, Type } from 'class-transformer'
 import { IsInt, IsPositive, validateOrReject } from 'class-validator'
 
-export class PaginationDto {
+export class CreatePaginationDto {
   @Type(() => Number)
   @IsInt()
   @IsPositive()
@@ -17,8 +17,8 @@ export class PaginationDto {
 
   public static async create(obj: {
     [key: string]: any
-  }): Promise<PaginationDto> {
-    const dto = plainToInstance(PaginationDto, obj)
+  }): Promise<CreatePaginationDto> {
+    const dto = plainToInstance(CreatePaginationDto, obj)
     await validateOrReject(dto)
     return dto
   }

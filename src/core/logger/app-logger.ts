@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
 import { LoggerPlugin, envs, LoggerTransportPlugin } from '@config/plugins'
-import { IHTTPError } from '@core/extensions'
+import { IHTTPError } from '@/modules/shared/extensions'
 
 export interface httpInfo {
   log: {

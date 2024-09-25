@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { OrderService } from '@modules/order'
 import { UpdateOrderDto, CreateOrderDto } from '@modules/order/dtos'
-import { PaginationDto } from '@modules/shared/dtos'
+import { CreatePaginationDto } from '@modules/shared/dtos'
 
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}

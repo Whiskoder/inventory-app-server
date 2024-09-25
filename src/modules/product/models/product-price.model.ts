@@ -35,7 +35,7 @@ export class ProductPrice {
   product!: Product
 
   @ManyToOne(() => Provider, (provider) => provider.productPrices, {
-    eager: true,
+    eager: false,
   })
   @JoinColumn()
   provider!: Provider

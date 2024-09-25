@@ -1,11 +1,13 @@
 # Variables de entorno
 .env
+.env.test
 
 # Archivos de node
 node_modules/
 
 # Base de datos
 /postgres
+/postgres-test
 
 # Build de producción
 /dist
@@ -13,3 +15,6 @@ node_modules/
 migrations/
 
 others/
+
+coverage/
+.vscode/

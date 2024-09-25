@@ -1,6 +1,6 @@
 export enum OrderStatus {
   // When the manager creates a draft of the order
-  DRAFT = 0,
+  OPEN = 0,
   // When the order has been sent to the warehouse but not confirmed
   SENT = 1,
   // When the order has been read by the warehouse

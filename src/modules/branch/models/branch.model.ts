@@ -14,7 +14,7 @@ import {
   phoneLength,
   postalCodeLength,
   shortNameLength,
-} from '@core/constants'
+} from '@/modules/shared/constants'
 
 @Entity({ name: 'branches' })
 export class Branch {
@@ -53,6 +53,7 @@ export class Branch {
     type: 'varchar',
     length: longNameLength,
     nullable: true,
+    unique: true,
   })
   name!: string
 

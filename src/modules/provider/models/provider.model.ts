@@ -18,7 +18,7 @@ import {
   rfcLength,
   phoneLength,
   postalCodeLength,
-} from '@core/constants'
+} from '@/modules/shared/constants'
 
 @Entity({ name: 'providers' })
 export class Provider {
@@ -63,7 +63,7 @@ export class Provider {
   @Column({
     type: 'varchar',
     length: longNameLength,
-    nullable: true,
+    unique: true,
   })
   name!: string
 
@@ -77,6 +77,7 @@ export class Provider {
   @Column({
     type: 'varchar',
     length: rfcLength,
+    unique: true,
   })
   rfc!: string
 

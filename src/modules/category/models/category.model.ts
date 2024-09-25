@@ -7,8 +7,9 @@ import {
   BeforeInsert,
 } from 'typeorm'
 
-import { descriptionLength, shortNameLength } from '@core/constants'
+import { descriptionLength, shortNameLength } from '@modules/shared/constants'
 import { Product } from '@modules/product/models'
+import { AppIcons } from '@modules/shared/enums'
 
 @Entity({ name: 'categories' })
 export class Category {
@@ -23,11 +24,11 @@ export class Category {
   name!: string
 
   @Column({
-    type: 'varchar',
-    length: shortNameLength,
-    default: 'default_icon',
+    type: 'enum',
+    default: AppIcons.DEFAULT,
+    enum: AppIcons,
   })
-  iconName!: string
+  iconName!: AppIcons
 
   @Column({
     type: 'varchar',
@@ -48,7 +49,6 @@ export class Category {
 
   normalizeStrings() {
     this.name = this.name.trim().toLowerCase()
-    this.iconName = this.iconName.trim().toLowerCase()
     this.description = this.description?.trim().toLowerCase()
   }
 

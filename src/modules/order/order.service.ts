@@ -8,13 +8,16 @@ import {
 } from '@core/errors'
 import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
 import { CreateOrderDto, UpdateOrderDto } from '@modules/order/dtos'
-import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
+import {
+  CreateHTTPResponseDto,
+  CreatePaginationDto,
+} from '@modules/shared/dtos'
 import { Order, OrderItem } from '@modules/order/models'
 import { OrderStatus } from '@modules/order/enums'
 import { Branch } from '@modules/branch/models'
 import { User } from '@modules/user/models'
 import { Role } from '@config/roles'
-import { ErrorMessages } from '@core/enums/messages'
+import { ErrorMessages } from '@/modules/shared/enums/messages'
 
 export class OrderService {
   constructor(
@@ -26,7 +29,7 @@ export class OrderService {
   public async createOrder(
     createOrderDto: CreateOrderDto,
     userEntity: User
-  ): Promise<HTTPResponseDto> {
+  ): Promise<CreateHTTPResponseDto> {
     // const { branchId, ...order } = createOrderDto
 
     // const branchEntity = await this.branchRepository.findOne({
@@ -44,15 +47,15 @@ export class OrderService {
     // })
     // await this.orderRepository.save(orderEntity)
 
-    return HTTPResponseDto.created('Order created successfully', {
+    return CreateHTTPResponseDto.created('Order created successfully', {
       // orders: [orderEntity],
     })
   }
 
   // TODO: Update order status to PENDING when warehouse reads the order
   public async getAllOrders(
-    paginationDto: PaginationDto
-  ): Promise<HTTPResponseDto> {
+    paginationDto: CreatePaginationDto
+  ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
     const [orders, totalItems] = await this.orderRepository.findAndCount({
       take: limit,
@@ -66,24 +69,24 @@ export class OrderService {
       skip,
     })
 
-    return HTTPResponseDto.ok(undefined, { orders, pagination })
+    return CreateHTTPResponseDto.ok(undefined, { orders, pagination })
   }
 
-  public async getOrderById(id: number): Promise<HTTPResponseDto> {
+  public async getOrderById(id: number): Promise<CreateHTTPResponseDto> {
     const orderEntity = await this.orderRepository.findOne({
       where: { id },
     })
 
     if (!orderEntity) throw new NotFoundException('Order not found')
 
-    return HTTPResponseDto.ok(undefined, { orders: [orderEntity] })
+    return CreateHTTPResponseDto.ok(undefined, { orders: [orderEntity] })
   }
 
   public async updateOrder(
     id: number,
     userEntity: User,
     updateOrderDto: UpdateOrderDto
-  ): Promise<HTTPResponseDto> {
+  ): Promise<CreateHTTPResponseDto> {
     const orderEntity = await this.orderRepository.findOne({ where: { id } })
 
     if (!orderEntity) throw new NotFoundException('Order not found')
@@ -97,16 +100,16 @@ export class OrderService {
     if (nextOrderStep)
       return await this.nextOrderStep(userEntity.role, id, orderStatus)
 
-    return HTTPResponseDto.ok('Order updated successfully')
+    return CreateHTTPResponseDto.ok('Order updated successfully')
   }
 
-  public async deleteOrder(id: number): Promise<HTTPResponseDto> {
+  public async deleteOrder(id: number): Promise<CreateHTTPResponseDto> {
     // TODO: Solve error if order has childs
     const orderEntity = await this.orderRepository.findOne({ where: { id } })
 
     if (!orderEntity) throw new NotFoundException('Order not found')
 
-    if (orderEntity.status !== OrderStatus.DRAFT)
+    if (orderEntity.status !== OrderStatus.OPEN)
       throw new BadRequestException('Only draft orders can be deleted')
 
     const deleteOrder = await this.orderRepository.delete({ id })
@@ -114,7 +117,7 @@ export class OrderService {
     if (!deleteOrder.affected)
       throw new InternalServerErrorException('Error deleting order')
 
-    return HTTPResponseDto.noContent()
+    return CreateHTTPResponseDto.noContent()
   }
 
   // TODO: Create order items only if the order is in draft status
@@ -125,7 +128,7 @@ export class OrderService {
     orderId: number,
     orderStatus: OrderStatus
   ) {
-    const managerTurns = [OrderStatus.DRAFT, OrderStatus.DELIVERED]
+    const managerTurns = [OrderStatus.OPEN, OrderStatus.DELIVERED]
     const warehousemanTurns = [OrderStatus.PENDING, OrderStatus.PROCESSING]
 
     if (orderStatus >= OrderStatus.COMPLETED)
@@ -176,7 +179,7 @@ export class OrderService {
   private async updateOrderStatus(
     orderId: number,
     orderStatus: OrderStatus
-  ): Promise<HTTPResponseDto> {
+  ): Promise<CreateHTTPResponseDto> {
     const updateOrder = await this.orderRepository.update(
       { id: orderId },
       { status: orderStatus }
@@ -185,6 +188,6 @@ export class OrderService {
     if (!updateOrder.affected)
       throw new InternalServerErrorException('Error updating order')
 
-    return HTTPResponseDto.ok('Order status updated', { orderStatus })
+    return CreateHTTPResponseDto.ok('Order status updated', { orderStatus })
   }
 }

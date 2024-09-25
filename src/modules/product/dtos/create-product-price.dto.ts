@@ -11,12 +11,12 @@ export class CreateProductPriceDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  pricePerUnit!: number
+  basePrice!: number
 
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  minUnitQuantity!: number
+  quantity!: number
 
   @Type(() => Number)
   @IsInt()
@@ -26,14 +26,8 @@ export class CreateProductPriceDto {
   public static async create(obj: {
     [key: string]: any
   }): Promise<CreateProductPriceDto> {
-    const { pricePerUnit, minUnitQuantity, providerId } = obj || {}
-    const dto = plainToInstance(CreateProductPriceDto, {
-      pricePerUnit,
-      minUnitQuantity,
-      providerId,
-    })
+    const dto = plainToInstance(CreateProductPriceDto, obj)
     await validateOrReject(dto)
-
     return dto
   }
 }

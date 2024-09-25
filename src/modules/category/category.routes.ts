@@ -37,13 +37,13 @@ export class CategoryRoutes {
     )
 
     router.put(
-      '/:id',
+      '/:categoryId',
       [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
       controller.updateCategory
     )
 
     router.delete(
-      '/:id',
+      '/:categoryId',
       [AuthMiddleware.checkPermission(resource, Action.DELETE)],
       controller.deleteCategory
     )

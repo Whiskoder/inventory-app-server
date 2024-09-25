@@ -1,9 +1,9 @@
-import { HTTPMessages } from '@core/constants/http-messages'
-import { HTTPStatusCode } from '@core/enums/http'
+import { HTTPMessages } from '@/modules/shared/constants/http-messages'
+import { HTTPStatusCode } from '@/modules/shared/enums/http'
 
 type HTTPResponseData = { [key: string]: any }
 
-export class HTTPResponseDto {
+export class CreateHTTPResponseDto {
   private constructor(
     readonly statusCode: number,
     readonly status: string,
@@ -11,8 +11,11 @@ export class HTTPResponseDto {
     readonly data?: HTTPResponseData
   ) {}
 
-  public static ok(message?: string, data?: HTTPResponseData): HTTPResponseDto {
-    return new HTTPResponseDto(
+  public static ok(
+    message?: string,
+    data?: HTTPResponseData
+  ): CreateHTTPResponseDto {
+    return new CreateHTTPResponseDto(
       HTTPStatusCode.Ok,
       HTTPMessages.OK,
       message,
@@ -23,8 +26,8 @@ export class HTTPResponseDto {
   public static created(
     message?: string,
     data?: HTTPResponseData
-  ): HTTPResponseDto {
-    return new HTTPResponseDto(
+  ): CreateHTTPResponseDto {
+    return new CreateHTTPResponseDto(
       HTTPStatusCode.Created,
       HTTPMessages.CREATED,
       message,
@@ -35,8 +38,8 @@ export class HTTPResponseDto {
   public static accepted(
     message?: string,
     data?: HTTPResponseData
-  ): HTTPResponseDto {
-    return new HTTPResponseDto(
+  ): CreateHTTPResponseDto {
+    return new CreateHTTPResponseDto(
       HTTPStatusCode.Accepted,
       HTTPMessages.ACCEPTED,
       message,
@@ -44,8 +47,8 @@ export class HTTPResponseDto {
     )
   }
 
-  public static noContent(): HTTPResponseDto {
-    return new HTTPResponseDto(
+  public static noContent(): CreateHTTPResponseDto {
+    return new CreateHTTPResponseDto(
       HTTPStatusCode.NoContent,
       HTTPMessages.NO_CONTENT
     )
@@ -54,8 +57,8 @@ export class HTTPResponseDto {
   public static partialContent(
     message?: string,
     data?: HTTPResponseData
-  ): HTTPResponseDto {
-    return new HTTPResponseDto(
+  ): CreateHTTPResponseDto {
+    return new CreateHTTPResponseDto(
       HTTPStatusCode.PartialContent,
       HTTPMessages.PARTIAL_CONTENT,
       message,

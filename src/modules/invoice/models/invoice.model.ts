@@ -12,7 +12,7 @@ import {
 
 import { Order } from '@modules/order/models'
 import { Provider } from '@modules/provider/models'
-import { descriptionLength, longNameLength } from '@core/constants'
+import { descriptionLength, longNameLength } from '@/modules/shared/constants'
 
 @Entity({ name: 'invoices' })
 export class Invoice {

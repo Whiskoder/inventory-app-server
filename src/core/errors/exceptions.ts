@@ -1,7 +1,7 @@
 import createError from 'http-errors'
 
-import { HTTPStatusCode } from '@core/enums/http'
-import { HTTPMessages } from '@core/constants'
+import { HTTPStatusCode } from '@/modules/shared/enums/http'
+import { HTTPMessages } from '@/modules/shared/constants'
 
 export class BadRequestException {
   constructor(message = HTTPMessages.BAD_REQUEST) {

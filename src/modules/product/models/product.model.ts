@@ -12,7 +12,8 @@ import {
 import { Category } from '@modules/category/models'
 import { OrderItem } from '@modules/order/models'
 import { ProductPrice } from '@modules/product/models'
-import { longNameLength, measurementUnitLength } from '@/core/constants'
+import { longNameLength } from '@/modules/shared/constants'
+import { MeasureUnit } from '@modules/product/enums'
 
 @Entity({ name: 'products' })
 export class Product {
@@ -20,11 +21,11 @@ export class Product {
   id!: number
 
   @Column({
-    type: 'varchar',
-    length: measurementUnitLength,
+    type: 'enum',
     unique: true,
+    enum: MeasureUnit,
   })
-  measurementUnit!: string
+  measurementUnit!: MeasureUnit
 
   @Column({
     type: 'varchar',
@@ -41,25 +42,23 @@ export class Product {
   isActive!: boolean
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.product, {
-    nullable: true,
+    eager: false,
   })
   orderItems?: OrderItem[]
 
   @OneToMany(() => ProductPrice, (productPrice) => productPrice.product, {
-    eager: true,
+    eager: false,
   })
   productPrices?: ProductPrice[]
 
   @ManyToOne(() => Category, (category) => category.products, {
-    nullable: false,
-    eager: true,
+    eager: false,
   })
   @JoinColumn()
   category!: Category
 
   normalizeStrings() {
     this.name = this.name.toLowerCase().trim()
-    this.measurementUnit = this.measurementUnit.toLowerCase().trim()
   }
 
   @BeforeInsert()

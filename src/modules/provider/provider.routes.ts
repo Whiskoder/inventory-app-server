@@ -28,17 +28,17 @@ export class ProviderRoutes {
       controller.getAllProviders
     )
     router.get(
-      '/:id',
+      '/:term',
       [AuthMiddleware.checkPermission(resource, Action.READ)],
-      controller.getProviderById
+      controller.getProviderByTerm
     )
     router.put(
-      '/:id',
+      '/:providerId',
       [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
       controller.updateProvider
     )
     router.delete(
-      '/:id',
+      '/:providerId',
       [AuthMiddleware.checkPermission(resource, Action.DELETE)],
       controller.deleteProvider
     )

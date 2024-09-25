@@ -2,66 +2,36 @@ import { plainToInstance, Type } from 'class-transformer'
 import {
   IsEnum,
   IsInt,
-  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   Length,
-  Max,
-  Min,
   validateOrReject,
 } from 'class-validator'
 
-import { longNameLength } from '@core/constants'
+import { longNameLength } from '@modules/shared/constants'
 import { MeasureUnit } from '@modules/product/enums'
-import { BadRequestException } from '@/core/errors'
-import { ErrorMessages } from '@core/enums/messages'
-
 export class UpdateProductDto {
-  @Type(() => Number)
   @IsOptional()
-  @IsInt()
-  @Min(10000)
-  @Max(99999)
-  barCode!: number
+  @IsEnum(MeasureUnit)
+  measurementUnit?: MeasureUnit
+
+  @IsOptional()
+  @IsString()
+  @Length(1, longNameLength)
+  name?: string
 
   @Type(() => Number)
   @IsOptional()
   @IsInt()
   @IsPositive()
-  categoryId!: number
-
-  @IsOptional()
-  @IsString()
-  @IsEnum(MeasureUnit)
-  measureUnit!: string
-
-  @IsOptional()
-  @IsString()
-  @Length(1, longNameLength)
-  name!: string
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  stock!: number
+  categoryId?: number
 
   public static async create(obj: {
     [key: string]: any
   }): Promise<UpdateProductDto> {
-    if (!obj) throw new BadRequestException(ErrorMessages.EmptyBody)
-
-    const { barCode, categoryId, measureUnit, name, stock } = obj
-    const dto = plainToInstance(UpdateProductDto, {
-      barCode,
-      categoryId,
-      measureUnit,
-      name,
-      stock,
-    })
+    const dto = plainToInstance(UpdateProductDto, obj)
     await validateOrReject(dto)
-
     return dto
   }
 }

@@ -9,7 +9,7 @@ import {
 import { Order } from '@modules/order/models'
 import { Product } from '@modules/product/models'
 import { Provider } from '@modules/provider/models'
-import { measurementUnitLength } from '@/core/constants'
+import { MeasureUnit } from '@modules/product/enums'
 
 @Entity({ name: 'order_items' })
 export class OrderItem {
@@ -24,24 +24,24 @@ export class OrderItem {
   basePriceAtOrder!: number
 
   @Column({
-    type: 'varchar',
-    length: measurementUnitLength,
+    type: 'enum',
+    unique: true,
+    enum: MeasureUnit,
   })
-  measurementUnit!: string
+  measurementUnit!: MeasureUnit
 
   @Column({
     type: 'decimal',
     precision: 2,
     scale: 2,
-    nullable: true,
+    default: 0,
   })
-  quantityDelivered?: number
+  quantityDelivered!: number
 
   @Column({
     type: 'decimal',
     precision: 2,
     scale: 2,
-    nullable: true,
   })
   quantityRequested!: number
 

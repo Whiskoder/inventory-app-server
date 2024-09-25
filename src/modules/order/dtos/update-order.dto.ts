@@ -13,11 +13,11 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { ErrorMessages } from '@core/enums/messages'
+import { ErrorMessages } from '@/modules/shared/enums/messages'
 import { BadRequestException } from '@core/errors'
 // import { MAX_DESCRIPTION_LENGTH, MIN_DESCRIPTION_LENGTH } from '@core/constants'
 import { OrderStatus } from '../enums'
-import { descriptionLength } from '@/core/constants'
+import { descriptionLength } from '@/modules/shared/constants'
 
 export class UpdateOrderDto {
   @IsOptional()

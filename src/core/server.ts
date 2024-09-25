@@ -2,6 +2,7 @@ import express, { Router } from 'express'
 import cors from 'cors'
 
 import { ExceptionHandlerMiddleware, FilterMiddleware } from '@core/middlewares'
+import { AppDataSource } from '@core/datasources'
 
 interface Options {
   port: number
@@ -11,7 +12,7 @@ interface Options {
 export class Server {
   public readonly app = express()
 
-  private serverListener?: Server
+  private serverListener?: any
   private readonly port: number
   private readonly routes: Router
 
@@ -33,11 +34,11 @@ export class Server {
 
     //* Error filter handler
     this.app.use(ExceptionHandlerMiddleware.handle)
-    this.app.listen(this.port)
+    this.serverListener = this.app.listen(this.port)
   }
 
   public async close() {
     if (!this.serverListener) return
-    this.serverListener.close()
+    await this.serverListener.close()
   }
 }

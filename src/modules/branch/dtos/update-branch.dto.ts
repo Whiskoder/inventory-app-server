@@ -8,7 +8,11 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { longNameLength, shortNameLength } from '@core/constants'
+import {
+  emailLength,
+  longNameLength,
+  shortNameLength,
+} from '@/modules/shared/constants'
 import { plainToInstance } from 'class-transformer'
 
 export class UpdateBranchDto {
@@ -18,8 +22,8 @@ export class UpdateBranchDto {
   cityName?: string
 
   @IsOptional()
-  @IsString()
   @IsEmail()
+  @Length(1, emailLength)
   contactEmail?: string
 
   @IsOptional()

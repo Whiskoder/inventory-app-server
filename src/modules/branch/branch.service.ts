@@ -2,41 +2,41 @@ import { Repository } from 'typeorm'
 
 import { Branch } from '@modules/branch/models'
 import { CreateBranchDto, UpdateBranchDto } from '@modules/branch/dtos'
-import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
-import { NotFoundException } from '@core/errors'
+import {
+  CreateHTTPResponseDto,
+  CreatePaginationDto,
+  CreateSortingDto,
+} from '@modules/shared/dtos'
+import { InternalServerErrorException, NotFoundException } from '@core/errors'
 import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
+import { UUID } from '@config/plugins'
 
 export class BranchService {
   constructor(private readonly branchRepository: Repository<Branch>) {}
 
   public async createBranch(
     createBranchDto: CreateBranchDto
-  ): Promise<HTTPResponseDto> {
-    const isExistingBranch = await this.branchRepository.update(
-      { name: createBranchDto.name, isActive: false },
-      { isActive: true }
-    )
-
-    if (isExistingBranch.affected === 1)
-      return HTTPResponseDto.accepted(
-        `Branch ${createBranchDto.name} already exists`
-      )
+  ): Promise<CreateHTTPResponseDto> {
     const branchEntity = this.branchRepository.create(createBranchDto)
     await this.branchRepository.save(branchEntity)
 
-    return HTTPResponseDto.created('Branch created succesfully', {
+    return CreateHTTPResponseDto.created('Branch created succesfully', {
       branches: [branchEntity],
     })
   }
 
   public async getAllBranches(
-    paginationDto: PaginationDto
-  ): Promise<HTTPResponseDto> {
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto
+  ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
+    const { sortBy = 'id', orderBy } = sortingDto
+
     const [branches, totalItems] = await this.branchRepository.findAndCount({
       take: limit,
       skip,
       where: { isActive: true },
+      order: { [sortBy]: orderBy },
     })
 
     const pagination = CalculatePaginationUseCase.execute({
@@ -46,48 +46,55 @@ export class BranchService {
       skip,
     })
 
-    return HTTPResponseDto.ok(undefined, { branches, pagination })
+    return CreateHTTPResponseDto.ok(undefined, { branches, pagination })
   }
 
-  public async getBranchByTerm(term: string): Promise<HTTPResponseDto> {
-    let branch
+  public async getBranchByTerm(term: string): Promise<CreateHTTPResponseDto> {
+    let branchEntity
     if (Number(term)) {
-      branch = await this.branchRepository.findOne({
+      branchEntity = await this.branchRepository.findOne({
         where: { id: +term, isActive: true },
       })
     } else {
-      branch = await this.branchRepository.findOne({
+      branchEntity = await this.branchRepository.findOne({
         where: { name: term.toLowerCase(), isActive: true },
       })
     }
 
-    if (!branch) throw new NotFoundException('Branch not found')
-    return HTTPResponseDto.ok(undefined, { branches: [branch] })
+    if (!branchEntity) throw new NotFoundException('Branch not found')
+    return CreateHTTPResponseDto.ok(undefined, { branches: [branchEntity] })
   }
 
   public async updateBranch(
     branchId: number,
     updateBranchDto: UpdateBranchDto
-  ): Promise<HTTPResponseDto> {
+  ): Promise<CreateHTTPResponseDto> {
     const branchEntity = this.branchRepository.create(updateBranchDto)
-    const updateBranch = await this.branchRepository.update(
+    const updatedBranch = await this.branchRepository.update(
       { isActive: true, id: branchId },
       branchEntity
     )
 
-    if (!updateBranch.affected) throw new NotFoundException('Branch not found')
+    if (!updatedBranch.affected) throw new NotFoundException('Branch not found')
 
-    return HTTPResponseDto.ok('Branch updated successfully')
+    return CreateHTTPResponseDto.ok('Branch updated successfully')
   }
 
-  public async deleteBranch(branchId: number): Promise<HTTPResponseDto> {
-    const deleteBranch = await this.branchRepository.update(
+  public async deleteBranch(branchId: number): Promise<CreateHTTPResponseDto> {
+    const branchEntity = await this.branchRepository.findOne({
+      where: { id: branchId, isActive: true },
+    })
+
+    if (!branchEntity) throw new NotFoundException('Branch not found')
+    const name = branchEntity.name + '_' + UUID.nanoid()
+    const deletedBranch = await this.branchRepository.update(
       { id: branchId },
-      { isActive: false }
+      { isActive: false, name }
     )
 
-    if (!deleteBranch.affected) throw new NotFoundException('Branch not found')
+    if (!deletedBranch.affected)
+      throw new InternalServerErrorException('Error deleting branch')
 
-    return HTTPResponseDto.noContent()
+    return CreateHTTPResponseDto.noContent()
   }
 }

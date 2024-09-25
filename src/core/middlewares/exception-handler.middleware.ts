@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { isArray, ValidationError } from 'class-validator'
 
-import { HTTPStatusCode } from '@core/enums/http'
-import { IHTTPError } from '@core/extensions'
+import { HTTPStatusCode } from '@/modules/shared/enums/http'
+import { IHTTPError } from '@/modules/shared/extensions'
 import { AppLogger } from '../logger/app-logger'
 
 const logger = AppLogger.create('ExceptionHandler')

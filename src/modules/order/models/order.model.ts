@@ -12,7 +12,8 @@ import { Invoice } from '@modules/invoice/models'
 import { OrderItem } from '@modules/order/models'
 import { Branch } from '@modules/branch/models'
 import { User } from '@modules/user/models'
-import { descriptionLength } from '@core/constants'
+import { descriptionLength } from '@/modules/shared/constants'
+import { OrderStatus } from '@modules/order/enums'
 
 @Entity({ name: 'orders' })
 export class Order {
@@ -45,9 +46,10 @@ export class Order {
   notes?: string
 
   @Column({
-    type: 'smallint',
+    type: 'enum',
+    enum: OrderStatus,
   })
-  status!: number
+  status!: OrderStatus
 
   @Column({
     type: 'decimal',

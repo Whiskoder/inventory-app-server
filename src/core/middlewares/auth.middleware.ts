@@ -5,7 +5,7 @@ import { AppDataSource } from '@core/datasources'
 import { ForbiddenException, UnauthorizedException } from '@core/errors'
 import { JWT } from '@config/plugins'
 import { User } from '@modules/user/models'
-import { ErrorMessages } from '@core/enums/messages'
+import { ErrorMessages } from '@modules/shared/enums/messages'
 
 export class AuthMiddleware {
   public static async validateToken(

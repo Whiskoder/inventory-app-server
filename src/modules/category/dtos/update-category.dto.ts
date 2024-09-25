@@ -1,18 +1,24 @@
-import { IsOptional, IsString, Length, validateOrReject } from 'class-validator'
-
-import { descriptionLength, shortNameLength } from '@core/constants'
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  Length,
+  validateOrReject,
+} from 'class-validator'
 import { plainToInstance } from 'class-transformer'
+
+import { descriptionLength, shortNameLength } from '@modules/shared/constants'
+import { AppIcons } from '@modules/shared/enums'
 
 export class UpdateCategoryDto {
   @IsOptional()
   @IsString()
   @Length(1, shortNameLength)
-  name!: string
+  name?: string
 
   @IsOptional()
-  @IsString()
-  @Length(1, shortNameLength)
-  iconName?: string
+  @IsEnum(AppIcons)
+  iconName?: AppIcons
 
   @IsOptional()
   @IsString()
@@ -22,10 +28,6 @@ export class UpdateCategoryDto {
   public static async create(obj: {
     [key: string]: any
   }): Promise<UpdateCategoryDto> {
-    // const { name } = obj || {}
-
-    // const dto = new UpdateCategoryDto()
-    // dto.name = name
     const dto = plainToInstance(UpdateCategoryDto, obj)
     await validateOrReject(dto)
     return dto

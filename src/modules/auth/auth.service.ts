@@ -2,7 +2,7 @@ import { Repository } from 'typeorm'
 
 import { BadRequestException, InternalServerErrorException } from '@core/errors'
 import { bcryptAdapter, JWT } from '@config/plugins'
-import { HTTPResponseDto } from '@modules/shared/dtos'
+import { CreateHTTPResponseDto } from '@modules/shared/dtos'
 import { RegisterUserDto, LoginUserDto } from '@modules/auth/dtos'
 import { User } from '@modules/user/models'
 // import { EmailService } from '@presentation/services'
@@ -13,7 +13,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>
   ) {}
 
-  public generateToken(userId: number) {
+  private generateToken(userId: number) {
     const tokenOptions = {
       payload: { id: userId },
     }
@@ -41,7 +41,7 @@ export class AuthService {
       throw new InternalServerErrorException('Unable to generate token')
 
     //* Send user entity to avoid sending password in response
-    return HTTPResponseDto.created(undefined, { user, token })
+    return CreateHTTPResponseDto.created(undefined, { user, token })
   }
 
   public async loginUser(loginUserDto: LoginUserDto) {
@@ -77,7 +77,7 @@ export class AuthService {
       throw new InternalServerErrorException('Unable to generate token')
 
     //* Send user entity to avoid sending password in response
-    return HTTPResponseDto.ok(undefined, {
+    return CreateHTTPResponseDto.ok(undefined, {
       user: userEntity,
       token,
     })

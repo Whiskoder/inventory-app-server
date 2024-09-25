@@ -48,37 +48,37 @@ export class ProductRoutes {
     )
 
     router.put(
-      '/:id',
+      '/:productId',
       [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
       controller.updateProduct
     )
 
     router.delete(
-      '/:id',
+      '/:productId',
       [AuthMiddleware.checkPermission(resource, Action.DELETE)],
       controller.deleteProduct
     )
 
     router.post(
-      '/:productId/price',
+      '/:productId/prices',
       [AuthMiddleware.checkPermission(resource, Action.CREATE)],
       controller.createProductPrice
     )
 
     router.get(
-      '/:productId/price',
+      '/:productId/prices',
       [AuthMiddleware.checkPermission(resource, Action.READ)],
       controller.getProductPricesByProductId
     )
 
     router.put(
-      '/:productId/price/:priceId',
+      '/:productId/prices/:priceId',
       [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
       controller.updateProductPrice
     )
 
     router.delete(
-      '/:productId/price/:priceId',
+      '/:productId/prices/:priceId',
       [AuthMiddleware.checkPermission(resource, Action.DELETE)],
       controller.deleteProductPrice
     )

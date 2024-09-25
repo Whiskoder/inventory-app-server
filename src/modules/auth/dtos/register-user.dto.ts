@@ -8,7 +8,7 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { longNameLength } from '@core/constants'
+import { emailLength, longNameLength } from '@/modules/shared/constants'
 import { plainToInstance } from 'class-transformer'
 
 export class RegisterUserDto {
@@ -17,6 +17,7 @@ export class RegisterUserDto {
   contactPhone?: string
 
   @IsEmail()
+  @Length(1, emailLength)
   email!: string
 
   @IsString()

@@ -1,44 +1,43 @@
 import { Repository } from 'typeorm'
 
-import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
-import { BadRequestException, NotFoundException } from '@core/errors'
+import {
+  CreateHTTPResponseDto,
+  CreatePaginationDto,
+  CreateSortingDto,
+} from '@modules/shared/dtos'
+import { InternalServerErrorException, NotFoundException } from '@core/errors'
 import { Category } from '@modules/category/models'
 import { CreateCategoryDto, UpdateCategoryDto } from '@modules/category/dtos'
 import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
+import { UUID } from '@config/plugins'
 
 export class CategoryService {
   constructor(private readonly categoryRepository: Repository<Category>) {}
 
   public async createCategory(
     createCategoryDto: CreateCategoryDto
-  ): Promise<HTTPResponseDto> {
-    const isExistingCategory = await this.categoryRepository.update(
-      { name: createCategoryDto.name, isActive: false },
-      { isActive: true }
-    )
-
-    if (isExistingCategory.affected === 1)
-      return HTTPResponseDto.accepted(
-        `Category ${createCategoryDto.name} already exists`
-      )
-
+  ): Promise<CreateHTTPResponseDto> {
     const categoryEntity = this.categoryRepository.create(createCategoryDto)
     await this.categoryRepository.save(categoryEntity)
 
-    return HTTPResponseDto.created('Category created succesfully', {
+    return CreateHTTPResponseDto.created('Category created succesfully', {
       categories: [categoryEntity],
     })
   }
 
   public async getAllCategories(
-    paginationDto: PaginationDto
-  ): Promise<HTTPResponseDto> {
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto
+  ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
+    const { sortBy = 'id', orderBy } = sortingDto
+
     const [categories, totalItems] = await this.categoryRepository.findAndCount(
       {
         take: limit,
         skip,
         where: { isActive: true },
+        order: { [sortBy]: orderBy },
       }
     )
 
@@ -49,12 +48,11 @@ export class CategoryService {
       skip,
     })
 
-    return HTTPResponseDto.ok(undefined, { categories, pagination })
+    return CreateHTTPResponseDto.ok(undefined, { categories, pagination })
   }
 
-  public async getCategoryByTerm(term: string): Promise<HTTPResponseDto> {
+  public async getCategoryByTerm(term: string): Promise<CreateHTTPResponseDto> {
     let category
-
     if (Number(term)) {
       category = await this.categoryRepository.findOne({
         where: { id: +term, isActive: true },
@@ -66,33 +64,42 @@ export class CategoryService {
     }
 
     if (!category) throw new NotFoundException('Category not found')
-    return HTTPResponseDto.ok(undefined, { categories: [category] })
+    return CreateHTTPResponseDto.ok(undefined, { categories: [category] })
   }
 
   public async updateCategory(
-    id: number,
+    categoryId: number,
     updateCategoryDto: UpdateCategoryDto
-  ): Promise<HTTPResponseDto> {
+  ): Promise<CreateHTTPResponseDto> {
     const categoryEntity = this.categoryRepository.create(updateCategoryDto)
-    const updateCategory = await this.categoryRepository.update(
-      { isActive: true, id },
+    const updatedCategory = await this.categoryRepository.update(
+      { isActive: true, id: categoryId },
       categoryEntity
     )
 
-    if (!updateCategory.affected)
+    if (!updatedCategory.affected)
       throw new NotFoundException('Category not found')
 
-    return HTTPResponseDto.ok('Category updated successfully')
+    return CreateHTTPResponseDto.ok('Category updated successfully')
   }
 
-  public async deleteCategory(id: number): Promise<HTTPResponseDto> {
-    const deleteCategory = await this.categoryRepository.update(id, {
-      isActive: false,
+  public async deleteCategory(
+    categoryId: number
+  ): Promise<CreateHTTPResponseDto> {
+    const categoryEntity = await this.categoryRepository.findOne({
+      where: { id: categoryId, isActive: true },
     })
 
-    if (!deleteCategory.affected)
-      throw new NotFoundException('Category not found')
+    if (!categoryEntity) throw new NotFoundException('Category not found')
+    const name = categoryEntity.name + '_' + UUID.nanoid()
+    const deletedCategory = await this.categoryRepository.update(
+      { id: categoryId },
+      { isActive: false, name }
+    )
 
-    return HTTPResponseDto.noContent()
+    if (!deletedCategory.affected)
+      throw new InternalServerErrorException('Error deleting category')
+
+    return CreateHTTPResponseDto.noContent()
   }
 }

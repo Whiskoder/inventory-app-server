@@ -13,8 +13,7 @@ import {
   longNameLength,
   passwordHashSize,
   phoneLength,
-  shortNameLength,
-} from '@/core/constants'
+} from '@/modules/shared/constants'
 
 @Entity({ name: 'users' })
 export class User {
@@ -37,9 +36,9 @@ export class User {
   @Column({
     type: 'varchar',
     length: emailLength,
-    nullable: true,
+    unique: true,
   })
-  email?: string
+  email!: string
 
   @Column({
     type: 'varchar',
@@ -61,9 +60,9 @@ export class User {
   password!: string
 
   @Column({
-    type: 'varchar',
-    length: shortNameLength,
+    type: 'enum',
     default: Role.EMPLOYEE,
+    enum: Role,
   })
   role!: Role
 

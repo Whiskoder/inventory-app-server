@@ -7,12 +7,12 @@ import {
   UpdateProductDto,
   UpdateProductPriceDto,
 } from '@modules/product/dtos'
-import { PaginationDto } from '@modules/shared/dtos'
+import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  // POST '/api/v1/product/'
+  // POST '/api/v1/products/'
   public createProduct = async (
     req: Request,
     res: Response,
@@ -27,15 +27,18 @@ export class ProductController {
     }
   }
 
-  // GET '/api/v1/product/'
+  // GET '/api/v1/products/'
   public getAllProducts = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      const paginationDto = await CreatePaginationDto.create(req.query)
+      const sortingDto = await CreateSortingDto.create(req.query)
       const response = await this.productService.getAllProducts(
-        res.locals.query
+        paginationDto,
+        sortingDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -43,54 +46,53 @@ export class ProductController {
     }
   }
 
-  // GET '/api/v1/product/:term'
+  // GET '/api/v1/products/:term'
   public getProductByTerm = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const response = await this.productService.getProductByTerm(
-        req.params.term
-      )
+      const term = req.params.term
+      const response = await this.productService.getProductByTerm(term)
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
   }
 
-  // PUT '/api/v1/product/:id'
+  // PUT '/api/v1/products/:productId'
   public updateProduct = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const id = +req.params.id
+      const productId = +req.params.productId
       const dto = await UpdateProductDto.create(req.body)
-      const response = await this.productService.updateProduct(id, dto)
+      const response = await this.productService.updateProduct(productId, dto)
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
   }
 
-  // DELETE '/api/v1/product/:id'
+  // DELETE '/api/v1/products/:productId'
   public deleteProduct = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const id = +req.params.id
-      const response = await this.productService.deleteProduct(id)
+      const productId = +req.params.productId
+      const response = await this.productService.deleteProduct(productId)
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
   }
 
-  // POST '/api/v1/product/:productId/price'
+  // POST '/api/v1/products/:productId/prices'
   public createProductPrice = async (
     req: Request,
     res: Response,
@@ -109,7 +111,7 @@ export class ProductController {
     }
   }
 
-  // GET '/api/v1/product/:productId/price'
+  // GET '/api/v1/products/:productId/prices'
   public getProductPricesByProductId = async (
     req: Request,
     res: Response,
@@ -117,9 +119,12 @@ export class ProductController {
   ) => {
     try {
       const productId = +req.params.productId
+      const paginationDto = await CreatePaginationDto.create(req.query)
+      const sortingDto = await CreateSortingDto.create(req.query)
       const response = await this.productService.getProductPricesByProductId(
         productId,
-        res.locals.query
+        paginationDto,
+        sortingDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -127,7 +132,7 @@ export class ProductController {
     }
   }
 
-  // PUT '/api/v1/product/:productId/price/:priceId'
+  // PUT '/api/v1/products/:productId/prices/:priceId'
   public updateProductPrice = async (
     req: Request,
     res: Response,
@@ -148,7 +153,7 @@ export class ProductController {
     }
   }
 
-  // DELETE '/api/v1/product/:productId/price/:priceId'
+  // DELETE '/api/v1/products/:productId/prices/:priceId'
   public deleteProductPrice = async (
     req: Request,
     res: Response,

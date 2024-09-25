@@ -1,6 +1,7 @@
 import { jwtVerify, SignJWT } from 'jose'
 
 import { InternalServerErrorException } from '@core/errors'
+import { envs } from '@config/plugins'
 
 interface GenerateTokenOptions {
   payload: any
@@ -20,15 +21,10 @@ export class JWT {
 
   private constructor(private readonly secret: Uint8Array) {}
 
-  public static create(secret: string): JWT {
-    if (!this._instance)
-      this._instance = new JWT(new TextEncoder().encode(secret))
-    return this._instance
-  }
-
   public static instance(): JWT {
     if (!this._instance) {
-      throw new Error('JWT instance not initialized')
+      const secret = envs.JWT_SECRET
+      this._instance = new JWT(new TextEncoder().encode(secret))
     }
     return this._instance
   }

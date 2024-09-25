@@ -6,7 +6,7 @@ export enum OrderBy {
   desc = 'desc',
 }
 
-export class SortingDto {
+export class CreateSortingDto {
   @IsOptional()
   @IsString()
   sortBy?: string
@@ -15,8 +15,10 @@ export class SortingDto {
   @IsEnum(OrderBy)
   orderBy?: OrderBy
 
-  public static async create(obj: { [key: string]: any }): Promise<SortingDto> {
-    const dto = plainToInstance(SortingDto, obj)
+  public static async create(obj: {
+    [key: string]: any
+  }): Promise<CreateSortingDto> {
+    const dto = plainToInstance(CreateSortingDto, obj)
     await validateOrReject(dto)
     return dto
   }
