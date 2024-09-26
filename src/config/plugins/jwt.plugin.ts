@@ -3,14 +3,14 @@ import { jwtVerify, SignJWT } from 'jose'
 import { InternalServerErrorException } from '@core/errors'
 import { envs } from '@config/plugins'
 
-interface GenerateTokenOptions {
+export interface GenerateTokenOptions {
   payload: any
   duration?: string
   issuer?: string
   audience?: string
 }
 
-interface VerifyTokenOptions {
+export interface VerifyTokenOptions {
   token: string
   issuer?: string
   audience?: string

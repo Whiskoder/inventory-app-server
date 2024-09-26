@@ -25,7 +25,7 @@ export class ExceptionHandlerMiddleware {
       return message
     }, [])
 
-    if (constraints.length < 0) return false
+    if (constraints.length <= 0) return false
 
     const statusCode = HTTPStatusCode.BadRequest
 

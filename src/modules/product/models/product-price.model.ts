@@ -16,14 +16,14 @@ export class ProductPrice {
 
   @Column({
     type: 'decimal',
-    precision: 120,
+    precision: 10,
     scale: 2,
   })
   quantity!: number
 
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 10,
     scale: 2,
   })
   basePrice!: number

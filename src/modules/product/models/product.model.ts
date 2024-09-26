@@ -22,7 +22,6 @@ export class Product {
 
   @Column({
     type: 'enum',
-    unique: true,
     enum: MeasureUnit,
   })
   measurementUnit!: MeasureUnit

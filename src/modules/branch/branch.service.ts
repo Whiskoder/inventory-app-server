@@ -30,7 +30,7 @@ export class BranchService {
     sortingDto: CreateSortingDto
   ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
-    const { sortBy = 'id', orderBy } = sortingDto
+    const { sortBy, orderBy } = sortingDto
 
     const [branches, totalItems] = await this.branchRepository.findAndCount({
       take: limit,

@@ -25,15 +25,15 @@ describe('auth.service.test.ts', () => {
     await AppDataSource.destroy()
   })
 
-  const testUser: RegisterUserDto = {
-    contactPhone: '+522742458721',
-    email: 'juan_gonzo@gmail.com',
-    firstName: 'Juan',
-    lastName: 'Gonzales Hernandez',
-    password: '123456Ab@',
-  }
-
   it('should return user and valid token', async () => {
+    const testUser: RegisterUserDto = {
+      contactPhone: '+522742458721',
+      email: 'uqiiDIDt1CnTbkhXzTh_d@gmail.com',
+      firstName: 'Juan',
+      lastName: 'Gonzales Hernandez',
+      password: '123456Ab@',
+    }
+
     const response = await authService.registerUser(testUser)
 
     expect(response).toEqual({
@@ -60,14 +60,29 @@ describe('auth.service.test.ts', () => {
   })
 
   it('should return bad request error if email is in use', async () => {
-    await authService.registerUser(testUser)
-    await expect(authService.registerUser(testUser)).rejects.toHaveProperty(
-      'statusCode',
-      400
-    )
+    const testUser: RegisterUserDto = {
+      contactPhone: '+522742458721',
+      email: 'snTxJcAUD0pRFsBHrPmqa@gmail.com',
+      firstName: 'Juan',
+      lastName: 'Gonzales Hernandez',
+      password: '123456Ab@',
+    }
+    await authService.registerUser({ ...testUser })
+
+    await expect(
+      authService.registerUser({ ...testUser })
+    ).rejects.toHaveProperty('statusCode', 400)
   })
 
   it('should login user and return valid token', async () => {
+    const testUser: RegisterUserDto = {
+      contactPhone: '+522742458721',
+      email: 'vp_Tb1deznSrI6ld__eeo@gmail.com',
+      firstName: 'Juan',
+      lastName: 'Gonzales Hernandez',
+      password: '123456Ab@',
+    }
+
     await authService.registerUser(testUser)
     const { email, password } = testUser
     const response = await authService.loginUser({ email, password })
@@ -94,6 +109,14 @@ describe('auth.service.test.ts', () => {
   })
 
   it('should return error bad request error if credentials are wrong', async () => {
+    const testUser: RegisterUserDto = {
+      contactPhone: '+522742458721',
+      email: 'e81PGALgS-LHjrcp5wfiW@gmail.com',
+      firstName: 'Juan',
+      lastName: 'Gonzales Hernandez',
+      password: '123456Ab@',
+    }
+
     await authService.registerUser(testUser)
     const loginUserDto = {
       email: testUser.email,

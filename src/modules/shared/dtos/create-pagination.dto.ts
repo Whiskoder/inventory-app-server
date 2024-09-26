@@ -5,12 +5,12 @@ export class CreatePaginationDto {
   @Type(() => Number)
   @IsInt()
   @IsPositive()
-  page!: number
+  page: number = 1
 
   @Type(() => Number)
   @IsInt()
   @IsPositive()
-  limit!: number
+  limit: number = 10
 
   @Transform(({ obj }) => (obj.page - 1) * obj.limit)
   skip!: number

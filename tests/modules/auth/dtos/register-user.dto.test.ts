@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
+import 'reflect-metadata'
 
 import { RegisterUserDto } from '@modules/auth/dtos'
 
@@ -7,7 +8,7 @@ describe('register-user.dto.test.ts', () => {
   it('should return a RegisterUserDto', async () => {
     const dto: RegisterUserDto = {
       contactPhone: '+522742458721',
-      email: 'juan_gonzo@gmail.com',
+      email: 'slRTvyffaJOnePkmD2_Z2@gmail.com',
       firstName: 'Juan',
       lastName: 'Gonzales Hernandez',
       password: '123456Ab@',

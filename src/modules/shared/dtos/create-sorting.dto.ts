@@ -9,11 +9,11 @@ export enum OrderBy {
 export class CreateSortingDto {
   @IsOptional()
   @IsString()
-  sortBy?: string
+  sortBy: string = 'id'
 
   @IsOptional()
   @IsEnum(OrderBy)
-  orderBy?: OrderBy
+  orderBy: OrderBy = OrderBy.asc
 
   public static async create(obj: {
     [key: string]: any

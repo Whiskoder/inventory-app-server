@@ -79,7 +79,7 @@ export class ProductService {
 
   public async getProductByTerm(term: string): Promise<CreateHTTPResponseDto> {
     let product
-    if (Number(product)) {
+    if (Number(term)) {
       product = await this.productRepository.findOne({
         where: { id: +term, isActive: true },
       })
@@ -191,7 +191,7 @@ export class ProductService {
     sortingDto: CreateSortingDto
   ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
-    const { orderBy, sortBy = 'id' } = sortingDto
+    const { orderBy, sortBy } = sortingDto
     const [result, totalItems] = await this.productPriceRepository.findAndCount(
       {
         take: limit,
@@ -250,23 +250,21 @@ export class ProductService {
   }
 
   private async checkProductPriceExists(productId: number, priceId: number) {
-    const productEntity = await this.productRepository.findOne({
-      where: { id: productId },
+    const productPriceEntity = await this.productPriceRepository.findOne({
+      where: { id: priceId },
+      relations: ['product'],
     })
 
-    if (!productEntity) throw new NotFoundException('Product not found')
-
-    const existingProductPrice = productEntity?.productPrices?.find(
-      ({ id }) => id === priceId
-    )
-    if (!existingProductPrice)
+    if (!productPriceEntity)
       throw new NotFoundException('Product price not found')
+
+    const isCorrectProduct = productPriceEntity.product?.id === productId
+    if (!isCorrectProduct) throw new NotFoundException('Product not found')
   }
 
   private plainProductPrices(productPriceList: ProductPrice[]) {
     return productPriceList.map(({ product, provider, ...productPrice }) => ({
       ...productPrice,
-      providerId: provider.id,
     }))
   }
 

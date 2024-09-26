@@ -1,7 +1,7 @@
 export enum MeasureUnit {
   grams = 'gr',
   kilograms = 'kg',
-  literes = 'l',
+  liters = 'l',
   mililiters = 'ml',
   boxes = 'box',
   pieces = 'pcs',

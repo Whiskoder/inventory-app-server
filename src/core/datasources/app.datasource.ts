@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   database: envs.DB_NAME,
   synchronize: envs.DB_SYNC,
   ssl: envs.DB_SSL,
-  logging: envs.NODE_ENV === 'development' ? false : false,
+  logging: false,
   entities: [join(__dirname, '../../modules/**/**/*.model.ts')],
   migrations: [join(__dirname, '../migrations', '*.ts')],
   subscribers: [],
