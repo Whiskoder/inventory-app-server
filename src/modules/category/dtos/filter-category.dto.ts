@@ -1,5 +1,11 @@
 import qs from 'qs'
 
+import {
+  GreaterThanEqualFilter,
+  LessThanEqualFilter,
+  RegexFilter,
+} from '@modules/shared/interfaces'
+
 // export interface FilterProps {
 // 	lte?: number;
 // 	gte?: number;
@@ -8,13 +14,6 @@ import qs from 'qs'
 // 	before?: Date;
 // 	after?: Date;
 // }
-
-type LessThanEqualFilter = number
-type GreaterThanEqualFilter = number
-type ExistsFilter = boolean
-type RegexFilter = string
-type BeforeFilter = Date
-type AfterFilter = Date
 
 export class FilterCategoryDto {
   name?: RegexFilter

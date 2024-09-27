@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 
 import { BranchService } from '@modules/branch'
-import { CreateBranchDto, UpdateBranchDto } from '@modules/branch/dtos'
+import {
+  RelationsBranchDto,
+  CreateBranchDto,
+  UpdateBranchDto,
+} from '@modules/branch/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
 export class BranchController {
@@ -48,7 +52,11 @@ export class BranchController {
     next: NextFunction
   ) => {
     try {
-      const response = await this.branchService.getBranchByTerm(req.params.term)
+      const relationsDto = await RelationsBranchDto.create(req.query)
+      const response = await this.branchService.getBranchByTerm(
+        req.params.term,
+        relationsDto
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)

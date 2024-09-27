@@ -7,7 +7,11 @@ import {
 } from '@modules/shared/dtos'
 import { InternalServerErrorException, NotFoundException } from '@core/errors'
 import { Category } from '@modules/category/models'
-import { CreateCategoryDto, UpdateCategoryDto } from '@modules/category/dtos'
+import {
+  CreateCategoryDto,
+  RelationsCategoryDto,
+  UpdateCategoryDto,
+} from '@modules/category/dtos'
 import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
 import { UUID } from '@config/plugins'
 
@@ -50,20 +54,25 @@ export class CategoryService {
     return CreateHTTPResponseDto.ok(undefined, { categories, pagination })
   }
 
-  public async getCategoryByTerm(term: string): Promise<CreateHTTPResponseDto> {
-    let category
+  public async getCategoryByTerm(
+    term: string,
+    relationsDto: RelationsCategoryDto
+  ): Promise<CreateHTTPResponseDto> {
+    let categoryEntity
     if (Number(term)) {
-      category = await this.categoryRepository.findOne({
+      categoryEntity = await this.categoryRepository.findOne({
         where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
       })
     } else {
-      category = await this.categoryRepository.findOne({
+      categoryEntity = await this.categoryRepository.findOne({
         where: { name: term.toLowerCase(), isActive: true },
+        relations: [...relationsDto.include],
       })
     }
 
-    if (!category) throw new NotFoundException('Category not found')
-    return CreateHTTPResponseDto.ok(undefined, { categories: [category] })
+    if (!categoryEntity) throw new NotFoundException('Category not found')
+    return CreateHTTPResponseDto.ok(undefined, { categories: [categoryEntity] })
   }
 
   public async updateCategory(

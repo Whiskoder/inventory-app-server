@@ -7,7 +7,7 @@ import {
 } from 'typeorm'
 
 import { Order } from '@modules/order/models'
-import { Role } from '@config/roles'
+import { Role } from '@/config/role.config'
 import {
   emailLength,
   longNameLength,

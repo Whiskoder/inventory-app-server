@@ -1,7 +1,11 @@
 import { Repository } from 'typeorm'
 
 import { Branch } from '@modules/branch/models'
-import { CreateBranchDto, UpdateBranchDto } from '@modules/branch/dtos'
+import {
+  RelationsBranchDto,
+  CreateBranchDto,
+  UpdateBranchDto,
+} from '@modules/branch/dtos'
 import {
   CreateHTTPResponseDto,
   CreatePaginationDto,
@@ -48,15 +52,20 @@ export class BranchService {
     return CreateHTTPResponseDto.ok(undefined, { branches, pagination })
   }
 
-  public async getBranchByTerm(term: string): Promise<CreateHTTPResponseDto> {
+  public async getBranchByTerm(
+    term: string,
+    relationsDto: RelationsBranchDto
+  ): Promise<CreateHTTPResponseDto> {
     let branchEntity
     if (Number(term)) {
       branchEntity = await this.branchRepository.findOne({
         where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
       })
     } else {
       branchEntity = await this.branchRepository.findOne({
         where: { name: term.toLowerCase(), isActive: true },
+        relations: [...relationsDto.include],
       })
     }
 

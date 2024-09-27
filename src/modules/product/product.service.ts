@@ -4,6 +4,7 @@ import { Product, ProductPrice } from '@modules/product/models'
 import {
   CreateProductDto,
   CreateProductPriceDto,
+  RelationsProductDto,
   UpdateProductDto,
   UpdateProductPriceDto,
 } from '@modules/product/dtos'
@@ -77,20 +78,25 @@ export class ProductService {
     })
   }
 
-  public async getProductByTerm(term: string): Promise<CreateHTTPResponseDto> {
-    let product
+  public async getProductByTerm(
+    term: string,
+    relationsDto: RelationsProductDto
+  ): Promise<CreateHTTPResponseDto> {
+    let productEntity
     if (Number(term)) {
-      product = await this.productRepository.findOne({
+      productEntity = await this.productRepository.findOne({
         where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
       })
     } else {
-      product = await this.productRepository.findOne({
+      productEntity = await this.productRepository.findOne({
         where: { name: term.toLowerCase(), isActive: true },
+        relations: [...relationsDto.include],
       })
     }
 
-    if (!product) throw new NotFoundException('Product not found')
-    return CreateHTTPResponseDto.ok(undefined, { products: [product] })
+    if (!productEntity) throw new NotFoundException('Product not found')
+    return CreateHTTPResponseDto.ok(undefined, { products: [productEntity] })
   }
 
   public async updateProduct(
@@ -185,36 +191,6 @@ export class ProductService {
     })
   }
 
-  public async getProductPricesByProductId(
-    productId: number,
-    paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto
-  ): Promise<CreateHTTPResponseDto> {
-    const { limit, skip, page: currentPage } = paginationDto
-    const { orderBy, sortBy } = sortingDto
-    const [result, totalItems] = await this.productPriceRepository.findAndCount(
-      {
-        take: limit,
-        skip,
-        where: { product: { id: productId } },
-        order: { [sortBy]: orderBy },
-      }
-    )
-
-    const pagination = CalculatePaginationUseCase.execute({
-      currentPage,
-      limit,
-      totalItems,
-    })
-
-    const productPrices = this.plainProductPrices(result)
-
-    return CreateHTTPResponseDto.ok(undefined, {
-      productPrices,
-      pagination,
-    })
-  }
-
   public async updateProductPrice(
     productId: number,
     priceId: number,
@@ -239,11 +215,11 @@ export class ProductService {
   ): Promise<CreateHTTPResponseDto> {
     await this.checkProductPriceExists(productId, priceId)
 
-    const deleteProductPrice = await this.productPriceRepository.delete({
+    const deletedProductPrice = await this.productPriceRepository.delete({
       id: priceId,
     })
 
-    if (!deleteProductPrice.affected)
+    if (!deletedProductPrice.affected)
       throw new InternalServerErrorException('Failed to delete product price')
 
     return CreateHTTPResponseDto.noContent()
@@ -258,7 +234,7 @@ export class ProductService {
     if (!productPriceEntity)
       throw new NotFoundException('Product price not found')
 
-    const isCorrectProduct = productPriceEntity.product?.id === productId
+    const isCorrectProduct = productPriceEntity.product.id === productId
     if (!isCorrectProduct) throw new NotFoundException('Product not found')
   }
 

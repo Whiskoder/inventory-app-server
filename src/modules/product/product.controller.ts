@@ -4,6 +4,7 @@ import { ProductService } from '@modules/product'
 import {
   CreateProductDto,
   CreateProductPriceDto,
+  RelationsProductDto,
   UpdateProductDto,
   UpdateProductPriceDto,
 } from '@modules/product/dtos'
@@ -53,8 +54,12 @@ export class ProductController {
     next: NextFunction
   ) => {
     try {
+      const relationsDto = await RelationsProductDto.create(req.query)
       const term = req.params.term
-      const response = await this.productService.getProductByTerm(term)
+      const response = await this.productService.getProductByTerm(
+        term,
+        relationsDto
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
@@ -104,27 +109,6 @@ export class ProductController {
       const response = await this.productService.createProductPrice(
         productId,
         dto
-      )
-      res.status(response.statusCode).json(response)
-    } catch (e) {
-      next(e)
-    }
-  }
-
-  // GET '/api/v1/products/:productId/prices'
-  public getProductPricesByProductId = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const productId = +req.params.productId
-      const paginationDto = await CreatePaginationDto.create(req.query)
-      const sortingDto = await CreateSortingDto.create(req.query)
-      const response = await this.productService.getProductPricesByProductId(
-        productId,
-        paginationDto,
-        sortingDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

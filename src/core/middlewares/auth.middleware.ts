@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { Action, Resource, RoleConfig } from '@config/roles'
+import { Action, Resource, RoleConfig } from '@/config/role.config'
 import { AppDataSource } from '@core/datasources'
 import { ForbiddenException, UnauthorizedException } from '@core/errors'
 import { JWT } from '@config/plugins'

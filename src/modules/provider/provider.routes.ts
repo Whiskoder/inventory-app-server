@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { Action, Resource } from '@config/roles'
+import { Actions, Resources } from '@modules/user/enums'
 import { AuthMiddleware } from '@core/middlewares'
 import { AppDataSource } from '@core/datasources'
 import { Provider } from '@modules/provider/models'
@@ -14,32 +14,36 @@ export class ProviderRoutes {
     const providerService = new ProviderService(providerRepository)
     const controller = new ProviderController(providerService)
 
-    const resource = Resource.PROVIDER
+    const resource = Resources.PROVIDER
     router.use(AuthMiddleware.validateToken)
 
     router.post(
       '/',
-      [AuthMiddleware.checkPermission(resource, Action.CREATE)],
+      [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
       controller.createProvider
     )
+
     router.get(
       '/',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
       controller.getAllProviders
     )
+
     router.get(
       '/:term',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
       controller.getProviderByTerm
     )
+
     router.put(
       '/:providerId',
-      [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.updateProvider
     )
+
     router.delete(
       '/:providerId',
-      [AuthMiddleware.checkPermission(resource, Action.DELETE)],
+      [AuthMiddleware.checkPermission(resource, Actions.DELETE)],
       controller.deleteProvider
     )
 

@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 
 import { ProviderService } from '@modules/provider'
-import { CreateProviderDto, UpdateProviderDto } from '@modules/provider/dtos'
+import {
+  CreateProviderDto,
+  RelationsProviderDto,
+  UpdateProviderDto,
+} from '@modules/provider/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
 export class ProviderController {
@@ -48,8 +52,12 @@ export class ProviderController {
     next: NextFunction
   ) => {
     try {
+      const relationsDto = await RelationsProviderDto.create(req.query)
       const term = req.params.term
-      const response = await this.providerService.getProviderByTerm(term)
+      const response = await this.providerService.getProviderByTerm(
+        term,
+        relationsDto
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)

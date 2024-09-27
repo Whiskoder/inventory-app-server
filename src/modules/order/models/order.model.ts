@@ -48,6 +48,7 @@ export class Order {
   @Column({
     type: 'enum',
     enum: OrderStatus,
+    default: OrderStatus.OPEN,
   })
   status!: OrderStatus
 
@@ -72,11 +73,12 @@ export class Order {
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
     eager: false,
+    onDelete: 'CASCADE',
   })
   orderItems?: OrderItem[]
 
   @ManyToOne(() => Branch, (branch) => branch.orders, {
-    eager: true,
+    eager: false,
   })
   @JoinColumn()
   branch!: Branch

@@ -1,6 +1,5 @@
-import { plainToInstance } from 'class-transformer'
+import { plainToInstance, Type } from 'class-transformer'
 import {
-  IsDate,
   IsDateString,
   IsInt,
   IsPositive,
@@ -11,21 +10,16 @@ export class CreateOrderDto {
   @IsDateString()
   deliveryDate!: Date
 
+  @Type(() => Number)
   @IsInt()
   @IsPositive()
-  restaurantId!: number
+  branchId!: number
 
   public static async create(obj: {
     [key: string]: any
   }): Promise<CreateOrderDto> {
-    const { deliveryDate, restaurantId } = obj || {}
-
-    const dto = plainToInstance(CreateOrderDto, {
-      deliveryDate,
-      restaurantId,
-    })
+    const dto = plainToInstance(CreateOrderDto, obj)
     await validateOrReject(dto)
-
     return dto
   }
 }

@@ -1,7 +1,11 @@
 import { Repository } from 'typeorm'
 
 import { Provider } from '@modules/provider/models'
-import { CreateProviderDto, UpdateProviderDto } from '@modules/provider/dtos'
+import {
+  CreateProviderDto,
+  RelationsProviderDto,
+  UpdateProviderDto,
+} from '@modules/provider/dtos'
 import {
   CreateHTTPResponseDto,
   CreatePaginationDto,
@@ -46,20 +50,21 @@ export class ProviderService {
     return CreateHTTPResponseDto.ok(undefined, { providers, pagination })
   }
 
-  public async getProviderByTerm(term: string): Promise<CreateHTTPResponseDto> {
+  public async getProviderByTerm(
+    term: string,
+    relationsDto: RelationsProviderDto
+  ): Promise<CreateHTTPResponseDto> {
     let providerEntity
     if (Number(term)) {
       providerEntity = await this.providerRepository.findOne({
         where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
       })
     } else {
-      const queryBuilder = this.providerRepository.createQueryBuilder()
-      providerEntity = await queryBuilder
-        .where('rfc =:rfc or name =:name', {
-          rfc: term.toUpperCase(),
-          name: term.toLowerCase(),
-        })
-        .getOne()
+      providerEntity = await this.providerRepository.findOne({
+        where: { name: term.toLowerCase(), isActive: true },
+        relations: [...relationsDto.include],
+      })
     }
 
     if (!providerEntity) throw new NotFoundException('Provider not found')

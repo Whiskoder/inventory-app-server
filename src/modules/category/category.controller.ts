@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 
 import { CategoryService } from '@modules/category'
-import { CreateCategoryDto, UpdateCategoryDto } from '@modules/category/dtos'
+import {
+  CreateCategoryDto,
+  RelationsCategoryDto,
+  UpdateCategoryDto,
+} from '@modules/category/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
 export class CategoryController {
@@ -50,8 +54,10 @@ export class CategoryController {
     next: NextFunction
   ) => {
     try {
+      const relationsDto = await RelationsCategoryDto.create(req.query)
       const response = await this.categoryService.getCategoryByTerm(
-        req.params.term
+        req.params.term,
+        relationsDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

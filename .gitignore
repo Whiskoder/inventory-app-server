@@ -15,6 +15,7 @@ node_modules/
 migrations/
 
 others/
+docs/
 
 coverage/
 .vscode/

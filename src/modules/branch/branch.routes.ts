@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { Action, Resource } from '@config/roles'
+import { Actions, Resources } from '@modules/user/enums'
 import { AppDataSource } from '@core/datasources'
 import { AuthMiddleware } from '@core/middlewares'
 import { Branch } from '@modules/branch/models'
@@ -14,36 +14,36 @@ export class BranchRoutes {
     const branchService = new BranchService(branchRepository)
     const controller = new BranchController(branchService)
 
-    const resource = Resource.BRANCH
+    const resource = Resources.BRANCH
     router.use(AuthMiddleware.validateToken)
 
     router.post(
       '/',
-      [AuthMiddleware.checkPermission(resource, Action.CREATE)],
+      [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
       controller.createBranch
     )
 
     router.get(
       '/',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
       controller.getAllBranches
     )
 
     router.get(
       '/:term',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
       controller.getBranchByTerm
     )
 
     router.put(
       '/:branchId',
-      [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.updateBranch
     )
 
     router.delete(
       '/:branchId',
-      [AuthMiddleware.checkPermission(resource, Action.DELETE)],
+      [AuthMiddleware.checkPermission(resource, Actions.DELETE)],
       controller.deleteBranch
     )
 

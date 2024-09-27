@@ -4,7 +4,7 @@ import { CategoryService, CategoryController } from '@modules/category'
 import { AppDataSource } from '@core/datasources'
 import { Category } from '@modules/category/models'
 import { AuthMiddleware } from '@core/middlewares'
-import { Action, Resource } from '@config/roles'
+import { Actions, Resources } from '@modules/user/enums'
 
 export class CategoryRoutes {
   static get routes(): Router {
@@ -14,37 +14,37 @@ export class CategoryRoutes {
     const categoryService = new CategoryService(categoryRepository)
     const controller = new CategoryController(categoryService)
 
-    const resource = Resource.CATEGORY
+    const resource = Resources.CATEGORY
 
     router.use(AuthMiddleware.validateToken)
 
     router.post(
       '/',
-      [AuthMiddleware.checkPermission(resource, Action.CREATE)],
+      [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
       controller.createCategory
     )
 
     router.get(
       '/',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
       controller.getAllCategories
     )
 
     router.get(
       '/:term',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
       controller.getCategoryByTerm
     )
 
     router.put(
       '/:categoryId',
-      [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.updateCategory
     )
 
     router.delete(
       '/:categoryId',
-      [AuthMiddleware.checkPermission(resource, Action.DELETE)],
+      [AuthMiddleware.checkPermission(resource, Actions.DELETE)],
       controller.deleteCategory
     )
     return router
