@@ -6,7 +6,6 @@ import { Order, OrderItem } from '@modules/order/models'
 import { AppDataSource } from '@core/datasources'
 import { OrderController, OrderService } from '@modules/order'
 import { Branch } from '@modules/branch/models'
-import { ProductPrice } from '../product/models'
 
 export class OrderRoutes {
   static get routes(): Router {
@@ -14,13 +13,11 @@ export class OrderRoutes {
 
     const orderRepository = AppDataSource.getRepository(Order)
     const orderItemsRepository = AppDataSource.getRepository(OrderItem)
-    const productPriceRepository = AppDataSource.getRepository(ProductPrice)
     const branchRepository = AppDataSource.getRepository(Branch)
 
     const orderService = new OrderService(
       orderRepository,
       orderItemsRepository,
-      productPriceRepository,
       branchRepository
     )
     const controller = new OrderController(orderService)

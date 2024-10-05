@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { AppDataSource } from '@core/datasources'
-import { Product, ProductPrice } from '@modules/product/models'
+import { Product } from '@modules/product/models'
 import { ProductController, ProductService } from '@modules/product'
 import { Resources, Actions } from '@modules/user/enums'
 import { AuthMiddleware } from '@core/middlewares'
@@ -13,13 +13,11 @@ export class ProductRoutes {
     const router = Router({ caseSensitive: false })
 
     const productRepository = AppDataSource.getRepository(Product)
-    const productPriceRepository = AppDataSource.getRepository(ProductPrice)
     const providerRepository = AppDataSource.getRepository(Provider)
     const categoryRepository = AppDataSource.getRepository(Category)
 
     const productService = new ProductService(
       productRepository,
-      productPriceRepository,
       providerRepository,
       categoryRepository
     )
@@ -57,24 +55,6 @@ export class ProductRoutes {
       '/:productId',
       [AuthMiddleware.checkPermission(resource, Actions.DELETE)],
       controller.deleteProduct
-    )
-
-    router.post(
-      '/:productId/prices',
-      [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
-      controller.createProductPrice
-    )
-
-    router.put(
-      '/:productId/prices/:priceId',
-      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
-      controller.updateProductPrice
-    )
-
-    router.delete(
-      '/:productId/prices/:priceId',
-      [AuthMiddleware.checkPermission(resource, Actions.DELETE)],
-      controller.deleteProductPrice
     )
 
     return router

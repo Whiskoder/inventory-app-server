@@ -3,18 +3,22 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 
 import { Order } from '@modules/order/models'
+import { User } from '@modules/user/models'
+import { Product } from '@modules/product/models'
 import {
   emailLength,
   longNameLength,
   phoneLength,
   postalCodeLength,
   shortNameLength,
-} from '@/modules/shared/constants'
+} from '@modules/shared/constants'
 
 @Entity({ name: 'branches' })
 export class Branch {
@@ -71,8 +75,15 @@ export class Branch {
   })
   streetName?: string
 
-  @OneToMany(() => Order, (order) => order.branch, { nullable: true })
+  @OneToMany(() => Order, (order) => order.branch)
   orders?: Order[]
+
+  @OneToMany(() => User, (user) => user.branch)
+  employees?: User[]
+
+  @ManyToMany(() => Product)
+  @JoinTable()
+  products?: Product[]
 
   @Column('boolean', { default: true, select: false })
   isActive!: boolean

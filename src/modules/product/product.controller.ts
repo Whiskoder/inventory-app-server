@@ -3,10 +3,8 @@ import { NextFunction, Request, Response } from 'express'
 import { ProductService } from '@modules/product'
 import {
   CreateProductDto,
-  CreateProductPriceDto,
   RelationsProductDto,
   UpdateProductDto,
-  UpdateProductPriceDto,
 } from '@modules/product/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
@@ -91,65 +89,6 @@ export class ProductController {
     try {
       const productId = +req.params.productId
       const response = await this.productService.deleteProduct(productId)
-      res.status(response.statusCode).json(response)
-    } catch (e) {
-      next(e)
-    }
-  }
-
-  // POST '/api/v1/products/:productId/prices'
-  public createProductPrice = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const productId = +req.params.productId
-      const dto = await CreateProductPriceDto.create(req.body)
-      const response = await this.productService.createProductPrice(
-        productId,
-        dto
-      )
-      res.status(response.statusCode).json(response)
-    } catch (e) {
-      next(e)
-    }
-  }
-
-  // PUT '/api/v1/products/:productId/prices/:priceId'
-  public updateProductPrice = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const productId = +req.params.productId
-      const priceId = +req.params.priceId
-      const dto = await UpdateProductPriceDto.create(req.body)
-      const response = await this.productService.updateProductPrice(
-        productId,
-        priceId,
-        dto
-      )
-      res.status(response.statusCode).json(response)
-    } catch (e) {
-      next(e)
-    }
-  }
-
-  // DELETE '/api/v1/products/:productId/prices/:priceId'
-  public deleteProductPrice = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const productId = +req.params.productId
-      const priceId = +req.params.priceId
-      const response = await this.productService.deleteProductPrice(
-        productId,
-        priceId
-      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)

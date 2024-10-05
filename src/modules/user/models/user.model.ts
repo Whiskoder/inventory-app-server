@@ -4,16 +4,18 @@ import {
   Column,
   OneToMany,
   CreateDateColumn,
+  ManyToOne,
 } from 'typeorm'
 
 import { Order } from '@modules/order/models'
-import { Role } from '@/config/role.config'
+import { Roles } from '@modules/user/enums'
 import {
   emailLength,
   longNameLength,
   passwordHashSize,
   phoneLength,
-} from '@/modules/shared/constants'
+} from '@modules/shared/constants'
+import { Branch } from '@modules/branch/models'
 
 @Entity({ name: 'users' })
 export class User {
@@ -61,10 +63,15 @@ export class User {
 
   @Column({
     type: 'enum',
-    default: Role.EMPLOYEE,
-    enum: Role,
+    default: Roles.EMPLOYEE,
+    enum: Roles,
   })
-  role!: Role
+  role!: Roles
+
+  // notifications: Notification
+
+  @ManyToOne(() => Branch, (branch) => branch.employees)
+  branch?: Branch
 
   @OneToMany(() => Order, (order) => order.user)
   orders?: Order[]

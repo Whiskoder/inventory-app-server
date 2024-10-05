@@ -1,12 +1,10 @@
 import { Repository } from 'typeorm'
 
-import { Product, ProductPrice } from '@modules/product/models'
+import { Product } from '@modules/product/models'
 import {
   CreateProductDto,
-  CreateProductPriceDto,
   RelationsProductDto,
   UpdateProductDto,
-  UpdateProductPriceDto,
 } from '@modules/product/dtos'
 import {
   CreateHTTPResponseDto,
@@ -26,7 +24,6 @@ import { UUID } from '@config/plugins'
 export class ProductService {
   constructor(
     private readonly productRepository: Repository<Product>,
-    private readonly productPriceRepository: Repository<ProductPrice>,
     private readonly providerRepository: Repository<Provider>,
     private readonly categoryRepository: Repository<Category>
   ) {}
@@ -147,101 +144,6 @@ export class ProductService {
       throw new InternalServerErrorException('Error deleting product')
 
     return CreateHTTPResponseDto.noContent()
-  }
-
-  public async createProductPrice(
-    productId: number,
-    createProductPriceDto: CreateProductPriceDto
-  ): Promise<CreateHTTPResponseDto> {
-    const { providerId, ...productPrice } = createProductPriceDto
-
-    const searchPromises = [
-      this.productRepository.findOne({
-        where: { id: productId, isActive: true },
-      }),
-      this.providerRepository.findOne({
-        where: { id: providerId, isActive: true },
-      }),
-      this.productPriceRepository.findOne({
-        where: { provider: { id: providerId }, product: { id: productId } },
-      }),
-    ]
-
-    const [productEntity, providerEntity, existingPrice] = await Promise.all(
-      searchPromises
-    )
-
-    if (!productEntity) throw new BadRequestException('Product not found')
-    if (!providerEntity) throw new BadRequestException('Provider not found')
-    if (existingPrice)
-      throw new BadRequestException(
-        `This product already has a price associated with the provider with id ${existingPrice.id}.`
-      )
-
-    const productPriceEntity = this.productPriceRepository.create({
-      ...productPrice,
-      provider: providerEntity,
-      product: productEntity,
-    })
-    await this.productPriceRepository.save(productPriceEntity)
-
-    const productPrices = this.plainProductPrices([productPriceEntity])
-    return CreateHTTPResponseDto.created('Product price created successfully', {
-      productPrices,
-    })
-  }
-
-  public async updateProductPrice(
-    productId: number,
-    priceId: number,
-    updateProductPriceDto: UpdateProductPriceDto
-  ): Promise<CreateHTTPResponseDto> {
-    await this.checkProductPriceExists(productId, priceId)
-
-    const productPriceEntity = this.productPriceRepository.create(
-      updateProductPriceDto
-    )
-    await this.productPriceRepository.update(
-      { id: priceId },
-      productPriceEntity
-    )
-
-    return CreateHTTPResponseDto.ok('Product price updated successfully')
-  }
-
-  public async deleteProductPrice(
-    productId: number,
-    priceId: number
-  ): Promise<CreateHTTPResponseDto> {
-    await this.checkProductPriceExists(productId, priceId)
-
-    const deletedProductPrice = await this.productPriceRepository.delete({
-      id: priceId,
-    })
-
-    if (!deletedProductPrice.affected)
-      throw new InternalServerErrorException('Failed to delete product price')
-
-    return CreateHTTPResponseDto.noContent()
-  }
-
-  private async checkProductPriceExists(productId: number, priceId: number) {
-    const productPriceEntity = await this.productPriceRepository.findOne({
-      where: { id: priceId },
-      relations: ['product'],
-    })
-
-    if (!productPriceEntity)
-      throw new NotFoundException('Product price not found')
-
-    const isCorrectProduct = productPriceEntity.product.id === productId
-    if (!isCorrectProduct) throw new NotFoundException('Product not found')
-  }
-
-  private plainProductPrices(productPriceList: ProductPrice[]) {
-    return productPriceList.map(({ product, provider, ...productPrice }) => ({
-      ...productPrice,
-    }))
   }
 
   private plainProducts(productList: Product[]) {

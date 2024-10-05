@@ -2,6 +2,7 @@ import { plainToInstance, Type } from 'class-transformer'
 import {
   IsEnum,
   IsInt,
+  IsNumber,
   IsPositive,
   IsString,
   Length,
@@ -13,11 +14,26 @@ import { MeasureUnit } from '@modules/product/enums'
 
 export class CreateProductDto {
   @IsEnum(MeasureUnit)
-  measurementUnit!: MeasureUnit
+  measureUnit!: MeasureUnit
 
   @IsString()
   @Length(1, longNameLength)
   name!: string
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  pricePerUnit!: number
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  minUnits!: number
+
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  brandId!: number
 
   @Type(() => Number)
   @IsInt()

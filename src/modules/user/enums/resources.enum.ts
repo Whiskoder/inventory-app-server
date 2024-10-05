@@ -3,6 +3,7 @@ export enum Resources {
   PRODUCT_PRICE = 'product_price',
   CATEGORY = 'category',
   BRANCH = 'branch',
+  BRAND = 'brand',
   INVOICE = 'invoice',
   PROVIDER = 'provider',
   ORDER = 'order',

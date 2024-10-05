@@ -25,13 +25,11 @@ import { Branch } from '@modules/branch/models'
 import { User } from '@modules/user/models'
 import { Roles } from '@modules/user/enums'
 import { ErrorMessages } from '@modules/shared/enums/messages'
-import { ProductPrice } from '@modules/product/models'
 
 export class OrderService {
   constructor(
     private readonly orderRepository: Repository<Order>,
     private readonly orderItemsRepository: Repository<OrderItem>,
-    private readonly productPriceRepository: Repository<ProductPrice>,
     private readonly branchRepository: Repository<Branch>
   ) {}
 
@@ -214,45 +212,45 @@ export class OrderService {
     createOrderItemDto: CreateOrderItemDto,
     orderId: number
   ): Promise<CreateHTTPResponseDto> {
-    const { productPriceId, quantityRequested } = createOrderItemDto
-    const searchPromises = [
-      this.productPriceRepository.findOne({
-        where: { id: productPriceId },
-        relations: ['provider', 'product'],
-      }),
-      this.orderRepository.findOne({ where: { id: orderId } }),
-    ]
-    const [productPriceEntity, orderEntity] = await Promise.all(searchPromises)
+    // const { productPriceId, quantityRequested } = createOrderItemDto
+    // const searchPromises = [
+    //   this.productPriceRepository.findOne({
+    //     where: { id: productPriceId },
+    //     relations: ['provider', 'product'],
+    //   }),
+    //   this.orderRepository.findOne({ where: { id: orderId } }),
+    // ]
+    // const [productPriceEntity, orderEntity] = await Promise.all(searchPromises)
 
-    if (!productPriceEntity)
-      throw new NotFoundException('Product price not found')
-    if (!orderEntity) throw new NotFoundException('Order not found')
+    // if (!productPriceEntity)
+    //   throw new NotFoundException('Product price not found')
+    // if (!orderEntity) throw new NotFoundException('Order not found')
 
-    const { status: orderStatus } = orderEntity as Order
-    if (orderStatus !== OrderStatus.OPEN)
-      throw new BadRequestException('Only draft orders can be modified')
+    // const { status: orderStatus } = orderEntity as Order
+    // if (orderStatus !== OrderStatus.OPEN)
+    //   throw new BadRequestException('Only draft orders can be modified')
 
-    const { product, provider, basePrice } = productPriceEntity as ProductPrice
+    // const { product, provider, basePrice } = productPriceEntity as ProductPrice
 
-    const isAlreadyOrderItemInOrder = await this.productPriceRepository.findOne(
-      { where: { product, provider } }
-    )
-    if (isAlreadyOrderItemInOrder)
-      throw new BadRequestException('Product already added')
+    // const isAlreadyOrderItemInOrder = await this.productPriceRepository.findOne(
+    //   { where: { product, provider } }
+    // )
+    // if (isAlreadyOrderItemInOrder)
+    //   throw new BadRequestException('Product already added')
 
-    const { measurementUnit } = product
-    const orderItemEntity = this.orderItemsRepository.create({
-      basePriceAtOrder: basePrice,
-      measurementUnit,
-      quantityRequested,
-      order: orderEntity,
-      product,
-      provider,
-    })
-    await this.orderItemsRepository.save(orderItemEntity)
+    // const { measurementUnit } = product
+    // const orderItemEntity = this.orderItemsRepository.create({
+    //   basePriceAtOrder: basePrice,
+    //   measurementUnit,
+    //   quantityRequested,
+    //   order: orderEntity,
+    //   product,
+    //   provider,
+    // })
+    // await this.orderItemsRepository.save(orderItemEntity)
 
     return CreateHTTPResponseDto.created('Order item placed', {
-      orderItems: [orderItemEntity],
+      // orderItems: [orderItemEntity],
     })
   }
 

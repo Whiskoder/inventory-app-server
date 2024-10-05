@@ -5,11 +5,11 @@ import {
   OneToMany,
   BeforeInsert,
   BeforeUpdate,
+  ManyToMany,
 } from 'typeorm'
 
 import { Invoice } from '@modules/invoice/models'
 import { OrderItem } from '@modules/order/models'
-import { ProductPrice } from '@modules/product/models'
 import {
   descriptionLength,
   emailLength,
@@ -19,6 +19,7 @@ import {
   phoneLength,
   postalCodeLength,
 } from '@/modules/shared/constants'
+import { Product } from '@/modules/product/models'
 
 @Entity({ name: 'providers' })
 export class Provider {
@@ -105,10 +106,8 @@ export class Provider {
   })
   orderItems?: OrderItem[]
 
-  @OneToMany(() => ProductPrice, (productPrice) => productPrice.provider, {
-    eager: false,
-  })
-  productPrices?: ProductPrice[]
+  @ManyToMany(() => Product)
+  products?: Product[]
 
   normalizeStrings() {
     this.name = this.name.toLowerCase().trim()

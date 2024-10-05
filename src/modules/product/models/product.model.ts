@@ -7,13 +7,16 @@ import {
   JoinColumn,
   BeforeInsert,
   BeforeUpdate,
+  ManyToMany,
 } from 'typeorm'
 
 import { Category } from '@modules/category/models'
 import { OrderItem } from '@modules/order/models'
-import { ProductPrice } from '@modules/product/models'
 import { longNameLength } from '@/modules/shared/constants'
 import { MeasureUnit } from '@modules/product/enums'
+import { Branch } from '@modules/branch/models'
+import { Brand } from '@modules/brand/models'
+import { Provider } from '@/modules/provider/models'
 
 @Entity({ name: 'products' })
 export class Product {
@@ -24,14 +27,27 @@ export class Product {
     type: 'enum',
     enum: MeasureUnit,
   })
-  measurementUnit!: MeasureUnit
+  measureUnit!: MeasureUnit
 
   @Column({
     type: 'varchar',
     length: longNameLength,
-    unique: true,
   })
   name!: string
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  pricePerUnit!: number
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  minUnits!: number
 
   @Column({
     type: 'boolean',
@@ -45,16 +61,21 @@ export class Product {
   })
   orderItems?: OrderItem[]
 
-  @OneToMany(() => ProductPrice, (productPrice) => productPrice.product, {
-    eager: false,
-  })
-  productPrices?: ProductPrice[]
-
   @ManyToOne(() => Category, (category) => category.products, {
     eager: false,
   })
   @JoinColumn()
   category!: Category
+
+  @ManyToOne(() => Brand, (brand) => brand.products, { eager: false })
+  @JoinColumn()
+  brand!: Brand
+
+  @ManyToMany(() => Branch)
+  branches?: Branch[]
+
+  @ManyToMany(() => Provider)
+  providers?: Provider[]
 
   normalizeStrings() {
     this.name = this.name.toLowerCase().trim()
