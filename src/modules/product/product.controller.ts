@@ -26,36 +26,29 @@ export class ProductController {
     }
   }
 
-  // GET '/api/v1/products/'
-  public getAllProducts = async (
+  // GET '/api/v1/products/:term'
+  public searchProductsByTerm = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
       const paginationDto = await CreatePaginationDto.create(req.query)
-      const sortingDto = await CreateSortingDto.create(req.query)
-      const response = await this.productService.getAllProducts(
-        paginationDto,
-        sortingDto
-      )
-      res.status(response.statusCode).json(response)
-    } catch (e) {
-      next(e)
-    }
-  }
-
-  // GET '/api/v1/products/:term'
-  public getProductByTerm = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
       const relationsDto = await RelationsProductDto.create(req.query)
+      const sortingProps = [
+        'category',
+        'name',
+        'brand',
+        'pricePerUnit',
+        'minUnits',
+        'measureUnit',
+      ]
+      const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
       const term = req.params.term
-      const response = await this.productService.getProductByTerm(
+      const response = await this.productService.searchProductsByTerm(
         term,
+        paginationDto,
+        sortingDto,
         relationsDto
       )
       res.status(response.statusCode).json(response)

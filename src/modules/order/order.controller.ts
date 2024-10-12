@@ -68,7 +68,8 @@ export class OrderController {
   ) => {
     try {
       const paginationDto = await CreatePaginationDto.create(req.query)
-      const sortingDto = await CreateSortingDto.create(req.query)
+      const props = ['']
+      const sortingDto = await CreateSortingDto.create(req.query, props)
       const response = await this.orderService.getAllOrders(
         paginationDto,
         sortingDto

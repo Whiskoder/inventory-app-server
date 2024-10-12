@@ -4,6 +4,7 @@ import { AppDataSource } from '@core/datasources'
 import { AuthController, AuthService } from '@modules/auth'
 import { JWT } from '@config/plugins'
 import { User } from '@modules/user/models'
+import { AuthMiddleware } from '@core/middlewares'
 
 export class AuthRoutes {
   static get routes(): Router {
@@ -16,6 +17,7 @@ export class AuthRoutes {
 
     router.post('/login', controller.loginUser)
     router.post('/register', controller.registerUser)
+    router.get('/check', [AuthMiddleware.validateToken], controller.checkAuth)
 
     return router
   }

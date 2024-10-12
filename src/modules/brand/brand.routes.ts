@@ -14,7 +14,7 @@ export class BrandRoutes {
     const brandService = new BrandService(brandRepository)
     const controller = new BrandController(brandService)
 
-    const resource = Resources.BRANCH
+    const resource = Resources.BRAND
     router.use(AuthMiddleware.validateToken)
 
     router.post(

@@ -12,7 +12,7 @@ describe('create-pagination.dto.test.ts', () => {
     }
     const createPaginationDto = await CreatePaginationDto.create(dto)
     expect(createPaginationDto).toBeInstanceOf(CreatePaginationDto)
-    expect(createPaginationDto).toEqual(dto)
+    expect(createPaginationDto).toEqual({ ...dto, skip: 0 })
   })
 
   it('should throw an error if the input is not valid', async () => {

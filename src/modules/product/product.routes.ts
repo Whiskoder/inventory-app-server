@@ -6,19 +6,19 @@ import { ProductController, ProductService } from '@modules/product'
 import { Resources, Actions } from '@modules/user/enums'
 import { AuthMiddleware } from '@core/middlewares'
 import { Category } from '@modules/category/models'
-import { Provider } from '@modules/provider/models'
+import { Brand } from '@modules/brand/models'
 
 export class ProductRoutes {
   static get routes(): Router {
     const router = Router({ caseSensitive: false })
 
     const productRepository = AppDataSource.getRepository(Product)
-    const providerRepository = AppDataSource.getRepository(Provider)
+    const brandRepository = AppDataSource.getRepository(Brand)
     const categoryRepository = AppDataSource.getRepository(Category)
 
     const productService = new ProductService(
       productRepository,
-      providerRepository,
+      brandRepository,
       categoryRepository
     )
     const controller = new ProductController(productService)
@@ -34,15 +34,15 @@ export class ProductRoutes {
     )
 
     router.get(
-      '/',
+      '/:term',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.getAllProducts
+      controller.searchProductsByTerm
     )
 
     router.get(
-      '/:term',
+      '/',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.getProductByTerm
+      controller.searchProductsByTerm
     )
 
     router.put(

@@ -1,4 +1,4 @@
-import { plainToInstance } from 'class-transformer'
+import { plainToInstance, Transform } from 'class-transformer'
 import { IsEnum, IsOptional, validateOrReject } from 'class-validator'
 
 enum Property {
@@ -6,6 +6,7 @@ enum Property {
 }
 
 export class RelationsBranchDto {
+  @Transform(({ value }) => value.split(','))
   @IsOptional()
   @IsEnum(Property, { each: true })
   include: Property[] = []

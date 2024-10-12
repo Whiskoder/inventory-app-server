@@ -10,7 +10,7 @@ import {
 import { longNameLength } from '@/modules/shared/constants'
 import { Product } from '@/modules/product/models'
 
-@Entity({ name: 'Brands' })
+@Entity({ name: 'brands' })
 export class Brand {
   @PrimaryGeneratedColumn()
   id!: number

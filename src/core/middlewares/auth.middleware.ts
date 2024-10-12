@@ -15,7 +15,6 @@ export class AuthMiddleware {
     next: NextFunction
   ): Promise<void> {
     const authorization = req.header('Authorization')
-
     if (!authorization) throw new UnauthorizedException('No token provided')
     if (!authorization?.startsWith('Bearer '))
       throw new UnauthorizedException('Invalid Bearer Token')

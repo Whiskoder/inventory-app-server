@@ -36,7 +36,8 @@ export class CategoryController {
   ) => {
     try {
       const paginationDto = await CreatePaginationDto.create(req.query)
-      const sortingDto = await CreateSortingDto.create(req.query)
+      const props = ['']
+      const sortingDto = await CreateSortingDto.create(req.query, props)
       const response = await this.categoryService.getAllCategories(
         paginationDto,
         sortingDto

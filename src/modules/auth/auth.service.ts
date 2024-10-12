@@ -82,4 +82,10 @@ export class AuthService {
       token,
     })
   }
+
+  public checkAuth(user: User) {
+    return CreateHTTPResponseDto.ok(undefined, {
+      user,
+    })
+  }
 }

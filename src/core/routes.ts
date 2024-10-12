@@ -6,6 +6,7 @@ import { BranchRoutes } from '@modules/branch'
 import { ProductRoutes } from '@modules/product'
 import { ProviderRoutes } from '@modules/provider'
 import { OrderRoutes } from '@modules/order'
+import { BrandRoutes } from '@modules/brand'
 
 export class AppRoutes {
   static get routes(): Router {
@@ -17,6 +18,7 @@ export class AppRoutes {
     router.use('/api/v1/products', ProductRoutes.routes)
     router.use('/api/v1/providers', ProviderRoutes.routes)
     router.use('/api/v1/orders', OrderRoutes.routes)
+    router.use('/api/v1/brands', BrandRoutes.routes)
 
     return router
   }

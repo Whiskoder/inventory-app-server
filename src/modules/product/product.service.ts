@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm'
+import { FindOperator, Like, Repository } from 'typeorm'
 
 import { Product } from '@modules/product/models'
 import {
@@ -18,50 +18,93 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@core/errors'
-import { Provider } from '@modules/provider/models'
 import { UUID } from '@config/plugins'
+import { Brand } from '@modules/brand/models'
 
 export class ProductService {
   constructor(
     private readonly productRepository: Repository<Product>,
-    private readonly providerRepository: Repository<Provider>,
+    private readonly brandRepository: Repository<Brand>,
     private readonly categoryRepository: Repository<Category>
   ) {}
 
   public async createProduct(
     createProductDto: CreateProductDto
   ): Promise<CreateHTTPResponseDto> {
-    const { categoryId, ...product } = createProductDto
-    const category = await this.categoryRepository.findOne({
-      where: { id: categoryId, isActive: true },
-    })
+    const { categoryId, brandId, ...product } = createProductDto
 
-    if (!category) throw new BadRequestException('Provided category not found')
+    const searchPromises = [
+      this.categoryRepository.findOne({
+        where: { id: categoryId, isActive: true },
+      }),
+      this.brandRepository.findOne({
+        where: { id: brandId, isActive: true },
+      }),
+    ]
+
+    const [categoryEntity, brandEntity] = await Promise.all(searchPromises)
+
+    if (!categoryEntity)
+      throw new BadRequestException('Provided category not found')
+
+    if (!brandEntity) throw new BadRequestException('Provided brand not found')
 
     const productEntity = this.productRepository.create({
       ...product,
-      category,
+      category: categoryEntity,
+      brand: brandEntity,
     })
     await this.productRepository.save(productEntity)
 
-    const products = this.plainProducts([productEntity])
+    // const products = this.plainProducts([productEntity])
     return CreateHTTPResponseDto.created('Product created successfully', {
-      products,
+      products: [productEntity],
     })
   }
 
-  public async getAllProducts(
+  public async searchProductsByTerm(
+    term: string,
     paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsProductDto
   ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
     const { orderBy, sortBy = 'id' } = sortingDto
+
+    if (Number(term)) {
+      const productEntity = await this.productRepository.findOne({
+        where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
+      })
+
+      if (!productEntity) throw new NotFoundException('Product not found')
+
+      return CreateHTTPResponseDto.ok(undefined, {
+        products: [productEntity],
+      })
+    }
+
+    const where: { isActive: boolean; name?: FindOperator<string> } = {
+      isActive: true,
+    }
+
+    if (term) {
+      const name = term.trim().toLowerCase()
+      if (name.length > 0) where.name = Like(`${name}%`)
+    }
+
+    let order: any = { [sortBy]: orderBy }
+    if (sortBy === 'category') order = { category: { name: orderBy } }
+    if (sortBy === 'brand') order = { brand: { name: orderBy } }
+
     const [products, totalItems] = await this.productRepository.findAndCount({
       take: limit,
       skip,
-      where: { isActive: true },
-      order: { [sortBy]: orderBy },
+      where,
+      relations: [...relationsDto.include],
+      order,
     })
+    //[sortBy]: orderBy
 
     const pagination = CalculatePaginationUseCase.execute({
       currentPage,
@@ -69,52 +112,45 @@ export class ProductService {
       totalItems,
     })
 
+    if (products.length === 0) throw new NotFoundException('Products not found')
+
     return CreateHTTPResponseDto.ok(undefined, {
       products,
       pagination,
     })
   }
 
-  public async getProductByTerm(
-    term: string,
-    relationsDto: RelationsProductDto
-  ): Promise<CreateHTTPResponseDto> {
-    let productEntity
-    if (Number(term)) {
-      productEntity = await this.productRepository.findOne({
-        where: { id: +term, isActive: true },
-        relations: [...relationsDto.include],
-      })
-    } else {
-      productEntity = await this.productRepository.findOne({
-        where: { name: term.toLowerCase(), isActive: true },
-        relations: [...relationsDto.include],
-      })
-    }
-
-    if (!productEntity) throw new NotFoundException('Product not found')
-    return CreateHTTPResponseDto.ok(undefined, { products: [productEntity] })
-  }
-
   public async updateProduct(
     productId: number,
     updateProductDto: UpdateProductDto
   ): Promise<CreateHTTPResponseDto> {
-    const { categoryId, ...product } = updateProductDto
+    const { categoryId, brandId, ...product } = updateProductDto
 
-    let category
+    let categoryEntity
+    let brandEntity
+
     if (categoryId) {
-      category = await this.categoryRepository.findOne({
+      categoryEntity = await this.categoryRepository.findOne({
         where: { id: categoryId, isActive: true },
       })
-      if (!category)
+      if (!categoryEntity)
         throw new BadRequestException('Provided category not found')
+    }
+
+    if (brandId) {
+      brandEntity = await this.brandRepository.findOne({
+        where: { id: brandId, isActive: true },
+      })
+      if (!brandEntity)
+        throw new BadRequestException('Provided brand not found')
     }
 
     const productEntity = this.productRepository.create({
       ...product,
-      category,
+      category: categoryEntity,
+      brand: brandEntity,
     })
+
     const updatedProduct = await this.productRepository.update(
       { id: productId, isActive: true },
       productEntity
@@ -144,12 +180,5 @@ export class ProductService {
       throw new InternalServerErrorException('Error deleting product')
 
     return CreateHTTPResponseDto.noContent()
-  }
-
-  private plainProducts(productList: Product[]) {
-    return productList.map(({ category, ...product }) => ({
-      ...product,
-      category: category.name,
-    }))
   }
 }

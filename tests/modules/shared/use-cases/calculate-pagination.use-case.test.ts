@@ -22,6 +22,27 @@ describe('calculate-pagination.use-case.test.ts', () => {
     })
   })
 
+  it('should return correct total pages', () => {
+    const totalItems = 101
+    const limit = 20
+    const currentPage = 2
+
+    const pagination = CalculatePaginationUseCase.execute({
+      totalItems,
+      currentPage,
+      limit,
+    })
+
+    expect(pagination).toMatchObject({
+      nextPage: 3,
+      previousPage: 1,
+      currentPage,
+      limit,
+      totalItems,
+      totalPages: 6,
+    })
+  })
+
   it('should set nextPage to undefined', () => {
     const totalItems = 100
     const currentPage = 10
