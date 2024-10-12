@@ -29,13 +29,18 @@ export const RoleConfig: IRoleConfig = {
   warehouse_manager: {
     permissions: {
       [Resources.BRANCH]: [],
-      [Resources.BRAND]: [Actions.CREATE, Actions.READ],
-      [Resources.CATEGORY]: [Actions.CREATE, Actions.READ],
+      [Resources.BRAND]: [Actions.CREATE, Actions.READ, Actions.UPDATE],
+      [Resources.CATEGORY]: [Actions.CREATE, Actions.READ, Actions.UPDATE],
       [Resources.INVOICE]: [],
       [Resources.ORDER_ITEM]: [],
       [Resources.ORDER]: [],
       [Resources.PRODUCT_PRICE]: [],
-      [Resources.PRODUCT]: [Actions.CREATE, Actions.READ],
+      [Resources.PRODUCT]: [
+        Actions.CREATE,
+        Actions.READ,
+        Actions.UPDATE,
+        Actions.DELETE,
+      ],
       [Resources.PROVIDER]: [],
     },
   },

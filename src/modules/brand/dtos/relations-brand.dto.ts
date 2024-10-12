@@ -1,7 +1,9 @@
 import { plainToInstance, Transform } from 'class-transformer'
 import { IsEnum, IsOptional, validateOrReject } from 'class-validator'
 
-enum Property {}
+enum Property {
+  product = 'product',
+}
 
 export class RelationsBrandDto {
   @Transform(({ value }) => value.split(','))

@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm'
+import { FindOperator, Like, Repository } from 'typeorm'
 
 import { Brand } from '@modules/brand/models'
 import {
@@ -29,17 +29,85 @@ export class BrandService {
     })
   }
 
-  public async getAllBrands(
+  // public async getAllBrands(
+  //   paginationDto: CreatePaginationDto,
+  //   sortingDto: CreateSortingDto
+  // ): Promise<CreateHTTPResponseDto> {
+  //   const { limit, skip, page: currentPage } = paginationDto
+  //   const { sortBy, orderBy } = sortingDto
+
+  //   const [brands, totalItems] = await this.brandRepository.findAndCount({
+  //     take: limit,
+  //     skip,
+  //     where: { isActive: true },
+  //     order: { [sortBy]: orderBy },
+  //   })
+
+  //   const pagination = CalculatePaginationUseCase.execute({
+  //     currentPage,
+  //     limit,
+  //     totalItems,
+  //   })
+
+  //   return CreateHTTPResponseDto.ok(undefined, { brands, pagination })
+  // }
+
+  // public async getBrandByTerm(
+  //   term: string,
+  //   relationsDto: RelationsBrandDto
+  // ): Promise<CreateHTTPResponseDto> {
+  //   let brandEntity
+  //   if (Number(term)) {
+  //     brandEntity = await this.brandRepository.findOne({
+  //       where: { id: +term, isActive: true },
+  //       // relations: [...relationsDto.include],
+  //     })
+  //   } else {
+  //     brandEntity = await this.brandRepository.findOne({
+  //       where: { name: term.toLowerCase(), isActive: true },
+  //       // relations: [...relationsDto.include],
+  //     })
+  //   }
+
+  //   if (!brandEntity) throw new NotFoundException('brand not found')
+  //   return CreateHTTPResponseDto.ok(undefined, { brands: [brandEntity] })
+  // }
+  public async searchBrandsByTerm(
+    term: string,
     paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsBrandDto
   ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
-    const { sortBy, orderBy } = sortingDto
+    const { orderBy, sortBy = 'id' } = sortingDto
+
+    if (Number(term)) {
+      const brandEntity = await this.brandRepository.findOne({
+        where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
+      })
+
+      if (!brandEntity) throw new NotFoundException('Brand not found')
+
+      return CreateHTTPResponseDto.ok(undefined, {
+        products: [brandEntity],
+      })
+    }
+
+    const where: { isActive: boolean; name?: FindOperator<string> } = {
+      isActive: true,
+    }
+
+    if (term) {
+      const name = term.trim().toLowerCase()
+      if (name.length > 0) where.name = Like(`${name}%`)
+    }
 
     const [brands, totalItems] = await this.brandRepository.findAndCount({
       take: limit,
       skip,
-      where: { isActive: true },
+      where,
+      relations: [...relationsDto.include],
       order: { [sortBy]: orderBy },
     })
 
@@ -49,28 +117,12 @@ export class BrandService {
       totalItems,
     })
 
-    return CreateHTTPResponseDto.ok(undefined, { brands, pagination })
-  }
+    if (brands.length === 0) throw new NotFoundException('Brand not found')
 
-  public async getBrandByTerm(
-    term: string,
-    relationsDto: RelationsBrandDto
-  ): Promise<CreateHTTPResponseDto> {
-    let brandEntity
-    if (Number(term)) {
-      brandEntity = await this.brandRepository.findOne({
-        where: { id: +term, isActive: true },
-        // relations: [...relationsDto.include],
-      })
-    } else {
-      brandEntity = await this.brandRepository.findOne({
-        where: { name: term.toLowerCase(), isActive: true },
-        // relations: [...relationsDto.include],
-      })
-    }
-
-    if (!brandEntity) throw new NotFoundException('brand not found')
-    return CreateHTTPResponseDto.ok(undefined, { brands: [brandEntity] })
+    return CreateHTTPResponseDto.ok(undefined, {
+      brands,
+      pagination,
+    })
   }
 
   public async updateBrand(

@@ -28,36 +28,23 @@ export class CategoryController {
     }
   }
 
-  //GET '/api/v1/categories/'
-  public getAllCategories = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const paginationDto = await CreatePaginationDto.create(req.query)
-      const props = ['']
-      const sortingDto = await CreateSortingDto.create(req.query, props)
-      const response = await this.categoryService.getAllCategories(
-        paginationDto,
-        sortingDto
-      )
-      res.status(response.statusCode).json(response)
-    } catch (e) {
-      next(e)
-    }
-  }
-
   //GET '/api/v1/categories/:term'
-  public getCategoryByTerm = async (
+  public searchCategoriesByTerm = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      const sortingProps = ['name']
+      const paginationDto = await CreatePaginationDto.create(req.query)
+      const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
       const relationsDto = await RelationsCategoryDto.create(req.query)
-      const response = await this.categoryService.getCategoryByTerm(
-        req.params.term,
+      const term = req.params.term
+
+      const response = await this.categoryService.searchCategoriesByTerm(
+        term,
+        paginationDto,
+        sortingDto,
         relationsDto
       )
       res.status(response.statusCode).json(response)

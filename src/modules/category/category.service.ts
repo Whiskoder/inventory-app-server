@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm'
+import { FindOperator, Like, Repository } from 'typeorm'
 
 import {
   CreateHTTPResponseDto,
@@ -28,19 +28,43 @@ export class CategoryService {
       categories: [categoryEntity],
     })
   }
-
-  public async getAllCategories(
+  public async searchCategoriesByTerm(
+    term: string,
     paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsCategoryDto
   ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
-    const { sortBy = 'id', orderBy } = sortingDto
+    const { orderBy, sortBy = 'id' } = sortingDto
+
+    if (Number(term)) {
+      const categoryEntity = await this.categoryRepository.findOne({
+        where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
+      })
+
+      if (!categoryEntity) throw new NotFoundException('Category not found')
+
+      return CreateHTTPResponseDto.ok(undefined, {
+        products: [categoryEntity],
+      })
+    }
+
+    const where: { isActive: boolean; name?: FindOperator<string> } = {
+      isActive: true,
+    }
+
+    if (term) {
+      const name = term.trim().toLowerCase()
+      if (name.length > 0) where.name = Like(`${name}%`)
+    }
 
     const [categories, totalItems] = await this.categoryRepository.findAndCount(
       {
         take: limit,
         skip,
-        where: { isActive: true },
+        where,
+        relations: [...relationsDto.include],
         order: { [sortBy]: orderBy },
       }
     )
@@ -51,28 +75,13 @@ export class CategoryService {
       totalItems,
     })
 
-    return CreateHTTPResponseDto.ok(undefined, { categories, pagination })
-  }
+    if (categories.length === 0)
+      throw new NotFoundException('Category not found')
 
-  public async getCategoryByTerm(
-    term: string,
-    relationsDto: RelationsCategoryDto
-  ): Promise<CreateHTTPResponseDto> {
-    let categoryEntity
-    if (Number(term)) {
-      categoryEntity = await this.categoryRepository.findOne({
-        where: { id: +term, isActive: true },
-        relations: [...relationsDto.include],
-      })
-    } else {
-      categoryEntity = await this.categoryRepository.findOne({
-        where: { name: term.toLowerCase(), isActive: true },
-        relations: [...relationsDto.include],
-      })
-    }
-
-    if (!categoryEntity) throw new NotFoundException('Category not found')
-    return CreateHTTPResponseDto.ok(undefined, { categories: [categoryEntity] })
+    return CreateHTTPResponseDto.ok(undefined, {
+      categories,
+      pagination,
+    })
   }
 
   public async updateCategory(

@@ -104,7 +104,6 @@ export class ProductService {
       relations: [...relationsDto.include],
       order,
     })
-    //[sortBy]: orderBy
 
     const pagination = CalculatePaginationUseCase.execute({
       currentPage,
@@ -159,7 +158,9 @@ export class ProductService {
     if (!updatedProduct.affected)
       throw new NotFoundException('Product not found')
 
-    return CreateHTTPResponseDto.ok('Product updated successfully')
+    return CreateHTTPResponseDto.ok('Product updated successfully', {
+      products: [{ ...productEntity, id: productId }],
+    })
   }
 
   public async deleteProduct(

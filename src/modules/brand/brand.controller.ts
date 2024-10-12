@@ -26,36 +26,22 @@ export class BrandController {
     }
   }
 
-  //GET '/api/v1/brands/'
-  public getAllBrands = async (
+  // GET '/api/v1/brands/:term'
+  public searchBrandsByTerm = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      const sortingProps = ['name']
       const paginationDto = await CreatePaginationDto.create(req.query)
-      const props = ['']
-      const sortingDto = await CreateSortingDto.create(req.query, props)
-      const response = await this.brandService.getAllBrands(
-        paginationDto,
-        sortingDto
-      )
-      res.status(response.statusCode).json(response)
-    } catch (e) {
-      next(e)
-    }
-  }
-
-  //GET '/api/v1/brands/:term'
-  public getBrandByTerm = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
       const relationsDto = await RelationsBrandDto.create(req.query)
-      const response = await this.brandService.getBrandByTerm(
-        req.params.term,
+      const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
+      const term = req.params.term
+      const response = await this.brandService.searchBrandsByTerm(
+        term,
+        paginationDto,
+        sortingDto,
         relationsDto
       )
       res.status(response.statusCode).json(response)
@@ -63,6 +49,24 @@ export class BrandController {
       next(e)
     }
   }
+
+  // //GET '/api/v1/brands/:term'
+  // public getBrandByTerm = async (
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ) => {
+  //   try {
+  //     const relationsDto = await RelationsBrandDto.create(req.query)
+  //     const response = await this.brandService.getBrandByTerm(
+  //       req.params.term,
+  //       relationsDto
+  //     )
+  //     res.status(response.statusCode).json(response)
+  //   } catch (e) {
+  //     next(e)
+  //   }
+  // }
 
   //PUT '/api/v1/brands/:brandId'
   public updateBrand = async (
