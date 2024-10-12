@@ -2,6 +2,14 @@ import { join } from 'node:path'
 import { DataSource } from 'typeorm'
 
 import { envs } from '@config/plugins'
+import { User } from '@modules/user/models'
+import { Provider } from '@modules/provider/models'
+import { Product } from '@modules/product/models'
+import { Order, OrderItem } from '@modules/order/models'
+import { Invoice } from '@modules/invoice/models'
+import { Category } from '@modules/category/models'
+import { Brand } from '@modules/brand/models'
+import { Branch } from '@modules/branch/models'
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -13,7 +21,17 @@ export const AppDataSource = new DataSource({
   synchronize: envs.DB_SYNC,
   ssl: envs.DB_SSL,
   logging: false,
-  entities: [join(__dirname, '../../modules/**/**/*.model.ts')],
+  entities: [
+    User,
+    Provider,
+    Product,
+    Order,
+    OrderItem,
+    Invoice,
+    Category,
+    Brand,
+    Branch,
+  ],
   migrations: [join(__dirname, '../migrations', '*.ts')],
   subscribers: [],
 })
