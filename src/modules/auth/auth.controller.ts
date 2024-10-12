@@ -35,4 +35,19 @@ export class AuthController {
       next(e)
     }
   }
+
+  // GET '/api/v1/auth/check'
+  public checkAuth = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const user = res.locals.user
+      const response = await this.authService.checkAuth(user)
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
 }

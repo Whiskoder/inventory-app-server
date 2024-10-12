@@ -1,2 +1,5 @@
 export * from '@modules/order/dtos/create-order.dto'
+export * from '@modules/order/dtos/relations-order.dto'
 export * from '@modules/order/dtos/update-order.dto'
+export * from '@modules/order/dtos/create-order-item.dto'
+export * from '@modules/order/dtos/update-order-item.dto'

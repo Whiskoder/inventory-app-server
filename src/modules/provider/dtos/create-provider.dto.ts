@@ -7,41 +7,62 @@ import {
   Matches,
   validateOrReject,
 } from 'class-validator'
-
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH, RFC_REGEX } from '@core/constants'
 import { plainToInstance } from 'class-transformer'
+
+import {
+  descriptionLength,
+  emailLength,
+  longNameLength,
+  postalCodeLength,
+  RFC_REGEX,
+  shortNameLength,
+} from '@modules/shared/constants'
 
 export class CreateProviderDto {
   @IsOptional()
-  @IsEmail()
-  emailAddress?: string
-
   @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-  name!: string
+  @Length(1, shortNameLength)
+  cityName?: string
 
-  //! FIX THIS
+  @IsOptional()
+  @IsEmail()
+  @Length(1, emailLength)
+  contactEmail?: string
+
   @IsOptional()
   @IsPhoneNumber('MX')
-  phone?: number
+  contactPhone?: string
+
+  @IsOptional()
+  @IsString()
+  @Length(1, longNameLength)
+  dependantLocality?: string
+
+  @IsOptional()
+  @IsString()
+  @Length(1, descriptionLength)
+  description?: string
+
+  @IsString()
+  @Length(1, longNameLength)
+  name!: string
+
+  @IsOptional()
+  @Length(1, postalCodeLength)
+  postalCode?: string
 
   @Matches(RFC_REGEX)
   rfc!: string
 
+  @IsOptional()
+  @Length(1, longNameLength)
+  streetName?: string
+
   public static async create(obj: {
     [key: string]: any
   }): Promise<CreateProviderDto> {
-    const { emailAddress, name, phone, rfc } = obj || {}
-
-    const dto = plainToInstance(CreateProviderDto, {
-      emailAddress,
-      name,
-      phone,
-      rfc,
-    })
-
+    const dto = plainToInstance(CreateProviderDto, obj)
     await validateOrReject(dto)
-
     return dto
   }
 }

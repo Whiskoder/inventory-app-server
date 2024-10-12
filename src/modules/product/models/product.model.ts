@@ -7,52 +7,75 @@ import {
   JoinColumn,
   BeforeInsert,
   BeforeUpdate,
+  ManyToMany,
 } from 'typeorm'
 
 import { Category } from '@modules/category/models'
 import { OrderItem } from '@modules/order/models'
-import { ProductPrice } from '@modules/product/models'
+import { longNameLength } from '@/modules/shared/constants'
+import { MeasureUnit } from '@modules/product/enums'
+import { Branch } from '@modules/branch/models'
+import { Brand } from '@modules/brand/models'
+import { Provider } from '@/modules/provider/models'
 
 @Entity({ name: 'products' })
 export class Product {
-  @Column('integer', { unique: true, nullable: true })
-  barCode!: number
+  @PrimaryGeneratedColumn()
+  id!: number
+
+  @Column({
+    type: 'enum',
+    enum: MeasureUnit,
+  })
+  measureUnit!: MeasureUnit
+
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+  })
+  name!: string
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  pricePerUnit!: number
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  minUnits!: number
+
+  @Column({
+    type: 'boolean',
+    default: true,
+    select: false,
+  })
+  isActive!: boolean
+
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.product, {
+    eager: false,
+  })
+  orderItems?: OrderItem[]
 
   @ManyToOne(() => Category, (category) => category.products, {
-    nullable: false,
-    eager: true,
+    eager: false,
   })
   @JoinColumn()
   category!: Category
 
-  @PrimaryGeneratedColumn()
-  id!: number
+  @ManyToOne(() => Brand, (brand) => brand.products, { eager: false })
+  @JoinColumn()
+  brand!: Brand
 
-  @Column('text')
-  measureUnit!: string
+  @ManyToMany(() => Branch)
+  branches?: Branch[]
 
-  @Column('text', { unique: true })
-  name!: string
-
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.product, {
-    nullable: true,
-  })
-  orderItems?: OrderItem[]
-
-  @OneToMany(() => ProductPrice, (productPrice) => productPrice.product, {
-    eager: true,
-  })
-  productPrices?: ProductPrice[]
-
-  // @ManyToMany(() => Provider, (provider) => provider.products)
-  // @JoinTable({ name: 'products_providers' })
-  // providers?: Provider[]
-
-  @Column('decimal', { default: 0 })
-  stock!: number
-
-  @Column('boolean', { default: true, select: false })
-  isActive!: boolean
+  @ManyToMany(() => Provider)
+  providers?: Provider[]
 
   normalizeStrings() {
     this.name = this.name.toLowerCase().trim()

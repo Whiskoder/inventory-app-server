@@ -1,86 +1,60 @@
 import { Router } from 'express'
 
 import { AppDataSource } from '@core/datasources'
-import { Product, ProductPrice } from '@modules/product/models'
+import { Product } from '@modules/product/models'
 import { ProductController, ProductService } from '@modules/product'
-import { Resource, Action } from '@config/roles'
+import { Resources, Actions } from '@modules/user/enums'
 import { AuthMiddleware } from '@core/middlewares'
 import { Category } from '@modules/category/models'
-import { Provider } from '@modules/provider/models'
+import { Brand } from '@modules/brand/models'
 
 export class ProductRoutes {
   static get routes(): Router {
     const router = Router({ caseSensitive: false })
 
     const productRepository = AppDataSource.getRepository(Product)
-    const productPriceRepository = AppDataSource.getRepository(ProductPrice)
-    const providerRepository = AppDataSource.getRepository(Provider)
+    const brandRepository = AppDataSource.getRepository(Brand)
     const categoryRepository = AppDataSource.getRepository(Category)
 
     const productService = new ProductService(
       productRepository,
-      productPriceRepository,
-      providerRepository,
+      brandRepository,
       categoryRepository
     )
     const controller = new ProductController(productService)
 
-    const resource = Resource.PRODUCT
+    const resource = Resources.PRODUCT
 
     router.use(AuthMiddleware.validateToken)
 
     router.post(
       '/',
-      [AuthMiddleware.checkPermission(resource, Action.CREATE)],
+      [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
       controller.createProduct
     )
 
     router.get(
-      '/',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
-      controller.getAllProducts
+      '/:term',
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
+      controller.searchProductsByTerm
     )
 
     router.get(
-      '/:term',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
-      controller.getProductByTerm
+      '/',
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
+      controller.searchProductsByTerm
     )
 
     router.put(
-      '/:id',
-      [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
+      '/:productId',
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.updateProduct
     )
 
     router.delete(
-      '/:id',
-      [AuthMiddleware.checkPermission(resource, Action.DELETE)],
+      '/:productId',
+      [AuthMiddleware.checkPermission(resource, Actions.DELETE)],
       controller.deleteProduct
-    )
-
-    router.post(
-      '/:productId/price',
-      [AuthMiddleware.checkPermission(resource, Action.CREATE)],
-      controller.createProductPrice
-    )
-
-    router.get(
-      '/:productId/price',
-      [AuthMiddleware.checkPermission(resource, Action.READ)],
-      controller.getProductPricesByProductId
-    )
-
-    router.put(
-      '/:productId/price/:priceId',
-      [AuthMiddleware.checkPermission(resource, Action.UPDATE)],
-      controller.updateProductPrice
-    )
-
-    router.delete(
-      '/:productId/price/:priceId',
-      [AuthMiddleware.checkPermission(resource, Action.DELETE)],
-      controller.deleteProductPrice
     )
 
     return router

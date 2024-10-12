@@ -1,89 +1,109 @@
 import { Repository } from 'typeorm'
+
 import { Provider } from '@modules/provider/models'
-import { CreateProviderDto, UpdateProviderDto } from '@modules/provider/dtos'
-import { HTTPResponseDto, PaginationDto } from '@modules/shared/dtos'
+import {
+  CreateProviderDto,
+  RelationsProviderDto,
+  UpdateProviderDto,
+} from '@modules/provider/dtos'
+import {
+  CreateHTTPResponseDto,
+  CreatePaginationDto,
+  CreateSortingDto,
+} from '@modules/shared/dtos'
 import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
-import { NotFoundException } from '@/core/errors'
+import { InternalServerErrorException, NotFoundException } from '@core/errors'
+import { UUID } from '@config/plugins'
 
 export class ProviderService {
   constructor(private readonly providerRepository: Repository<Provider>) {}
 
   public async createProvider(
     createProviderDto: CreateProviderDto
-  ): Promise<HTTPResponseDto> {
-    const isExistingProvider = await this.providerRepository.update(
-      { name: createProviderDto.name, isActive: false },
-      { isActive: true }
-    )
-
-    if (isExistingProvider.affected === 1)
-      return HTTPResponseDto.accepted(
-        `Provider ${createProviderDto.name} already exists`
-      )
-
+  ): Promise<CreateHTTPResponseDto> {
     const providerEntity = this.providerRepository.create(createProviderDto)
     await this.providerRepository.save(providerEntity)
-    return HTTPResponseDto.created('Product created successfully', {
+    return CreateHTTPResponseDto.created('Product created successfully', {
       providers: [providerEntity],
     })
   }
 
   public async getAllProviders(
-    paginationDto: PaginationDto
-  ): Promise<HTTPResponseDto> {
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto
+  ): Promise<CreateHTTPResponseDto> {
     const { limit, skip, page: currentPage } = paginationDto
+    const { orderBy, sortBy = 'id' } = sortingDto
     const [providers, totalItems] = await this.providerRepository.findAndCount({
       take: limit,
       skip,
       where: { isActive: true },
+      order: { [sortBy]: orderBy },
     })
 
     const pagination = CalculatePaginationUseCase.execute({
       currentPage,
       limit,
       totalItems,
-      skip,
     })
 
-    return HTTPResponseDto.ok(undefined, { providers, pagination })
+    return CreateHTTPResponseDto.ok(undefined, { providers, pagination })
   }
 
-  public async getProviderById(id: number): Promise<HTTPResponseDto> {
-    const providerEntity = await this.providerRepository.findOne({
-      where: { id },
-    })
+  public async getProviderByTerm(
+    term: string,
+    relationsDto: RelationsProviderDto
+  ): Promise<CreateHTTPResponseDto> {
+    let providerEntity
+    if (Number(term)) {
+      providerEntity = await this.providerRepository.findOne({
+        where: { id: +term, isActive: true },
+        relations: [...relationsDto.include],
+      })
+    } else {
+      providerEntity = await this.providerRepository.findOne({
+        where: { name: term.toLowerCase(), isActive: true },
+        relations: [...relationsDto.include],
+      })
+    }
 
     if (!providerEntity) throw new NotFoundException('Provider not found')
-    return HTTPResponseDto.ok(undefined, { providers: [providerEntity] })
+    return CreateHTTPResponseDto.ok(undefined, { providers: [providerEntity] })
   }
 
   public async updateProvider(
-    id: number,
+    providerId: number,
     updateProviderDto: UpdateProviderDto
-  ): Promise<HTTPResponseDto> {
+  ): Promise<CreateHTTPResponseDto> {
     const providerEntity = this.providerRepository.create(updateProviderDto)
     const updateProduct = await this.providerRepository.update(
-      {
-        id,
-        isActive: true,
-      },
+      { id: providerId, isActive: true },
       providerEntity
     )
 
     if (!updateProduct.affected)
       throw new NotFoundException('Provider not found')
 
-    return HTTPResponseDto.ok('Provider updated successfully')
+    return CreateHTTPResponseDto.ok('Provider updated successfully')
   }
 
-  public async deleteProvider(id: number): Promise<HTTPResponseDto> {
-    const deleteProvider = await this.providerRepository.update(id, {
-      isActive: false,
+  public async deleteProvider(
+    providerId: number
+  ): Promise<CreateHTTPResponseDto> {
+    const providerEntity = await this.providerRepository.findOne({
+      where: { id: providerId, isActive: true },
     })
 
-    if (!deleteProvider.affected)
-      throw new NotFoundException('Provider not found')
+    if (!providerEntity) throw new NotFoundException('Provider not found')
+    const name = providerEntity.name + '_' + UUID.nanoid()
+    const deletedProvider = await this.providerRepository.update(
+      { id: providerId },
+      { isActive: false, name }
+    )
 
-    return HTTPResponseDto.noContent()
+    if (!deletedProvider.affected)
+      throw new InternalServerErrorException('Error deleting provider')
+
+    return CreateHTTPResponseDto.noContent()
   }
 }

@@ -1,25 +1,63 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm'
 
 import { Order } from '@modules/order/models'
 import { Provider } from '@modules/provider/models'
+import { descriptionLength, longNameLength } from '@/modules/shared/constants'
 
-@Entity()
+@Entity({ name: 'invoices' })
 export class Invoice {
-  @CreateDateColumn()
-  createdAt!: Date
-
-  @Column('text', { nullable: true })
-  filename?: string
-
   @PrimaryGeneratedColumn()
   id!: number
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt!: Date
+
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    nullable: true,
+  })
+  fileUrl?: string
+
+  @Column({
+    type: 'varchar',
+    length: descriptionLength,
+    nullable: true,
+  })
+  notes?: string
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  paymentDate?: Date
+
+  @Column({
+    type: 'decimal',
+    precision: 2,
+    scale: 2,
+  })
+  totalAmount!: number
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
+  updatedAt!: Date
 
   @ManyToOne(() => Order, (order) => order.invoices, {
     eager: false,
@@ -27,18 +65,24 @@ export class Invoice {
   @JoinColumn()
   order!: Order
 
-  @Column('timestamptz', { nullable: true })
-  paymentDate?: Date
-
-  @Column('text', { nullable: true })
-  paymentMethod?: string
-
   @ManyToOne(() => Provider, (provider) => provider.invoices, {
     eager: false,
   })
   @JoinColumn()
   provider!: Provider
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  totalPrice!: number
+  normalizeStrings() {
+    this.fileUrl = this.fileUrl?.trim().toLowerCase()
+    this.notes = this.notes?.trim().toLowerCase()
+  }
+
+  @BeforeInsert()
+  async beforeInsert() {
+    this.normalizeStrings()
+  }
+
+  @BeforeUpdate()
+  async beforeUpdate() {
+    this.normalizeStrings()
+  }
 }

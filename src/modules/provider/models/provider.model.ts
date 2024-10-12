@@ -3,65 +3,128 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
+  BeforeInsert,
+  BeforeUpdate,
   ManyToMany,
-  JoinTable,
 } from 'typeorm'
 
-import { Category } from '@modules/category/models'
-import { Equipment } from '@modules/equipments/models'
 import { Invoice } from '@modules/invoice/models'
 import { OrderItem } from '@modules/order/models'
-import { Product, ProductPrice } from '@modules/product/models'
+import {
+  descriptionLength,
+  emailLength,
+  longNameLength,
+  shortNameLength,
+  rfcLength,
+  phoneLength,
+  postalCodeLength,
+} from '@/modules/shared/constants'
+import { Product } from '@/modules/product/models'
 
 @Entity({ name: 'providers' })
 export class Provider {
-  // @ManyToMany(() => Category, (category) => category.providers)
-  // @JoinTable({ name: 'providers_categories' })
-  // categories?: Category[]
-
-  // @Column('text', { nullable: true })
-  // description?: string
-
-  @Column('text', { nullable: true, unique: true })
-  emailAddress?: string
-
-  //! Remove this relation
-  @ManyToMany(() => Equipment, (equipment) => equipment.providers, {
-    nullable: true,
-  })
-  equipments?: Equipment[]
-
   @PrimaryGeneratedColumn()
   id!: number
 
-  @OneToMany(() => Invoice, (invoice) => invoice.provider, {
+  @Column({
+    type: 'varchar',
+    length: shortNameLength,
     nullable: true,
-    eager: true,
+  })
+  cityName?: string
+
+  @Column({
+    type: 'varchar',
+    length: emailLength,
+    nullable: true,
+  })
+  contactEmail?: string
+
+  @Column({
+    type: 'varchar',
+    length: phoneLength,
+    nullable: true,
+  })
+  contactPhone?: string
+
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    nullable: true,
+  })
+  dependantLocality?: string
+
+  @Column({
+    type: 'varchar',
+    length: descriptionLength,
+    nullable: true,
+  })
+  description?: string
+
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    unique: true,
+  })
+  name!: string
+
+  @Column({
+    type: 'varchar',
+    length: postalCodeLength,
+    nullable: true,
+  })
+  postalCode?: string
+
+  @Column({
+    type: 'varchar',
+    length: rfcLength,
+    unique: true,
+  })
+  rfc!: string
+
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    nullable: true,
+  })
+  streetName?: string
+
+  @Column({
+    type: 'boolean',
+    default: true,
+    select: false,
+  })
+  isActive!: boolean
+
+  @OneToMany(() => Invoice, (invoice) => invoice.provider, {
+    eager: false,
   })
   invoices?: Invoice[]
 
-  @Column('text', { unique: true })
-  name!: string
-
   @OneToMany(() => OrderItem, (orderItem) => orderItem.provider, {
-    nullable: true,
+    eager: false,
   })
   orderItems?: OrderItem[]
 
-  @Column('numeric', { nullable: true })
-  phone?: number
+  @ManyToMany(() => Product)
+  products?: Product[]
 
-  @OneToMany(() => ProductPrice, (productPrice) => productPrice.provider, {
-    nullable: true,
-  })
-  productPrices?: ProductPrice[]
+  normalizeStrings() {
+    this.name = this.name.toLowerCase().trim()
+    this.description = this.description?.toLowerCase().trim()
+    this.cityName = this.cityName?.toLowerCase().trim()
+    this.contactEmail = this.contactEmail?.toLowerCase().trim()
+    this.dependantLocality = this.dependantLocality?.toLowerCase().trim()
+    this.streetName = this.streetName?.toLowerCase().trim()
+  }
 
-  // @ManyToMany(() => Product, (product) => product.providers)
-  // products?: Product[]
+  @BeforeInsert()
+  async beforeInsert() {
+    this.normalizeStrings()
+  }
 
-  @Column('text', { unique: true })
-  rfc!: string
-
-  @Column('boolean', { default: true, select: false })
-  isActive!: boolean
+  @BeforeUpdate()
+  async beforeUpdate() {
+    this.normalizeStrings()
+  }
 }

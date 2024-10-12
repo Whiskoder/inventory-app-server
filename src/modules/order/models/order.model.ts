@@ -10,58 +10,82 @@ import {
 
 import { Invoice } from '@modules/invoice/models'
 import { OrderItem } from '@modules/order/models'
-import { Restaurant } from '@modules/restaurant/models'
+import { Branch } from '@modules/branch/models'
 import { User } from '@modules/user/models'
+import { descriptionLength } from '@/modules/shared/constants'
+import { OrderStatus } from '@modules/order/enums'
 
-@Entity()
+@Entity({ name: 'orders' })
 export class Order {
-  @Column('timestamptz', { nullable: true })
-  completionDate?: Date
-
-  @CreateDateColumn()
-  createdAt!: Date
-
-  @Column('timestamptz')
-  deliveryDate!: Date
-
   @PrimaryGeneratedColumn()
   id!: number
 
-  @OneToMany(() => Invoice, (invoice) => invoice.order, {
-    cascade: true,
-    eager: true,
+  @Column({
+    type: 'timestamp',
     nullable: true,
+  })
+  completedAt?: Date
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt!: Date
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  deliveryDate!: Date
+
+  @Column({
+    type: 'varchar',
+    length: descriptionLength,
+    nullable: true,
+  })
+  notes?: string
+
+  @Column({
+    type: 'enum',
+    enum: OrderStatus,
+    default: OrderStatus.OPEN,
+  })
+  status!: OrderStatus
+
+  @Column({
+    type: 'decimal',
+    precision: 2,
+    scale: 2,
+    default: 0,
+  })
+  totalPriceAmount!: number
+
+  @Column({
+    type: 'smallint',
+    default: 0,
+  })
+  totalItems!: number
+
+  @OneToMany(() => Invoice, (invoice) => invoice.order, {
+    eager: false,
   })
   invoices?: Invoice[]
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
-    cascade: true,
-    eager: true,
+    eager: false,
+    onDelete: 'CASCADE',
   })
   orderItems?: OrderItem[]
 
-  @Column('integer')
-  orderStatus!: number
-
-  @Column('text', { nullable: true })
-  requestNotes?: string
-
-  @ManyToOne(() => Restaurant, (restaurant) => restaurant.orders, {
-    eager: true,
+  @ManyToOne(() => Branch, (branch) => branch.orders, {
+    eager: false,
   })
   @JoinColumn()
-  restaurant!: Restaurant
+  branch!: Branch
 
-  @Column('integer', { default: 0 })
-  totalItems!: number
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  totalPrice!: number
-
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, (user) => user.orders, {
+    eager: false,
+  })
   @JoinColumn()
   user!: User
-
-  @Column('text', { nullable: true })
-  warehouseNotes?: string
 }

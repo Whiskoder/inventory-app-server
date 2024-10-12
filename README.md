@@ -24,6 +24,8 @@ grupoDlamaña
 Copiar el archivo `.env.template` y renombrarlo a `.env`
 Modificar las variables de entorno según corresponda
 
+generate secure secret "openssl rand -base64 60"
+
 - Iniciar la base de datos
 
 ```bash

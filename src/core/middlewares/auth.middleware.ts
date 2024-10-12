@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { Action, Resource, RoleConfig } from '@config/roles'
+import { Actions, Resources } from '@modules/user/enums'
+import { RoleConfig } from '@config/role.config'
 import { AppDataSource } from '@core/datasources'
 import { ForbiddenException, UnauthorizedException } from '@core/errors'
 import { JWT } from '@config/plugins'
 import { User } from '@modules/user/models'
-import { ErrorMessages } from '@core/enums/messages'
+import { ErrorMessages } from '@modules/shared/enums/messages'
 
 export class AuthMiddleware {
   public static async validateToken(
@@ -14,7 +15,6 @@ export class AuthMiddleware {
     next: NextFunction
   ): Promise<void> {
     const authorization = req.header('Authorization')
-
     if (!authorization) throw new UnauthorizedException('No token provided')
     if (!authorization?.startsWith('Bearer '))
       throw new UnauthorizedException('Invalid Bearer Token')
@@ -40,7 +40,7 @@ export class AuthMiddleware {
     }
   }
 
-  public static checkPermission = (resource: Resource, action: Action) => {
+  public static checkPermission = (resource: Resources, action: Actions) => {
     return (req: Request, res: Response, next: NextFunction) => {
       const user = res.locals.user as User
 

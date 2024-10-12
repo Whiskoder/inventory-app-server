@@ -7,46 +7,63 @@ import {
   Matches,
   validateOrReject,
 } from 'class-validator'
-
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH, RFC_REGEX } from '@core/constants'
 import { plainToInstance } from 'class-transformer'
-import { BadRequestException } from '@core/errors'
-import { ErrorMessages } from '@core/enums/messages'
 
+import {
+  descriptionLength,
+  emailLength,
+  longNameLength,
+  postalCodeLength,
+  RFC_REGEX,
+  shortNameLength,
+} from '@modules/shared/constants'
 export class UpdateProviderDto {
   @IsOptional()
-  @IsEmail()
-  emailAddress?: string
+  @IsString()
+  @Length(1, shortNameLength)
+  cityName?: string
 
   @IsOptional()
-  @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-  name?: string
+  @IsEmail()
+  @Length(1, emailLength)
+  contactEmail?: string
 
   @IsOptional()
   @IsPhoneNumber('MX')
-  phone?: number
+  contactPhone?: string
+
+  @IsOptional()
+  @IsString()
+  @Length(1, longNameLength)
+  dependantLocality?: string
+
+  @IsOptional()
+  @IsString()
+  @Length(1, descriptionLength)
+  description?: string
+
+  @IsOptional()
+  @IsString()
+  @Length(1, longNameLength)
+  name!: string
+
+  @IsOptional()
+  @Length(1, postalCodeLength)
+  postalCode?: string
 
   @IsOptional()
   @Matches(RFC_REGEX)
-  rfc?: string
+  rfc!: string
+
+  @IsOptional()
+  @Length(1, longNameLength)
+  streetName?: string
 
   public static async create(obj: {
     [key: string]: any
   }): Promise<UpdateProviderDto> {
-    if (!obj) throw new BadRequestException(ErrorMessages.EmptyBody)
-
-    const { emailAddress, name, phone, rfc } = obj
-
-    const dto = plainToInstance(UpdateProviderDto, {
-      emailAddress,
-      name,
-      phone,
-      rfc,
-    })
-
+    const dto = plainToInstance(UpdateProviderDto, obj)
     await validateOrReject(dto)
-
     return dto
   }
 }

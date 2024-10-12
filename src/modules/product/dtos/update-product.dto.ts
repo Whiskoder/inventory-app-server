@@ -7,61 +7,49 @@ import {
   IsPositive,
   IsString,
   Length,
-  Max,
-  Min,
   validateOrReject,
 } from 'class-validator'
 
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
+import { longNameLength } from '@modules/shared/constants'
 import { MeasureUnit } from '@modules/product/enums'
-import { BadRequestException } from '@/core/errors'
-import { ErrorMessages } from '@core/enums/messages'
-
 export class UpdateProductDto {
+  @IsOptional()
+  @IsEnum(MeasureUnit)
+  measureUnit?: MeasureUnit
+
+  @IsOptional()
+  @IsString()
+  @Length(1, longNameLength)
+  name?: string
+
   @Type(() => Number)
   @IsOptional()
-  @IsInt()
-  @Min(10000)
-  @Max(99999)
-  barCode!: number
+  @IsNumber()
+  @IsPositive()
+  pricePerUnit!: number
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  minUnits!: number
 
   @Type(() => Number)
   @IsOptional()
   @IsInt()
   @IsPositive()
-  categoryId!: number
+  brandId!: number
 
-  @IsOptional()
-  @IsString()
-  @IsEnum(MeasureUnit)
-  measureUnit!: string
-
-  @IsOptional()
-  @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-  name!: string
-
-  @IsOptional()
   @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  stock!: number
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  categoryId?: number
 
   public static async create(obj: {
     [key: string]: any
   }): Promise<UpdateProductDto> {
-    if (!obj) throw new BadRequestException(ErrorMessages.EmptyBody)
-
-    const { barCode, categoryId, measureUnit, name, stock } = obj
-    const dto = plainToInstance(UpdateProductDto, {
-      barCode,
-      categoryId,
-      measureUnit,
-      name,
-      stock,
-    })
+    const dto = plainToInstance(UpdateProductDto, obj)
     await validateOrReject(dto)
-
     return dto
   }
 }

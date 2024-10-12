@@ -3,58 +3,48 @@ import {
   IsEnum,
   IsInt,
   IsNumber,
-  IsOptional,
   IsPositive,
   IsString,
   Length,
-  Max,
-  Min,
   validateOrReject,
 } from 'class-validator'
 
-import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '@core/constants'
+import { longNameLength } from '@modules/shared/constants'
 import { MeasureUnit } from '@modules/product/enums'
 
 export class CreateProductDto {
+  @IsEnum(MeasureUnit)
+  measureUnit!: MeasureUnit
+
+  @IsString()
+  @Length(1, longNameLength)
+  name!: string
+
   @Type(() => Number)
-  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  pricePerUnit!: number
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  minUnits!: number
+
+  @Type(() => Number)
   @IsInt()
-  @Min(10000)
-  @Max(99999)
-  barCode!: number
+  @IsPositive()
+  brandId!: number
 
   @Type(() => Number)
   @IsInt()
   @IsPositive()
   categoryId!: number
 
-  @IsString()
-  @IsEnum(MeasureUnit)
-  measureUnit!: string
-
-  @IsString()
-  @Length(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-  name!: string
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  stock!: number
-
   public static async create(obj: {
     [key: string]: any
   }): Promise<CreateProductDto> {
-    const { barCode, categoryId, measureUnit, name, stock } = obj || {}
-    const dto = plainToInstance(CreateProductDto, {
-      barCode,
-      categoryId,
-      measureUnit,
-      name,
-      stock,
-    })
+    const dto = plainToInstance(CreateProductDto, obj)
     await validateOrReject(dto)
-
     return dto
   }
 }

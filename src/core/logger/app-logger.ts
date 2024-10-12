@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
 import { LoggerPlugin, envs, LoggerTransportPlugin } from '@config/plugins'
-import { IHTTPError } from '@core/extensions'
+import { IHTTPError } from '@/modules/shared/extensions'
 
 export interface httpInfo {
   log: {
@@ -105,7 +105,7 @@ export class AppLogger {
   public httpError(req: Request, res: Response, error: IHTTPError) {
     const metadata = this.formatHttpLoggerResponse(req, res, error)
     const message = `[${metadata.request.method}] ${metadata.request.url} - ${error.statusCode} ${error.message} `
-    this.logger.log(LogSeverityLevel.HTTP, message, metadata)
+    this.log(LogSeverityLevel.HTTP, message, metadata)
   }
 
   private log(logLevel: LogSeverityLevel, message: string, metadata?: unknown) {
