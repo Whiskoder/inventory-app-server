@@ -5,7 +5,11 @@ import {
   CreatePaginationDto,
   CreateSortingDto,
 } from '@modules/shared/dtos'
-import { InternalServerErrorException, NotFoundException } from '@core/errors'
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@core/errors'
 import { Category } from '@modules/category/models'
 import {
   CreateCategoryDto,

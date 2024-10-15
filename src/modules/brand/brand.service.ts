@@ -29,49 +29,6 @@ export class BrandService {
     })
   }
 
-  // public async getAllBrands(
-  //   paginationDto: CreatePaginationDto,
-  //   sortingDto: CreateSortingDto
-  // ): Promise<CreateHTTPResponseDto> {
-  //   const { limit, skip, page: currentPage } = paginationDto
-  //   const { sortBy, orderBy } = sortingDto
-
-  //   const [brands, totalItems] = await this.brandRepository.findAndCount({
-  //     take: limit,
-  //     skip,
-  //     where: { isActive: true },
-  //     order: { [sortBy]: orderBy },
-  //   })
-
-  //   const pagination = CalculatePaginationUseCase.execute({
-  //     currentPage,
-  //     limit,
-  //     totalItems,
-  //   })
-
-  //   return CreateHTTPResponseDto.ok(undefined, { brands, pagination })
-  // }
-
-  // public async getBrandByTerm(
-  //   term: string,
-  //   relationsDto: RelationsBrandDto
-  // ): Promise<CreateHTTPResponseDto> {
-  //   let brandEntity
-  //   if (Number(term)) {
-  //     brandEntity = await this.brandRepository.findOne({
-  //       where: { id: +term, isActive: true },
-  //       // relations: [...relationsDto.include],
-  //     })
-  //   } else {
-  //     brandEntity = await this.brandRepository.findOne({
-  //       where: { name: term.toLowerCase(), isActive: true },
-  //       // relations: [...relationsDto.include],
-  //     })
-  //   }
-
-  //   if (!brandEntity) throw new NotFoundException('brand not found')
-  //   return CreateHTTPResponseDto.ok(undefined, { brands: [brandEntity] })
-  // }
   public async searchBrandsByTerm(
     term: string,
     paginationDto: CreatePaginationDto,

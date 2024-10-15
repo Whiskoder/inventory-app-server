@@ -2,7 +2,6 @@ import express, { Router } from 'express'
 import cors from 'cors'
 
 import { ExceptionHandlerMiddleware, FilterMiddleware } from '@core/middlewares'
-import { AppDataSource } from '@core/datasources'
 
 interface Options {
   port: number
