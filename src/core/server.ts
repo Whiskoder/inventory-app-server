@@ -22,7 +22,7 @@ export class Server {
 
   public async start() {
     //* Middlewares
-    this.app.use(cors()) // Enable CORS
+    // this.app.use(cors()) // Enable CORS
     this.app.use(express.json()) // Enable JSON parsing
 
     //* Routes

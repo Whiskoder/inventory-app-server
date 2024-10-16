@@ -10,6 +10,7 @@ import { Invoice } from '@modules/invoice/models'
 import { Category } from '@modules/category/models'
 import { Brand } from '@modules/brand/models'
 import { Branch } from '@modules/branch/models'
+import { AppLogger } from '@core/logger'
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -34,4 +35,26 @@ export const AppDataSource = new DataSource({
   ],
   migrations: [join(__dirname, '../migrations', '*.ts')],
   subscribers: [],
+  connectTimeoutMS: 3000,
 })
+
+export async function initializeDatasource(
+  maxRetries: number,
+  retryDelayMs: number,
+  logger: AppLogger
+): Promise<void> {
+  while (maxRetries > 0) {
+    try {
+      await AppDataSource.initialize()
+      return
+    } catch (error) {
+      logger.error('Failed to connect database, trying again')
+
+      if (--maxRetries === 0) {
+        logger.error('Max retries reached, failed to connect to database')
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
+    }
+  }
+}

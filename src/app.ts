@@ -1,4 +1,4 @@
-import { AppDataSource } from '@core/datasources'
+import { initializeDatasource } from '@core/datasources'
 import { AppRoutes } from '@core/routes'
 import { envs } from '@config/plugins'
 import { Server } from '@core/server'
@@ -10,7 +10,7 @@ import { AppLogger } from '@core/logger'
 async function main() {
   const logger = AppLogger.create('App')
   try {
-    await AppDataSource.initialize()
+    await initializeDatasource(3, 1000, logger)
 
     const server = new Server({
       port: envs.PORT,
