@@ -52,9 +52,8 @@ export async function initializeDatasource(
         throw Error('Error connecting to database')
       } else {
         logger.error('Failed to connect database, trying again')
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
       }
-
-      await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
     }
   }
 }
