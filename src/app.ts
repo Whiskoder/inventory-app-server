@@ -9,6 +9,7 @@ import { AppLogger } from '@core/logger'
 
 async function main() {
   const logger = AppLogger.create('App')
+
   try {
     await initializeDatasource(
       envs.DB_MAX_RETRIES,

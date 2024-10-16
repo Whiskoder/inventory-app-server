@@ -35,7 +35,6 @@ export const AppDataSource = new DataSource({
   ],
   migrations: [join(__dirname, '../migrations', '*.ts')],
   subscribers: [],
-  connectTimeoutMS: 3000,
 })
 
 export async function initializeDatasource(
@@ -48,10 +47,11 @@ export async function initializeDatasource(
       await AppDataSource.initialize()
       return
     } catch (error) {
-      logger.error('Failed to connect database, trying again')
-
       if (--maxRetries === 0) {
         logger.error('Max retries reached, failed to connect to database')
+        throw Error('Error connecting to database')
+      } else {
+        logger.error('Failed to connect database, trying again')
       }
 
       await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
