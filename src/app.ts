@@ -10,7 +10,11 @@ import { AppLogger } from '@core/logger'
 async function main() {
   const logger = AppLogger.create('App')
   try {
-    await initializeDatasource(3, 1000, logger)
+    await initializeDatasource(
+      envs.DB_MAX_RETRIES,
+      envs.DB_RETRY_DELAY_MS,
+      logger
+    )
 
     const server = new Server({
       port: envs.PORT,

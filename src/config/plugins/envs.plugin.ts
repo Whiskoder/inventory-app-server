@@ -8,6 +8,8 @@ export const envs = {
   DB_PORT: get('DB_PORT').required().asPortNumber(),
   DB_SSL: get('DB_SSL').required().asBool(),
   DB_SYNC: get('DB_SYNC').required().asBool(),
+  DB_MAX_RETRIES: get('DB_MAX_RETRIES').required().asIntPositive(),
+  DB_RETRY_DELAY_MS: get('DB_RETRY_DELAY_MS').required().asIntPositive(),
   DB_USER: get('DB_USER').required().asString(),
   MAILER_HOST: get('MAILER_HOST').required().asString(),
   MAILER_PASS: get('MAILER_PASS').required().asString(),
