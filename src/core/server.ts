@@ -21,8 +21,13 @@ export class Server {
   }
 
   public async start() {
+    const corsOptions = {
+      origin: '*', // Allow all origins, you can specify domains as an array here
+      methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+      allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    }
     //* Middlewares
-    this.app.use(cors()) // Enable CORS
+    this.app.use(cors(corsOptions)) // Enable CORS
     this.app.use(express.json()) // Enable JSON parsing
 
     //* Routes
