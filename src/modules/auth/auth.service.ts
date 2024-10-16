@@ -83,7 +83,7 @@ export class AuthService {
     })
   }
 
-  public checkAuth(user: User) {
+  public async checkAuth(user: User) {
     return CreateHTTPResponseDto.ok(undefined, {
       user,
     })

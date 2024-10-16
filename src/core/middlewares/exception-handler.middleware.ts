@@ -74,6 +74,7 @@ export class ExceptionHandlerMiddleware {
     }
 
     if (error instanceof TypeError) {
+      // Handle error when user sends an empty body
       if (
         error.message.includes(
           "Cannot read properties of undefined (reading 'constructor')"
