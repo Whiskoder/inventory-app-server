@@ -79,7 +79,7 @@ export class ExceptionHandlerMiddleware {
         ? 'Internal Server Error'
         : error.message || 'Something went wrong'
     if (statusCode >= 500) {
-      // console.log(error)
+      console.log(error)
       logger.error(error.stack)
     } else {
       logger.httpError(req, res, error)
