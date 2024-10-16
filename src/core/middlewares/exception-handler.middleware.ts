@@ -72,6 +72,24 @@ export class ExceptionHandlerMiddleware {
       logger.httpError(req, res, error)
       return
     }
+
+    if (error instanceof TypeError) {
+      if (
+        error.message.includes(
+          "Cannot read properties of undefined (reading 'constructor')"
+        )
+      ) {
+        const statusCode = HTTPStatusCode.BadRequest
+        res.status(statusCode).send({
+          statusCode,
+          error: ExceptionHandlerMiddleware.getHTTPMessage(statusCode),
+          message: 'Body is empty',
+        })
+        logger.httpError(req, res, error)
+        return
+      }
+    }
+
     const statusCode = error.statusCode || 500
     // Avoid sending stack trace to client in production
     const message =
