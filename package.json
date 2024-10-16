@@ -15,7 +15,7 @@
     "migration:generate": "npm run typeorm migration:generate ./src/databases/migrations/migration -- -d ./src/databases/datasources/app.datasource.ts",
     "migration:run": "npm run typeorm migration:run -- -d ./src/databases/datasources/app.datasource.ts",
     "typeorm": "tsnd -r tsconfig-paths/register ./node_modules/.bin/typeorm",
-    "seed": "tsnd -r tsconfig-paths/register src/databases/seed/seed.ts"
+    "seed": "tsnd -r tsconfig-paths/register src/core/seed/init.ts"
   },
   "keywords": [],
   "author": "",

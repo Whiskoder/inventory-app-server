@@ -7,4 +7,7 @@ export enum MeasureUnit {
   pieces = 'pcs',
   ounces = 'oz',
   gallons = 'gal',
+  rolls = 'roll',
+  packages = 'pkg',
+  cans = 'can',
 }
