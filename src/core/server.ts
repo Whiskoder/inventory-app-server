@@ -1,7 +1,11 @@
 import express, { Router } from 'express'
 import cors from 'cors'
 
-import { ExceptionHandlerMiddleware, FilterMiddleware } from '@core/middlewares'
+import {
+  ExceptionHandlerMiddleware,
+  FilterMiddleware,
+  ThrottlerMiddleware,
+} from '@core/middlewares'
 
 interface Options {
   port: number
@@ -22,6 +26,7 @@ export class Server {
 
   public async start() {
     //* Middlewares
+    this.app.use(ThrottlerMiddleware.limit())
     this.app.use(cors()) // Enable CORS
     this.app.use(express.json()) // Enable JSON parsing
 

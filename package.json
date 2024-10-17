@@ -49,6 +49,7 @@
     "dotenv": "^16.4.5",
     "env-var": "^7.5.0",
     "express": "^5.0.0",
+    "express-rate-limit": "^7.4.1",
     "http-errors": "^2.0.0",
     "jose": "^5.8.0",
     "nanoid": "^3.3.7",
