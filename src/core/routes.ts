@@ -12,13 +12,13 @@ export class AppRoutes {
   static get routes(): Router {
     const router = Router({ caseSensitive: false })
 
-    router.use('/api/v1/auth', AuthRoutes.routes)
-    router.use('/api/v1/categories', CategoryRoutes.routes)
-    router.use('/api/v1/branches', BranchRoutes.routes)
-    router.use('/api/v1/products', ProductRoutes.routes)
-    router.use('/api/v1/providers', ProviderRoutes.routes)
-    router.use('/api/v1/orders', OrderRoutes.routes)
-    router.use('/api/v1/brands', BrandRoutes.routes)
+    router.use('/v1/auth', AuthRoutes.routes)
+    router.use('/v1/categories', CategoryRoutes.routes)
+    router.use('/v1/branches', BranchRoutes.routes)
+    router.use('/v1/products', ProductRoutes.routes)
+    router.use('/v1/providers', ProviderRoutes.routes)
+    router.use('/v1/orders', OrderRoutes.routes)
+    router.use('/v1/brands', BrandRoutes.routes)
 
     return router
   }
