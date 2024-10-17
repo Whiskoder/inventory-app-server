@@ -26,7 +26,7 @@ export class Server {
 
   public async start() {
     //* Middlewares
-    this.app.use(ThrottlerMiddleware.limit())
+    this.app.use(ThrottlerMiddleware.limit()) // Rate limit
     this.app.use(cors()) // Enable CORS
     this.app.use(express.json()) // Enable JSON parsing
 

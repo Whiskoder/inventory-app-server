@@ -1,6 +1,5 @@
 import { rateLimit } from 'express-rate-limit'
-import { TooManyRequestsException } from '../errors'
-import { Request, Response, NextFunction } from 'express'
+import { TooManyRequestsException } from '@core/errors'
 
 export class ThrottlerMiddleware {
   // Default to 1000 request per 15 minute
