@@ -34,15 +34,15 @@ export class ProductRoutes {
     )
 
     router.get(
-      '/:term',
+      '/:productId',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.searchProductsByTerm
+      controller.getProductById
     )
 
     router.get(
       '/',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.searchProductsByTerm
+      controller.getProductList
     )
 
     router.put(

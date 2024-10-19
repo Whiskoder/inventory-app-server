@@ -1,49 +1,39 @@
 import { BadRequestException, NotFoundException } from '@core/errors'
 
 export interface CalculatePaginationOpts {
-  currentPage: number
+  skip: number
   limit: number
   totalItems: number
 }
 
-export class CalculatePaginationUseCase {
-  private static calculateNextPage(
-    currentPage: number,
-    totalPages: number
-  ): number | undefined {
-    const nextPage = currentPage + 1
-    return nextPage <= totalPages ? nextPage : undefined
+export const CalculatePaginationUseCase = (opts: CalculatePaginationOpts) => {
+  const { skip, limit, totalItems } = opts
+
+  if (!totalItems) throw new NotFoundException('No items found')
+  if (totalItems < skip)
+    throw new BadRequestException(
+      `Offset out of range, total items: ${totalItems}`
+    )
+
+  const calculateNextOffset = () => {
+    return skip + limit >= totalItems
+      ? totalItems - limit >= 0
+        ? totalItems - limit
+        : 0
+      : skip + limit
   }
 
-  private static calculatePreviousPage(
-    currentPage: number
-  ): number | undefined {
-    return currentPage > 1 ? currentPage - 1 : undefined
+  const calculatePreviousOffset = () => {
+    return skip - limit <= 0 ? 0 : skip - limit
   }
 
-  public static execute(opts: CalculatePaginationOpts) {
-    const { currentPage, limit, totalItems } = opts
+  const next = calculateNextOffset()
+  const previous = calculatePreviousOffset()
 
-    const constructor = CalculatePaginationUseCase
-
-    const totalPages = Math.ceil(totalItems / limit)
-    const nextPage = constructor.calculateNextPage(currentPage, totalPages)
-    const previousPage = constructor.calculatePreviousPage(currentPage)
-    const skip = (currentPage - 1) * limit
-
-    if (!totalItems) throw new NotFoundException('No items found')
-    if (totalItems < skip)
-      throw new BadRequestException(
-        `Page out of range, total pages: ${totalPages}`
-      )
-
-    return {
-      totalPages,
-      nextPage,
-      previousPage,
-      currentPage,
-      totalItems,
-      limit,
-    }
+  return {
+    limit,
+    next,
+    previous,
+    totalItems,
   }
 }

@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { ProductService } from '@modules/product'
 import {
   CreateProductDto,
+  FilterProductDto,
   RelationsProductDto,
   UpdateProductDto,
 } from '@modules/product/dtos'
@@ -26,8 +27,27 @@ export class ProductController {
     }
   }
 
-  // GET '/api/v1/products/:term'
-  public searchProductsByTerm = async (
+  // GET '/api/v1/products/:productId'
+  public getProductById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const productId = +req.params.productId
+      const relationsDto = await RelationsProductDto.create(req.query)
+      const response = await this.productService.getProductById(
+        productId,
+        relationsDto
+      )
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  // GET '/api/v1/products'
+  public getProductList = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -44,12 +64,12 @@ export class ProductController {
         'measureUnit',
       ]
       const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
-      const term = req.params.term
-      const response = await this.productService.searchProductsByTerm(
-        term,
+      const filterDto = await FilterProductDto.create(req.query)
+      const response = await this.productService.getProductList(
         paginationDto,
         sortingDto,
-        relationsDto
+        relationsDto,
+        filterDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

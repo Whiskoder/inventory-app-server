@@ -1,4 +1,4 @@
-import { FindOperator, Like, Repository } from 'typeorm'
+import { Equal, Like, Repository } from 'typeorm'
 
 import {
   CreateHTTPResponseDto,
@@ -13,6 +13,7 @@ import {
 import { Category } from '@modules/category/models'
 import {
   CreateCategoryDto,
+  FilterCategoryDto,
   RelationsCategoryDto,
   UpdateCategoryDto,
 } from '@modules/category/dtos'
@@ -32,36 +33,36 @@ export class CategoryService {
       categories: [categoryEntity],
     })
   }
-  public async searchCategoriesByTerm(
-    term: string,
-    paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto,
+
+  public async getCategoryById(
+    categoryId: number,
     relationsDto: RelationsCategoryDto
   ): Promise<CreateHTTPResponseDto> {
-    const { limit, skip, page: currentPage } = paginationDto
-    const { orderBy, sortBy = 'id' } = sortingDto
+    const categoryEntity = await this.categoryRepository.findOne({
+      where: { id: categoryId, isActive: true },
+      relations: [...relationsDto.include],
+    })
 
-    if (Number(term)) {
-      const categoryEntity = await this.categoryRepository.findOne({
-        where: { id: +term, isActive: true },
-        relations: [...relationsDto.include],
-      })
+    if (!categoryEntity) throw new NotFoundException('Category not found')
+    return CreateHTTPResponseDto.ok(undefined, { categories: [categoryEntity] })
+  }
 
-      if (!categoryEntity) throw new NotFoundException('Category not found')
+  public async getCategoryList(
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsCategoryDto,
+    filterDto: FilterCategoryDto
+  ): Promise<CreateHTTPResponseDto> {
+    const { limit, skip } = paginationDto
+    const { orderBy, sortBy } = sortingDto
 
-      return CreateHTTPResponseDto.ok(undefined, {
-        products: [categoryEntity],
-      })
-    }
-
-    const where: { isActive: boolean; name?: FindOperator<string> } = {
+    let where: { [key: string]: any } = {
       isActive: true,
     }
 
-    if (term) {
-      const name = term.trim().toLowerCase()
-      if (name.length > 0) where.name = Like(`${name}%`)
-    }
+    const { equalsName, likeName } = filterDto
+    if (equalsName) where.name = Equal(equalsName)
+    if (likeName) where.name = Like(`${likeName}`)
 
     const [categories, totalItems] = await this.categoryRepository.findAndCount(
       {
@@ -73,8 +74,8 @@ export class CategoryService {
       }
     )
 
-    const pagination = CalculatePaginationUseCase.execute({
-      currentPage,
+    const pagination = CalculatePaginationUseCase({
+      skip,
       limit,
       totalItems,
     })

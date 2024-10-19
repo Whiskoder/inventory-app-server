@@ -24,15 +24,22 @@ export class CreateSortingDto {
   ): Promise<CreateSortingDto> {
     const dto = plainToInstance(CreateSortingDto, obj)
     await validateOrReject(dto)
-    if (dto.sortBy.trim().length === 0) dto.sortBy = 'id'
+
     dto.sortBy = dto.sortBy.trim()
-    props.push('id')
-    if (props.indexOf(dto.sortBy) === -1)
+    if (dto.sortBy.length === 0) dto.sortBy = 'id' // Set id as default
+
+    CreateSortingDto.validateSortByProps(props, dto.sortBy)
+
+    return dto
+  }
+
+  private static validateSortByProps(props: string[], sortBy: string) {
+    const sortByProps = [...props, 'id']
+    if (sortByProps.indexOf(sortBy) === -1)
       throw new BadRequestException(
-        `Provided sort property doesnt exist, use one of the following: ${props?.join(
+        `Sort property is unknown, use one of the following: ${props?.join(
           ', '
         )}`
       )
-    return dto
   }
 }

@@ -1,8 +1,9 @@
-import { Repository } from 'typeorm'
+import { Equal, Like, Repository } from 'typeorm'
 
 import { Provider } from '@modules/provider/models'
 import {
   CreateProviderDto,
+  FilterProviderDto,
   RelationsProviderDto,
   UpdateProviderDto,
 } from '@modules/provider/dtos'
@@ -28,47 +29,46 @@ export class ProviderService {
     })
   }
 
-  public async getAllProviders(
-    paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto
+  public async getProviderById(
+    providerId: number,
+    relationsDto: RelationsProviderDto
   ): Promise<CreateHTTPResponseDto> {
-    const { limit, skip, page: currentPage } = paginationDto
-    const { orderBy, sortBy = 'id' } = sortingDto
+    const providerEntity = await this.providerRepository.findOne({
+      where: { id: providerId, isActive: true },
+      relations: [...relationsDto.include],
+    })
+
+    if (!providerEntity) throw new NotFoundException('Provider not found')
+    return CreateHTTPResponseDto.ok(undefined, { providers: [providerEntity] })
+  }
+
+  public async getProviderList(
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsProviderDto,
+    filterDto: FilterProviderDto
+  ): Promise<CreateHTTPResponseDto> {
+    const { limit, skip } = paginationDto
+    const { orderBy, sortBy } = sortingDto
+
     const [providers, totalItems] = await this.providerRepository.findAndCount({
       take: limit,
       skip,
-      where: { isActive: true },
+      where: this.createFilter(filterDto),
+      relations: [...relationsDto.include],
       order: { [sortBy]: orderBy },
     })
 
-    const pagination = CalculatePaginationUseCase.execute({
-      currentPage,
+    const pagination = CalculatePaginationUseCase({
+      skip,
       limit,
       totalItems,
     })
 
+    if (providers.length === 0)
+      throw new NotFoundException('Providers not found')
+
     return CreateHTTPResponseDto.ok(undefined, { providers, pagination })
-  }
-
-  public async getProviderByTerm(
-    term: string,
-    relationsDto: RelationsProviderDto
-  ): Promise<CreateHTTPResponseDto> {
-    let providerEntity
-    if (Number(term)) {
-      providerEntity = await this.providerRepository.findOne({
-        where: { id: +term, isActive: true },
-        relations: [...relationsDto.include],
-      })
-    } else {
-      providerEntity = await this.providerRepository.findOne({
-        where: { name: term.toLowerCase(), isActive: true },
-        relations: [...relationsDto.include],
-      })
-    }
-
-    if (!providerEntity) throw new NotFoundException('Provider not found')
-    return CreateHTTPResponseDto.ok(undefined, { providers: [providerEntity] })
   }
 
   public async updateProvider(
@@ -105,5 +105,53 @@ export class ProviderService {
       throw new InternalServerErrorException('Error deleting provider')
 
     return CreateHTTPResponseDto.noContent()
+  }
+
+  private createFilter(filterDto: FilterProviderDto) {
+    const where: { [key: string]: any } = {
+      isActive: true,
+    }
+
+    const {
+      equalsCityName,
+      equalsContactEmail,
+      equalsContactPhone,
+      equalsDependantLocality,
+      equalsName,
+      equalsPostalCode,
+      equalsStreetName,
+      equalsRfc,
+      likeCityName,
+      likeContactEmail,
+      likeContactPhone,
+      likeDependantLocality,
+      likeName,
+      likeStreetName,
+    } = filterDto
+
+    if (likeCityName) where.cityName = Like(`${likeCityName}`)
+    if (equalsCityName) where.cityName = Equal(equalsCityName)
+
+    if (likeContactEmail) where.contactEmail = Like(`${likeContactEmail}`)
+    if (equalsContactEmail) where.contactEmail = Equal(equalsContactEmail)
+
+    if (likeContactPhone) where.contactPhone = Like(`${likeContactPhone}`)
+    if (equalsContactPhone) where.contactPhone = Equal(equalsContactPhone)
+
+    if (likeDependantLocality)
+      where.dependantLocality = Like(`${likeDependantLocality}`)
+    if (equalsDependantLocality)
+      where.dependantLocality = Equal(equalsDependantLocality)
+
+    if (likeName) where.name = Like(`${likeName}`)
+    if (equalsName) where.name = Equal(equalsName)
+
+    if (likeStreetName) where.streetName = Like(`${likeStreetName}`)
+    if (equalsStreetName) where.streetName = Equal(equalsStreetName)
+
+    if (equalsPostalCode) where.postalCode = Equal(equalsPostalCode)
+    if (equalsRfc) where.rfc = Equal(equalsRfc)
+
+    return where
   }
 }

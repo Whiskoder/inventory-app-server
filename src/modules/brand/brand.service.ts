@@ -1,8 +1,9 @@
-import { FindOperator, Like, Repository } from 'typeorm'
+import { Equal, Like, Repository } from 'typeorm'
 
 import { Brand } from '@modules/brand/models'
 import {
   CreateBrandDto,
+  FilterBrandDto,
   RelationsBrandDto,
   UpdateBrandDto,
 } from '@modules/brand/dtos'
@@ -29,36 +30,35 @@ export class BrandService {
     })
   }
 
-  public async searchBrandsByTerm(
-    term: string,
-    paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto,
+  public async getBrandById(
+    brandId: number,
     relationsDto: RelationsBrandDto
   ): Promise<CreateHTTPResponseDto> {
-    const { limit, skip, page: currentPage } = paginationDto
-    const { orderBy, sortBy = 'id' } = sortingDto
+    const brandEntity = await this.brandRepository.findOne({
+      where: { id: brandId, isActive: true },
+      relations: [...relationsDto.include],
+    })
 
-    if (Number(term)) {
-      const brandEntity = await this.brandRepository.findOne({
-        where: { id: +term, isActive: true },
-        relations: [...relationsDto.include],
-      })
+    if (!brandEntity) throw new NotFoundException('brand not found')
+    return CreateHTTPResponseDto.ok(undefined, { brands: [brandEntity] })
+  }
 
-      if (!brandEntity) throw new NotFoundException('Brand not found')
+  public async getBrandList(
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsBrandDto,
+    filterDto: FilterBrandDto
+  ): Promise<CreateHTTPResponseDto> {
+    const { limit, skip } = paginationDto
+    const { orderBy, sortBy } = sortingDto
 
-      return CreateHTTPResponseDto.ok(undefined, {
-        products: [brandEntity],
-      })
-    }
-
-    const where: { isActive: boolean; name?: FindOperator<string> } = {
+    const where: { [key: string]: any } = {
       isActive: true,
     }
 
-    if (term) {
-      const name = term.trim().toLowerCase()
-      if (name.length > 0) where.name = Like(`${name}%`)
-    }
+    const { equalsName, likeName } = filterDto
+    if (equalsName) where.name = Equal(equalsName)
+    if (likeName) where.name = Like(`${likeName}`)
 
     const [brands, totalItems] = await this.brandRepository.findAndCount({
       take: limit,
@@ -68,8 +68,8 @@ export class BrandService {
       order: { [sortBy]: orderBy },
     })
 
-    const pagination = CalculatePaginationUseCase.execute({
-      currentPage,
+    const pagination = CalculatePaginationUseCase({
+      skip,
       limit,
       totalItems,
     })

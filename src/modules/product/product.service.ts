@@ -1,8 +1,16 @@
-import { FindOperator, Like, Repository } from 'typeorm'
+import {
+  Equal,
+  FindOperator,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm'
 
 import { Product } from '@modules/product/models'
 import {
   CreateProductDto,
+  FilterProductDto,
   RelationsProductDto,
   UpdateProductDto,
 } from '@modules/product/dtos'
@@ -62,36 +70,27 @@ export class ProductService {
     })
   }
 
-  public async searchProductsByTerm(
-    term: string,
-    paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto,
+  public async getProductById(
+    productId: number,
     relationsDto: RelationsProductDto
   ): Promise<CreateHTTPResponseDto> {
-    const { limit, skip, page: currentPage } = paginationDto
-    const { orderBy, sortBy = 'id' } = sortingDto
+    const productEntity = await this.productRepository.findOne({
+      where: { id: productId, isActive: true },
+      relations: [...relationsDto.include],
+    })
 
-    if (Number(term)) {
-      const productEntity = await this.productRepository.findOne({
-        where: { id: +term, isActive: true },
-        relations: [...relationsDto.include],
-      })
+    if (!productEntity) throw new NotFoundException('Product not found')
+    return CreateHTTPResponseDto.ok(undefined, { products: [productEntity] })
+  }
 
-      if (!productEntity) throw new NotFoundException('Product not found')
-
-      return CreateHTTPResponseDto.ok(undefined, {
-        products: [productEntity],
-      })
-    }
-
-    const where: { isActive: boolean; name?: FindOperator<string> } = {
-      isActive: true,
-    }
-
-    if (term) {
-      const name = term.trim().toLowerCase()
-      if (name.length > 0) where.name = Like(`${name}%`)
-    }
+  public async getProductList(
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsProductDto,
+    filterDto: FilterProductDto
+  ): Promise<CreateHTTPResponseDto> {
+    const { limit, skip } = paginationDto
+    const { orderBy, sortBy } = sortingDto
 
     let order: any = { [sortBy]: orderBy }
     if (sortBy === 'category') order = { category: { name: orderBy } }
@@ -100,13 +99,13 @@ export class ProductService {
     const [products, totalItems] = await this.productRepository.findAndCount({
       take: limit,
       skip,
-      where,
+      where: this.createFilter(filterDto),
       relations: [...relationsDto.include],
       order,
     })
 
-    const pagination = CalculatePaginationUseCase.execute({
-      currentPage,
+    const pagination = CalculatePaginationUseCase({
+      skip,
       limit,
       totalItems,
     })
@@ -181,5 +180,44 @@ export class ProductService {
       throw new InternalServerErrorException('Error deleting product')
 
     return CreateHTTPResponseDto.noContent()
+  }
+
+  private createFilter(filterDto: FilterProductDto) {
+    const where: { [key: string]: any } = {
+      isActive: true,
+    }
+
+    const {
+      equalsBrandName,
+      equalsCategoryName,
+      equalsMeasureUnit,
+      equalsName,
+      gteMinUnits,
+      gtePricePerUnit,
+      likeBrandName,
+      likeCategoryName,
+      likeName,
+      lteMinUnits,
+      ltePricePerUnit,
+    } = filterDto
+
+    if (likeName) where.name = Like(`${likeName}`)
+    if (equalsName) where.name = Equal(equalsName)
+
+    if (likeBrandName) where.brand = { name: Like(`${likeBrandName}`) }
+    if (equalsBrandName) where.brand = { name: Equal(equalsBrandName) }
+
+    if (likeCategoryName) where.category = { name: Like(`${likeCategoryName}`) }
+    if (equalsCategoryName) where.category = { name: Equal(equalsCategoryName) }
+
+    if (equalsMeasureUnit) where.measureUnit = Equal(equalsMeasureUnit)
+
+    if (ltePricePerUnit) where.pricePerUnit = LessThanOrEqual(ltePricePerUnit)
+    if (gtePricePerUnit) where.pricePerUnit = MoreThanOrEqual(gtePricePerUnit)
+
+    if (lteMinUnits) where.pricePerUnit = LessThanOrEqual(lteMinUnits)
+    if (gteMinUnits) where.pricePerUnit = MoreThanOrEqual(gteMinUnits)
+
+    return where
   }
 }

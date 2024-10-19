@@ -4,7 +4,7 @@ import { IsOptional, IsString, validateOrReject } from 'class-validator'
 import { BadRequestException } from '@core/errors'
 import { ErrorMessages } from '@modules/shared/enums/messages'
 
-export class FilterCategoryDto {
+export class FilterBrandDto {
   @IsString()
   @IsOptional()
   equalsName?: string
@@ -20,9 +20,9 @@ export class FilterCategoryDto {
 
   public static async create(obj: {
     [key: string]: any
-  }): Promise<FilterCategoryDto> {
+  }): Promise<FilterBrandDto> {
     const parsedQuery = qs.parse(obj)
-    const dto = new FilterCategoryDto(parsedQuery)
+    const dto = new FilterBrandDto(parsedQuery)
     await validateOrReject(dto)
 
     if (dto.equalsName && dto.likeName)

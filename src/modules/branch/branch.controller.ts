@@ -5,6 +5,7 @@ import {
   RelationsBranchDto,
   CreateBranchDto,
   UpdateBranchDto,
+  FilterBranchDto,
 } from '@modules/branch/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
@@ -26,19 +27,18 @@ export class BranchController {
     }
   }
 
-  //GET '/api/v1/branches/'
-  public getAllBranches = async (
+  //GET '/api/v1/branches/:branchId'
+  public getBranchById = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const paginationDto = await CreatePaginationDto.create(req.query)
-      const props = ['']
-      const sortingDto = await CreateSortingDto.create(req.query, props)
-      const response = await this.branchService.getAllBranches(
-        paginationDto,
-        sortingDto
+      const branchId = +req.params.branchId
+      const relationsDto = await RelationsBranchDto.create(req.query)
+      const response = await this.branchService.getBranchById(
+        branchId,
+        relationsDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -46,17 +46,34 @@ export class BranchController {
     }
   }
 
-  //GET '/api/v1/branches/:term'
-  public getBranchByTerm = async (
+  //GET '/api/v1/branches/'
+  public getBranchList = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      const props = [
+        'cityName',
+        'contactEmail',
+        'contactPhone',
+        'dependantLocality',
+        'name',
+        'postalCode',
+        'streetName',
+        'employee',
+        'order',
+      ]
+      const paginationDto = await CreatePaginationDto.create(req.query)
+      const sortingDto = await CreateSortingDto.create(req.query, props)
       const relationsDto = await RelationsBranchDto.create(req.query)
-      const response = await this.branchService.getBranchByTerm(
-        req.params.term,
-        relationsDto
+      const filterDto = await FilterBranchDto.create(req.query)
+
+      const response = await this.branchService.getBranchList(
+        paginationDto,
+        sortingDto,
+        relationsDto,
+        filterDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

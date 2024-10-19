@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { CategoryService } from '@modules/category'
 import {
   CreateCategoryDto,
+  FilterCategoryDto,
   RelationsCategoryDto,
   UpdateCategoryDto,
 } from '@modules/category/dtos'
@@ -28,8 +29,23 @@ export class CategoryController {
     }
   }
 
-  //GET '/api/v1/categories/:term'
-  public searchCategoriesByTerm = async (
+  //GET '/api/v1/categories/:categoryId'
+  public getCategoryById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const categoryId = +req.params.categoryId
+    const relationsDto = await RelationsCategoryDto.create(req.query)
+    const response = await this.categoryService.getCategoryById(
+      categoryId,
+      relationsDto
+    )
+    res.status(response.statusCode).json(response)
+  }
+
+  //GET '/api/v1/categories/'
+  public getCategoryList = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -39,13 +55,13 @@ export class CategoryController {
       const paginationDto = await CreatePaginationDto.create(req.query)
       const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
       const relationsDto = await RelationsCategoryDto.create(req.query)
-      const term = req.params.term
+      const filterDto = await FilterCategoryDto.create(req.query)
 
-      const response = await this.categoryService.searchCategoriesByTerm(
-        term,
+      const response = await this.categoryService.getCategoryList(
         paginationDto,
         sortingDto,
-        relationsDto
+        relationsDto,
+        filterDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

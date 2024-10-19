@@ -134,7 +134,7 @@ export class OrderService {
     paginationDto: CreatePaginationDto,
     sortingDto: CreateSortingDto
   ): Promise<CreateHTTPResponseDto> {
-    const { limit, skip, page: currentPage } = paginationDto
+    const { limit, skip } = paginationDto
     const { orderBy, sortBy } = sortingDto
     const [orders, totalItems] = await this.orderRepository.findAndCount({
       take: limit,
@@ -142,8 +142,8 @@ export class OrderService {
       order: { [sortBy]: orderBy },
     })
 
-    const pagination = CalculatePaginationUseCase.execute({
-      currentPage,
+    const pagination = CalculatePaginationUseCase({
+      skip,
       limit,
       totalItems,
     })
