@@ -102,7 +102,9 @@ export class CategoryService {
     if (!updatedCategory.affected)
       throw new NotFoundException('Category not found')
 
-    return CreateHTTPResponseDto.ok('Category updated successfully')
+    return CreateHTTPResponseDto.ok('Category updated successfully', {
+      categories: [{ ...categoryEntity, id: categoryId }],
+    })
   }
 
   public async deleteCategory(

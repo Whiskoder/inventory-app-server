@@ -98,7 +98,7 @@ export class ProductService {
 
     const [products, totalItems] = await this.productRepository.findAndCount({
       take: limit,
-      skip,
+      skip: skip,
       where: this.createFilter(filterDto),
       relations: [...relationsDto.include],
       order,

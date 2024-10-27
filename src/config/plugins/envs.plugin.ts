@@ -19,4 +19,8 @@ export const envs = {
   PORT: get('PORT').required().asPortNumber(),
   SEND_EMAIL: get('SEND_EMAIL').required().asBool(),
   JWT_SECRET: get('JWT_SECRET').required().asString(),
+  BUCKET_ENDPOINT: get('BUCKET_ENDPOINT').required().asString(),
+  BUCKET_NAME: get('BUCKET_NAME').required().asString(),
+  BUCKET_CLIENT_ID: get('BUCKET_CLIENT_ID').required().asString(),
+  BUCKET_CLIENT_SECRET: get('BUCKET_CLIENT_SECRET').required().asString(),
 }

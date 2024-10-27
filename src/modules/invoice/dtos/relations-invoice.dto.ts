@@ -2,13 +2,11 @@ import { plainToInstance, Transform } from 'class-transformer'
 import { IsEnum, IsOptional, validateOrReject } from 'class-validator'
 
 enum Property {
-  orderItems = 'orderItems',
-  invoices = 'invoices',
-  branch = 'branch',
-  user = 'user',
+  order = 'order',
+  provider = 'provider',
 }
 
-export class RelationsOrderDto {
+export class RelationsInvoiceDto {
   @Transform(({ value }) => value.split(','))
   @IsOptional()
   @IsEnum(Property, { each: true })
@@ -16,8 +14,8 @@ export class RelationsOrderDto {
 
   public static async create(obj: {
     [key: string]: any
-  }): Promise<RelationsOrderDto> {
-    const dto = plainToInstance(RelationsOrderDto, obj)
+  }): Promise<RelationsInvoiceDto> {
+    const dto = plainToInstance(RelationsInvoiceDto, obj)
     await validateOrReject(dto)
     return dto
   }

@@ -21,6 +21,14 @@ export class Order {
   id!: number
 
   @Column({
+    type: 'varchar',
+    length: 10,
+    nullable: false,
+    unique: true,
+  })
+  folio!: string
+
+  @Column({
     type: 'timestamp',
     nullable: true,
   })

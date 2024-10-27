@@ -30,7 +30,7 @@ export const RoleConfig: IRoleConfig = {
       [Resources.BRANCH]: [],
       [Resources.BRAND]: [Actions.CREATE, Actions.READ, Actions.UPDATE],
       [Resources.CATEGORY]: [Actions.CREATE, Actions.READ, Actions.UPDATE],
-      [Resources.INVOICE]: [],
+      [Resources.INVOICE]: [Actions.CREATE, Actions.READ, Actions.UPDATE],
       [Resources.ORDER_ITEM]: [],
       [Resources.ORDER]: [],
       [Resources.PRODUCT]: [

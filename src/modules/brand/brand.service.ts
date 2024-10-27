@@ -94,7 +94,9 @@ export class BrandService {
 
     if (!updatedbrand.affected) throw new NotFoundException('brand not found')
 
-    return CreateHTTPResponseDto.ok('brand updated successfully')
+    return CreateHTTPResponseDto.ok('Brand updated successfully', {
+      brands: [{ ...brandEntity, id: brandId }],
+    })
   }
 
   public async deleteBrand(brandId: number): Promise<CreateHTTPResponseDto> {

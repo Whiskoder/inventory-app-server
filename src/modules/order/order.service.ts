@@ -1,4 +1,10 @@
-import { Repository } from 'typeorm'
+import {
+  Equal,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm'
 
 import {
   BadRequestException,
@@ -10,6 +16,7 @@ import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
 import {
   CreateOrderDto,
   CreateOrderItemDto,
+  FilterOrderDto,
   RelationsOrderDto,
   UpdateOrderDto,
   UpdateOrderItemDto,
@@ -49,6 +56,7 @@ export class OrderService {
     const orderEntity = this.orderRepository.create({
       deliveryDate,
       user: userEntity,
+      folio: this.generateFolio(),
       branch: branchEntity,
     })
     await this.orderRepository.save(orderEntity)
@@ -130,16 +138,21 @@ export class OrderService {
     throw new ForbiddenException(ErrorMessages.ForbiddenException)
   }
 
-  public async getAllOrders(
+  public async getOrderList(
     paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsOrderDto,
+    filterDto: FilterOrderDto
   ): Promise<CreateHTTPResponseDto> {
     const { limit, skip } = paginationDto
     const { orderBy, sortBy } = sortingDto
+
     const [orders, totalItems] = await this.orderRepository.findAndCount({
       take: limit,
       skip,
+      where: this.createFilter(filterDto),
       order: { [sortBy]: orderBy },
+      relations: [...relationsDto.include],
     })
 
     const pagination = CalculatePaginationUseCase({
@@ -147,6 +160,8 @@ export class OrderService {
       limit,
       totalItems,
     })
+
+    if (orders.length === 0) throw new NotFoundException('Orders not found')
 
     return CreateHTTPResponseDto.ok(undefined, { orders, pagination })
   }
@@ -312,5 +327,53 @@ export class OrderService {
       throw new InternalServerErrorException('Error updating order')
 
     return CreateHTTPResponseDto.ok('Order status updated', { orderStatus })
+  }
+
+  private generateFolio() {
+    const date = new Date()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = String(date.getFullYear()).slice(-2)
+    const randomDigits = Math.floor(10 + Math.random() * 90)
+    const folio = `F${randomDigits}-${month}${year}`
+    return folio
+  }
+
+  private createFilter(filterDto: FilterOrderDto) {
+    const where: { [key: string]: any } = {}
+
+    const {
+      lteCompletedAt,
+      lteCreatedAt,
+      lteDeliveryDate,
+      lteTotalPriceAmount,
+      gteCompletedAt,
+      gteCreatedAt,
+      gteDeliveryDate,
+      gteTotalPriceAmount,
+      equalsOrderStatus,
+      likeFolio,
+      equalsFolio,
+    } = filterDto
+
+    if (lteCompletedAt) where.completedAt = LessThanOrEqual(lteCompletedAt)
+    if (gteCompletedAt) where.completedAt = MoreThanOrEqual(gteCompletedAt)
+
+    if (lteCreatedAt) where.createdAt = LessThanOrEqual(lteCreatedAt)
+    if (gteCreatedAt) where.createdAt = MoreThanOrEqual(gteCreatedAt)
+
+    if (lteDeliveryDate) where.deliveryDate = LessThanOrEqual(lteDeliveryDate)
+    if (gteDeliveryDate) where.deliveryDate = MoreThanOrEqual(gteDeliveryDate)
+
+    if (lteTotalPriceAmount)
+      where.totalPriceAmount = LessThanOrEqual(lteTotalPriceAmount)
+    if (gteTotalPriceAmount)
+      where.totalPriceAmount = MoreThanOrEqual(gteTotalPriceAmount)
+
+    if (equalsOrderStatus) where.orderStatus = Equal(equalsOrderStatus)
+
+    if (likeFolio) where.folio = Like(`${likeFolio}`)
+    if (equalsFolio) where.folio = Equal(equalsFolio)
+
+    return where
   }
 }

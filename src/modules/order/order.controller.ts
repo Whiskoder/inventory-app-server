@@ -6,6 +6,7 @@ import {
   RelationsOrderDto,
   CreateOrderItemDto,
   UpdateOrderItemDto,
+  FilterOrderDto,
 } from '@modules/order/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
@@ -67,12 +68,23 @@ export class OrderController {
     next: NextFunction
   ) => {
     try {
+      const sortingProps = [
+        'completedAt',
+        'createdAt',
+        'deliveryDate',
+        'status',
+        'totalPriceAmount',
+        'totalItems',
+      ]
       const paginationDto = await CreatePaginationDto.create(req.query)
-      const props = ['']
-      const sortingDto = await CreateSortingDto.create(req.query, props)
-      const response = await this.orderService.getAllOrders(
+      const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
+      const filterDto = await FilterOrderDto.create(req.query)
+      const relationsDto = await RelationsOrderDto.create(req.query)
+      const response = await this.orderService.getOrderList(
         paginationDto,
-        sortingDto
+        sortingDto,
+        relationsDto,
+        filterDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

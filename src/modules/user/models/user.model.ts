@@ -58,6 +58,7 @@ export class User {
   @Column({
     type: 'varchar',
     length: passwordHashSize,
+    select: false,
   })
   password!: string
 
