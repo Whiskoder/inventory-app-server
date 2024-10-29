@@ -5,9 +5,9 @@ import { AuthMiddleware } from '@core/middlewares'
 import { Actions, Resources } from '@modules/user/enums'
 import { Invoice } from '@modules/invoice/models'
 import { InvoiceController, InvoiceService } from '@modules/invoice'
-import { FileUploadMiddleware } from '@/core/middlewares/file-upload.middleware'
-import { BucketService } from '../shared/services'
-import { envs } from '@/config/plugins'
+import { FileUploadMiddleware } from '@core/middlewares/file-upload.middleware'
+import { BucketService } from '@modules/shared/services'
+import { envs } from '@config/plugins'
 
 export class InvoiceRoutes {
   static get routes(): Router {

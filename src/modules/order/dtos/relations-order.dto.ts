@@ -3,6 +3,9 @@ import { IsEnum, IsOptional, validateOrReject } from 'class-validator'
 
 enum Property {
   orderItems = 'orderItems',
+  orderItemsProduct = 'orderItems.product',
+  orderItemsProductBrand = 'orderItems.product.brand',
+  orderItemsProductCategory = 'orderItems.product.category',
   invoices = 'invoices',
   branch = 'branch',
   user = 'user',

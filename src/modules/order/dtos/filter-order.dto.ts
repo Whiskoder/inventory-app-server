@@ -1,5 +1,6 @@
 import qs from 'qs'
 import {
+  IsDateString,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -11,35 +12,29 @@ import { BadRequestException } from '@core/errors'
 import { ErrorMessages } from '@modules/shared/enums/messages'
 
 export class FilterOrderDto {
-  @IsNumber()
-  @IsPositive()
+  @IsDateString()
   @IsOptional()
-  lteCreatedAt?: number
+  lteCreatedAt?: string
 
-  @IsNumber()
-  @IsPositive()
+  @IsDateString()
   @IsOptional()
-  gteCreatedAt?: number
+  gteCreatedAt?: string
 
-  @IsNumber()
-  @IsPositive()
+  @IsDateString()
   @IsOptional()
-  lteDeliveryDate?: number
+  lteDeliveryDate?: string
 
-  @IsNumber()
-  @IsPositive()
+  @IsDateString()
   @IsOptional()
-  gteDeliveryDate?: number
+  gteDeliveryDate?: string
 
-  @IsNumber()
-  @IsPositive()
+  @IsDateString()
   @IsOptional()
-  lteCompletedAt?: number
+  lteCompletedAt?: string
 
-  @IsNumber()
-  @IsPositive()
+  @IsDateString()
   @IsOptional()
-  gteCompletedAt?: number
+  gteCompletedAt?: string
 
   @IsNumber()
   @IsPositive()
@@ -65,12 +60,12 @@ export class FilterOrderDto {
   likeFolio?: string
 
   constructor(parsedQuery: { [key: string]: any }) {
-    this.lteCreatedAt = +parsedQuery?.createdAt?.lte || undefined
-    this.gteCreatedAt = +parsedQuery?.createdAt?.gte || undefined
-    this.lteDeliveryDate = +parsedQuery?.deliveryDate?.lte || undefined
-    this.gteDeliveryDate = +parsedQuery?.deliveryDate?.gte || undefined
-    this.lteCompletedAt = +parsedQuery?.completedAt?.lte || undefined
-    this.gteCompletedAt = +parsedQuery?.completedAt?.gte || undefined
+    this.lteCreatedAt = parsedQuery?.createdAt?.lte || undefined
+    this.gteCreatedAt = parsedQuery?.createdAt?.gte || undefined
+    this.lteDeliveryDate = parsedQuery?.deliveryDate?.lte || undefined
+    this.gteDeliveryDate = parsedQuery?.deliveryDate?.gte || undefined
+    this.lteCompletedAt = parsedQuery?.completedAt?.lte || undefined
+    this.gteCompletedAt = parsedQuery?.completedAt?.gte || undefined
     this.lteTotalPriceAmount = +parsedQuery?.totalPriceAmount?.lte || undefined
     this.gteTotalPriceAmount = +parsedQuery?.totalPriceAmount?.gte || undefined
     this.equalsOrderStatus = +parsedQuery?.orderStatus?.equals || undefined
@@ -88,8 +83,8 @@ export class FilterOrderDto {
     if (dto.equalsFolio && dto.likeFolio)
       throw new BadRequestException(ErrorMessages.LikeEqualsConflict)
 
-    dto.equalsFolio = dto.equalsFolio?.trim().toLowerCase()
-    dto.likeFolio = dto.likeFolio?.trim().toLowerCase()
+    dto.equalsFolio = dto.equalsFolio?.trim().toUpperCase()
+    dto.likeFolio = dto.likeFolio?.trim().toUpperCase()
 
     return dto
   }

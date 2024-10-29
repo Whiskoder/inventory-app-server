@@ -1,5 +1,7 @@
 import {
+  Between,
   Equal,
+  In,
   LessThanOrEqual,
   Like,
   MoreThanOrEqual,
@@ -20,6 +22,7 @@ import {
   RelationsOrderDto,
   UpdateOrderDto,
   UpdateOrderItemDto,
+  DeleteMultipleOrderItemsDto,
 } from '@modules/order/dtos'
 import {
   CreateHTTPResponseDto,
@@ -32,12 +35,25 @@ import { Branch } from '@modules/branch/models'
 import { User } from '@modules/user/models'
 import { Roles } from '@modules/user/enums'
 import { ErrorMessages } from '@modules/shared/enums/messages'
+import { Product } from '@modules/product/models'
+import { EmailService, SendMailOptions } from '@modules/emails/services'
+import {
+  orderUpdateEmail,
+  OrderUpdateEmailProps,
+} from '@modules/emails/templates'
+
+// TODO: move to plugins
+import { format } from 'date-fns'
+import { es as esLocale } from 'date-fns/locale/es'
 
 export class OrderService {
   constructor(
     private readonly orderRepository: Repository<Order>,
     private readonly orderItemsRepository: Repository<OrderItem>,
-    private readonly branchRepository: Repository<Branch>
+    private readonly productsRepository: Repository<Product>,
+    private readonly branchRepository: Repository<Branch>,
+    private readonly userRepository: Repository<User>,
+    private readonly emailService: EmailService
   ) {}
 
   public async createOrder(
@@ -66,35 +82,73 @@ export class OrderService {
     })
   }
 
-  // TODO: Refactor Order life cycle
-  public async nextOrderStep(
+  public async placeOrder(
     orderId: number,
     userEntity: User
   ): Promise<CreateHTTPResponseDto> {
     const orderEntity = await this.orderRepository.findOne({
       where: { id: orderId },
+      relations: ['branch'],
     })
     if (!orderEntity) throw new NotFoundException('Order not found')
 
     const { status: orderStatus } = orderEntity
-    const branchManagerTurns = [OrderStatus.OPEN, OrderStatus.DELIVERED]
-    const warehouseManagerTurns = [OrderStatus.SENT, OrderStatus.PROCESSING]
     const { role: userRole } = userEntity
 
-    if (orderStatus >= OrderStatus.COMPLETED)
-      throw new BadRequestException('Order already completed')
+    if (orderStatus > OrderStatus.OPEN)
+      throw new BadRequestException('Order already placed')
 
     const isBranchManager = userRole === Roles.BRANCH_MANAGER
-    const isWarehouseManager = userRole === Roles.WAREHOUSE_MANAGER
     const isAdmin = userRole === Roles.ADMIN
 
-    const isBranchManagerTurn =
-      isBranchManager && branchManagerTurns.includes(orderStatus)
-    const isWarehouseManagerTurn =
-      isWarehouseManager && warehouseManagerTurns.includes(orderStatus)
+    if (isBranchManager || isAdmin) {
+      const response = await this.updateOrderStatus(orderId, OrderStatus.SENT)
 
-    if (isBranchManagerTurn || isWarehouseManagerTurn || isAdmin)
-      return await this.updateOrderStatus(orderId, orderStatus + 1)
+      // Notify users
+      const users = await this.userRepository.find({
+        where: { role: Roles.WAREHOUSE_MANAGER },
+      })
+
+      const { folio } = orderEntity
+
+      users.forEach(async ({ email, firstName }) => {
+        const deliveryDate = format(
+          orderEntity.deliveryDate,
+          'EEEE, MMMM dd, yyyy',
+          { locale: esLocale }
+        )
+
+        const { name, streetName, dependantLocality, cityName, postalCode } =
+          orderEntity.branch
+        const items = [streetName, dependantLocality, cityName, postalCode]
+
+        const address =
+          items.reduce((address, item) => {
+            if (item) address = `${address}, ${item}`
+            return address
+          }, name) ?? ''
+
+        const props: OrderUpdateEmailProps = {
+          address,
+          deliveryDate,
+          username: firstName,
+          downloadOrderLink: `orders/pdf/${folio}`,
+          folio,
+        }
+        const htmlBody = await orderUpdateEmail(props)
+        console.log(props)
+
+        const options: SendMailOptions = {
+          htmlBody,
+          to: email,
+          subject: `Tienes un nuevo pedido - ${orderEntity.folio}`,
+          from: 'no-responder@sistemasdealimentacion.com.mx',
+        }
+        this.emailService.sendEmail(options)
+      })
+
+      return response
+    }
 
     throw new ForbiddenException(ErrorMessages.ForbiddenException)
   }
@@ -223,95 +277,146 @@ export class OrderService {
     return CreateHTTPResponseDto.noContent()
   }
 
-  public async createOrderItem(
-    createOrderItemDto: CreateOrderItemDto,
+  public async createMultipleOrderItems(
+    createOrderItemsDto: CreateOrderItemDto[],
     orderId: number
   ): Promise<CreateHTTPResponseDto> {
-    // const { productPriceId, quantityRequested } = createOrderItemDto
-    // const searchPromises = [
-    //   this.productPriceRepository.findOne({
-    //     where: { id: productPriceId },
-    //     relations: ['provider', 'product'],
-    //   }),
-    //   this.orderRepository.findOne({ where: { id: orderId } }),
-    // ]
-    // const [productPriceEntity, orderEntity] = await Promise.all(searchPromises)
-
-    // if (!productPriceEntity)
-    //   throw new NotFoundException('Product price not found')
-    // if (!orderEntity) throw new NotFoundException('Order not found')
-
-    // const { status: orderStatus } = orderEntity as Order
-    // if (orderStatus !== OrderStatus.OPEN)
-    //   throw new BadRequestException('Only draft orders can be modified')
-
-    // const { product, provider, basePrice } = productPriceEntity as ProductPrice
-
-    // const isAlreadyOrderItemInOrder = await this.productPriceRepository.findOne(
-    //   { where: { product, provider } }
-    // )
-    // if (isAlreadyOrderItemInOrder)
-    //   throw new BadRequestException('Product already added')
-
-    // const { measurementUnit } = product
-    // const orderItemEntity = this.orderItemsRepository.create({
-    //   basePriceAtOrder: basePrice,
-    //   measurementUnit,
-    //   quantityRequested,
-    //   order: orderEntity,
-    //   product,
-    //   provider,
-    // })
-    // await this.orderItemsRepository.save(orderItemEntity)
-
-    return CreateHTTPResponseDto.created('Order item placed', {
-      // orderItems: [orderItemEntity],
+    const orderEntity = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['orderItems', 'orderItems.product'],
     })
+    if (!orderEntity) throw new NotFoundException('Order not found')
+
+    const ids = createOrderItemsDto.map(({ productPriceId }) => productPriceId)
+    const products = await this.productsRepository.findBy({
+      id: In(ids),
+    })
+
+    const { orderItems: existingOrderItems, status } = orderEntity
+
+    if (status !== OrderStatus.OPEN)
+      throw new BadRequestException('Only draft orders can be modified')
+
+    const filteredOrderItems = products.filter(({ id }) => {
+      const exclude = existingOrderItems?.findIndex(
+        ({ product }) => product.id === id
+      )
+      return exclude === -1
+    })
+
+    const orderItemsEntities = filteredOrderItems.map((product) => {
+      const orderItemDto = createOrderItemsDto.find(
+        ({ productPriceId }) => productPriceId === product.id
+      )
+      return this.orderItemsRepository.create({
+        product,
+        measurementUnit: product.measureUnit,
+        basePriceAtOrder: product.pricePerUnit,
+        quantityRequested: orderItemDto?.quantityRequested,
+        order: orderEntity,
+      })
+    })
+
+    await this.orderItemsRepository.save(orderItemsEntities)
+    await this.updateOrderItems(orderId)
+
+    return CreateHTTPResponseDto.created('Order items placed')
   }
 
-  public async updateOrderItem(
-    updateOrderItemDto: UpdateOrderItemDto,
-    orderId: number,
-    orderItemId: number
+  public async updateMultipleOrderItems(
+    updateOrderItemsDto: UpdateOrderItemDto[],
+    orderId: number
   ): Promise<CreateHTTPResponseDto> {
-    await this.checkOrderItemExists(orderId, orderItemId)
+    const orderItemIds = updateOrderItemsDto.map(
+      ({ orderItemId }) => orderItemId
+    )
+    const itemsToUpdate = await this.checkOrderItemExists(orderId, orderItemIds)
 
-    const orderItemEntity = this.orderItemsRepository.create(updateOrderItemDto)
-    await this.orderItemsRepository.update({ id: orderItemId }, orderItemEntity)
+    updateOrderItemsDto.map(({ quantityRequested, orderItemId }) => {
+      if (itemsToUpdate.some((id) => id === orderItemId)) {
+        const orderItemEntity = this.orderItemsRepository.create({
+          quantityRequested,
+        })
+        this.orderItemsRepository.update({ id: orderItemId }, orderItemEntity)
+      }
+    })
 
-    return CreateHTTPResponseDto.ok('Order item updated successfully')
+    await this.updateOrderItems(orderId)
+
+    return CreateHTTPResponseDto.ok('Order items updated successfully')
   }
 
   public async deleteOrderItem(
     orderId: number,
-    orderItemId: number
+    deleteMultipleOrderItemsDto: DeleteMultipleOrderItemsDto
   ): Promise<CreateHTTPResponseDto> {
-    await this.checkOrderItemExists(orderId, orderItemId)
+    const ids = await this.checkOrderItemExists(
+      orderId,
+      deleteMultipleOrderItemsDto.orderItemIds
+    )
 
     const deletedOrderItem = await this.orderItemsRepository.delete({
-      id: orderItemId,
+      id: In(ids),
     })
 
     if (!deletedOrderItem.affected)
       throw new InternalServerErrorException('Failed to delete order item')
 
+    await this.updateOrderItems(orderId)
+
     return CreateHTTPResponseDto.noContent()
   }
 
-  private async checkOrderItemExists(orderId: number, orderItemId: number) {
-    const orderItemEntity = await this.orderItemsRepository.findOne({
-      where: { id: orderItemId },
-      relations: ['order'],
+  private async updateOrderItems(orderId: number) {
+    const orderEntity = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['orderItems'],
     })
 
-    if (!orderItemEntity) throw new NotFoundException('Order item not found')
+    if (!orderEntity)
+      throw new InternalServerErrorException('Failed to update order')
 
-    const isCorrectOrder = orderItemEntity.order.id === orderId
-    if (!isCorrectOrder) throw new NotFoundException('Order not found')
+    const totalItems = orderEntity.orderItems?.length
+    let totalPriceAmount = 0
 
-    const { status: orderStatus } = orderItemEntity.order
+    orderEntity.orderItems?.map(({ basePriceAtOrder, quantityRequested }) => {
+      totalPriceAmount = totalPriceAmount + basePriceAtOrder * quantityRequested
+    })
+
+    const updatedOrderEntity = this.orderRepository.create({
+      totalItems,
+      totalPriceAmount,
+    })
+    return this.orderRepository.update(
+      { id: orderEntity.id },
+      updatedOrderEntity
+    )
+  }
+
+  private async checkOrderItemExists(orderId: number, orderItemIds: number[]) {
+    const orderEntity = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['orderItems'],
+    })
+
+    if (!orderEntity) throw new NotFoundException('Order not found')
+
+    const { status: orderStatus } = orderEntity
     if (orderStatus !== OrderStatus.OPEN)
       throw new BadRequestException('Only draft orders can be modified')
+
+    const { orderItems } = orderEntity
+
+    if (!orderItems)
+      throw new BadRequestException('Theres no items in the order to update')
+
+    const existingItems = orderItemIds.filter((currentItemId) => {
+      return orderItems.some(
+        (existingItems) => currentItemId === existingItems.id
+      )
+    })
+
+    return existingItems
   }
 
   private async updateOrderStatus(
@@ -355,22 +460,38 @@ export class OrderService {
       equalsFolio,
     } = filterDto
 
-    if (lteCompletedAt) where.completedAt = LessThanOrEqual(lteCompletedAt)
-    if (gteCompletedAt) where.completedAt = MoreThanOrEqual(gteCompletedAt)
+    const addRangeCondition = (
+      key: string,
+      lte: string | number | undefined,
+      gte: string | number | undefined
+    ) => {
+      if (lte && gte) {
+        if (typeof lte === 'string') {
+          const f = 'yyyy-MM-dd HH:MM:SS'
+          where[key] = Between(
+            format(new Date(gte), f),
+            format(new Date(lte), f)
+          )
+          return
+        }
+        where[key] = Between(gte, gte)
+        return
+      }
 
-    if (lteCreatedAt) where.createdAt = LessThanOrEqual(lteCreatedAt)
-    if (gteCreatedAt) where.createdAt = MoreThanOrEqual(gteCreatedAt)
+      if (lte) where[key] = LessThanOrEqual(lte)
+      if (gte) where[key] = MoreThanOrEqual(gte)
+    }
 
-    if (lteDeliveryDate) where.deliveryDate = LessThanOrEqual(lteDeliveryDate)
-    if (gteDeliveryDate) where.deliveryDate = MoreThanOrEqual(gteDeliveryDate)
-
-    if (lteTotalPriceAmount)
-      where.totalPriceAmount = LessThanOrEqual(lteTotalPriceAmount)
-    if (gteTotalPriceAmount)
-      where.totalPriceAmount = MoreThanOrEqual(gteTotalPriceAmount)
+    addRangeCondition('completedAt', lteCompletedAt, gteCompletedAt)
+    addRangeCondition('createdAt', lteCreatedAt, gteCreatedAt)
+    addRangeCondition('deliveryDate', lteDeliveryDate, gteDeliveryDate)
+    addRangeCondition(
+      'totalPriceAmount',
+      lteTotalPriceAmount,
+      gteTotalPriceAmount
+    )
 
     if (equalsOrderStatus) where.orderStatus = Equal(equalsOrderStatus)
-
     if (likeFolio) where.folio = Like(`${likeFolio}`)
     if (equalsFolio) where.folio = Equal(equalsFolio)
 

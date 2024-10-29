@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
     "baseUrl": "./",

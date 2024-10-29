@@ -29,19 +29,26 @@ export class Order {
   folio!: string
 
   @Column({
-    type: 'timestamp',
+    type: 'timestamptz',
     nullable: true,
   })
   completedAt?: Date
 
   @CreateDateColumn({
-    type: 'timestamp',
+    type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   createdAt!: Date
 
+  @CreateDateColumn({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
+  updatedAt!: Date
+
   @Column({
-    type: 'timestamp',
+    type: 'timestamptz',
     nullable: true,
   })
   deliveryDate!: Date
@@ -62,7 +69,7 @@ export class Order {
 
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 10,
     scale: 2,
     default: 0,
   })
@@ -81,7 +88,6 @@ export class Order {
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
     eager: false,
-    onDelete: 'CASCADE',
   })
   orderItems?: OrderItem[]
 

@@ -1,11 +1,15 @@
 import { Router } from 'express'
 
 import { Actions, Resources } from '@modules/user/enums'
-import { AuthMiddleware } from '@core/middlewares'
-import { Order, OrderItem } from '@modules/order/models'
 import { AppDataSource } from '@core/datasources'
-import { OrderController, OrderService } from '@modules/order'
+import { AuthMiddleware } from '@core/middlewares'
 import { Branch } from '@modules/branch/models'
+import { EmailService } from '@modules/emails/services'
+import { envs } from '@config/plugins'
+import { Order, OrderItem } from '@modules/order/models'
+import { OrderController, OrderService } from '@modules/order'
+import { Product } from '@modules/product/models'
+import { User } from '@modules/user/models'
 
 export class OrderRoutes {
   static get routes(): Router {
@@ -13,12 +17,26 @@ export class OrderRoutes {
 
     const orderRepository = AppDataSource.getRepository(Order)
     const orderItemsRepository = AppDataSource.getRepository(OrderItem)
+    const productRepository = AppDataSource.getRepository(Product)
     const branchRepository = AppDataSource.getRepository(Branch)
+    const userRepository = AppDataSource.getRepository(User)
+
+    const emailService = new EmailService({
+      defaultSender: envs.MAILER_USER,
+      mailerHost: envs.MAILER_HOST,
+      mailerPort: envs.MAILER_PORT,
+      mailerUser: envs.MAILER_USER,
+      mailerPass: envs.MAILER_PASS,
+      postToProvider: envs.SEND_EMAIL,
+    })
 
     const orderService = new OrderService(
       orderRepository,
       orderItemsRepository,
-      branchRepository
+      productRepository,
+      branchRepository,
+      userRepository,
+      emailService
     )
     const controller = new OrderController(orderService)
 
@@ -32,9 +50,9 @@ export class OrderRoutes {
     )
 
     router.post(
-      '/:orderId/next',
+      '/:orderId/place',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
-      controller.nextOrderStep
+      controller.placeOrder
     )
 
     router.post(
@@ -70,17 +88,17 @@ export class OrderRoutes {
     router.post(
       '/:orderId/items/',
       [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
-      controller.createOrderItem
+      controller.createMultipleOrderItems
     )
 
     router.put(
-      '/:orderId/items/:orderItemId',
+      '/:orderId/items/',
       [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
-      controller.updateOrderItem
+      controller.updateMultipleOrderItems
     )
 
     router.delete(
-      '/:orderId/items/:orderItemId',
+      '/:orderId/items/',
       [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
       controller.deleteOrderItem
     )

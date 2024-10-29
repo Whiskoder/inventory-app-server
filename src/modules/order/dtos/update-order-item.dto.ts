@@ -7,6 +7,11 @@ export class UpdateOrderItemDto {
   @IsPositive()
   quantityRequested!: number
 
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  orderItemId!: number
+
   public static async create(obj: {
     [key: string]: any
   }): Promise<UpdateOrderItemDto> {
