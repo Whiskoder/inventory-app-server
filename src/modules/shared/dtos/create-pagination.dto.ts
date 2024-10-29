@@ -11,25 +11,18 @@ export class CreatePaginationDto {
   @IsInt()
   @IsPositive()
   @IsOptional()
-  page: number = 1
-
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  @IsOptional()
   limit: number = 10
 
   @Type(() => Number)
   @IsInt()
   @IsOptional()
-  skip!: number
+  skip: number = 0
 
   public static async create(obj: {
     [key: string]: any
   }): Promise<CreatePaginationDto> {
     const dto = plainToInstance(CreatePaginationDto, obj)
     await validateOrReject(dto)
-    if (!dto.skip) dto.skip = (dto.page - 1) * dto.limit
     return dto
   }
 }

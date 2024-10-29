@@ -58,6 +58,7 @@ export class User {
   @Column({
     type: 'varchar',
     length: passwordHashSize,
+    select: false,
   })
   password!: string
 
@@ -70,7 +71,7 @@ export class User {
 
   // notifications: Notification
 
-  @ManyToOne(() => Branch, (branch) => branch.employees)
+  @ManyToOne(() => Branch, (branch) => branch.employees, { eager: true })
   branch?: Branch
 
   @OneToMany(() => Order, (order) => order.user)

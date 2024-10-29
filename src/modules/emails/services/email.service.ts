@@ -1,5 +1,4 @@
-/*
-import { InternalServerErrorException } from '@/core/errors'
+import { InternalServerErrorException } from '@core/errors'
 import nodemailer, { Transporter } from 'nodemailer'
 
 export interface SendMailOptions {
@@ -32,15 +31,6 @@ export class EmailService {
   constructor(options: EmailServiceOptions) {
     this.init(options)
   }
-
-  // const emailService = new EmailService({
-  //   defaultSender: envs.MAILER_USER,
-  //   mailerHost: envs.MAILER_HOST,
-  //   mailerPort: envs.MAILER_PORT,
-  //   mailerUser: envs.MAILER_USER,
-  //   mailerPass: envs.MAILER_PASS,
-  //   postToProvider: envs.SEND_EMAIL,
-  // })
 
   private init = (options: EmailServiceOptions) => {
     const {
@@ -92,7 +82,7 @@ export class EmailService {
         html: htmlBody,
         attachments,
       })
-      console.log(sentInformation)
+      // console.log(sentInformation)
       return true
     } catch (error) {
       console.log(error)
@@ -100,4 +90,3 @@ export class EmailService {
     }
   }
 }
-*/

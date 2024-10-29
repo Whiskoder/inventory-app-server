@@ -26,13 +26,13 @@ export class BranchRoutes {
     router.get(
       '/',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.getAllBranches
+      controller.getBranchList
     )
 
     router.get(
-      '/:term',
+      '/:branchId',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.getBranchByTerm
+      controller.getBranchById
     )
 
     router.put(

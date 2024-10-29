@@ -1,32 +1,36 @@
 import qs from 'qs'
+import { IsOptional, IsString, validateOrReject } from 'class-validator'
 
-import {
-  GreaterThanEqualFilter,
-  LessThanEqualFilter,
-  RegexFilter,
-} from '@modules/shared/interfaces'
-
-// export interface FilterProps {
-// 	lte?: number;
-// 	gte?: number;
-// 	exists?: boolean;
-// 	regex?: string;1
-// 	before?: Date;
-// 	after?: Date;
-// }
+import { BadRequestException } from '@core/errors'
+import { ErrorMessages } from '@modules/shared/enums/messages'
 
 export class FilterCategoryDto {
-  name?: RegexFilter
+  @IsString()
+  @IsOptional()
+  equalsName?: string
 
-  price?: LessThanEqualFilter | GreaterThanEqualFilter
+  @IsString()
+  @IsOptional()
+  likeName?: string
+
+  constructor(parsedQuery: { [key: string]: any }) {
+    this.equalsName = parsedQuery?.name?.equals
+    this.likeName = parsedQuery?.name?.like
+  }
 
   public static async create(obj: {
     [key: string]: any
   }): Promise<FilterCategoryDto> {
-    // const {limit, pa}
-    const { name } = qs.parse(obj)
-    console.log(name)
+    const parsedQuery = qs.parse(obj)
+    const dto = new FilterCategoryDto(parsedQuery)
+    await validateOrReject(dto)
 
-    return new FilterCategoryDto()
+    if (dto.equalsName && dto.likeName)
+      throw new BadRequestException(ErrorMessages.LikeEqualsConflict)
+
+    dto.equalsName = dto.equalsName?.trim().toLowerCase()
+    dto.likeName = dto.likeName?.trim().toLowerCase()
+
+    return dto
   }
 }

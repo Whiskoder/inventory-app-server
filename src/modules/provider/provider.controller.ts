@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { ProviderService } from '@modules/provider'
 import {
   CreateProviderDto,
+  FilterProviderDto,
   RelationsProviderDto,
   UpdateProviderDto,
 } from '@modules/provider/dtos'
@@ -26,19 +27,18 @@ export class ProviderController {
     }
   }
 
-  //GET '/api/v1/providers/'
-  public getAllProviders = async (
+  //GET '/api/v1/providers/:providerId'
+  public getProviderById = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const paginationDto = await CreatePaginationDto.create(req.query)
-      const props = ['']
-      const sortingDto = await CreateSortingDto.create(req.query, props)
-      const response = await this.providerService.getAllProviders(
-        paginationDto,
-        sortingDto
+      const providerId = +req.params.providerId
+      const relationsDto = await RelationsProviderDto.create(req.query)
+      const response = await this.providerService.getProviderById(
+        providerId,
+        relationsDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -46,18 +46,33 @@ export class ProviderController {
     }
   }
 
-  //GET '/api/v1/providers/:term'
-  public getProviderByTerm = async (
+  //GET '/api/v1/providers/'
+  public getProviderList = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      const props = [
+        'cityName',
+        'contactEmail',
+        'contactPhone',
+        'dependantLocality',
+        'name',
+        'postalCode',
+        'streetName',
+        'rfc',
+      ]
+      const paginationDto = await CreatePaginationDto.create(req.query)
+      const sortingDto = await CreateSortingDto.create(req.query, props)
       const relationsDto = await RelationsProviderDto.create(req.query)
-      const term = req.params.term
-      const response = await this.providerService.getProviderByTerm(
-        term,
-        relationsDto
+      const filterDto = await FilterProviderDto.create(req.query)
+
+      const response = await this.providerService.getProviderList(
+        paginationDto,
+        sortingDto,
+        relationsDto,
+        filterDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

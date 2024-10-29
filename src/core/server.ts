@@ -1,4 +1,5 @@
 import express, { Router } from 'express'
+import fileUpload from 'express-fileupload'
 import cors from 'cors'
 
 import {
@@ -29,7 +30,11 @@ export class Server {
     this.app.use(ThrottlerMiddleware.limit()) // Rate limit
     this.app.use(cors()) // Enable CORS
     this.app.use(express.json()) // Enable JSON parsing
-
+    this.app.use(
+      fileUpload({
+        limits: { fileSize: 50 * 1024 * 1024 },
+      })
+    )
     //* Routes
     this.app.use(this.routes)
 

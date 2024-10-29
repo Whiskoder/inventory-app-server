@@ -6,8 +6,12 @@ import {
   RelationsOrderDto,
   CreateOrderItemDto,
   UpdateOrderItemDto,
+  FilterOrderDto,
+  CreateMultipleOrderItemsDto,
 } from '@modules/order/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
+import { UpdateMultipleOrderItemsDto } from './dtos/update-multiple-order-items.dto'
+import { DeleteMultipleOrderItemsDto } from './dtos/delete-multiple-order-items.dto'
 
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -28,8 +32,8 @@ export class OrderController {
     }
   }
 
-  // POST '/api/v1/order/:orderId/next/'
-  public nextOrderStep = async (
+  // POST '/api/v1/order/:orderId/place/'
+  public placeOrder = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -37,7 +41,7 @@ export class OrderController {
     try {
       const orderId = +req.params.orderId
       const user = res.locals.user
-      const response = await this.orderService.nextOrderStep(orderId, user)
+      const response = await this.orderService.placeOrder(orderId, user)
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
@@ -67,12 +71,23 @@ export class OrderController {
     next: NextFunction
   ) => {
     try {
+      const sortingProps = [
+        'completedAt',
+        'createdAt',
+        'deliveryDate',
+        'status',
+        'totalPriceAmount',
+        'totalItems',
+      ]
       const paginationDto = await CreatePaginationDto.create(req.query)
-      const props = ['']
-      const sortingDto = await CreateSortingDto.create(req.query, props)
-      const response = await this.orderService.getAllOrders(
+      const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
+      const filterDto = await FilterOrderDto.create(req.query)
+      const relationsDto = await RelationsOrderDto.create(req.query)
+      const response = await this.orderService.getOrderList(
         paginationDto,
-        sortingDto
+        sortingDto,
+        relationsDto,
+        filterDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -132,16 +147,18 @@ export class OrderController {
   }
 
   // POST '/api/v1/order/:orderId/items/'
-  public createOrderItem = async (
+  public createMultipleOrderItems = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const createOrderItemDto = await CreateOrderItemDto.create(req.body)
+      const createOrderItemDtos = await CreateMultipleOrderItemsDto.create(
+        req.body
+      )
       const orderId = +req.params.orderId
-      const response = await this.orderService.createOrderItem(
-        createOrderItemDto,
+      const response = await this.orderService.createMultipleOrderItems(
+        createOrderItemDtos,
         orderId
       )
       res.status(response.statusCode).json(response)
@@ -150,20 +167,20 @@ export class OrderController {
     }
   }
 
-  // PUT '/api/v1/order/:orderId/items/:orderItemId'
-  public updateOrderItem = async (
+  // PUT '/api/v1/order/:orderId/items/'
+  public updateMultipleOrderItems = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const updateOrderItemDto = await UpdateOrderItemDto.create(req.body)
+      const updateOrderItemDtos = await UpdateMultipleOrderItemsDto.create(
+        req.body
+      )
       const orderId = +req.params.orderId
-      const orderItemId = +req.params.orderItemId
-      const response = await this.orderService.updateOrderItem(
-        updateOrderItemDto,
-        orderId,
-        orderItemId
+      const response = await this.orderService.updateMultipleOrderItems(
+        updateOrderItemDtos,
+        orderId
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -179,10 +196,11 @@ export class OrderController {
   ) => {
     try {
       const orderId = +req.params.orderId
-      const orderItemId = +req.params.orderItemId
+      const deleteMultipleOrderItemsDto =
+        await DeleteMultipleOrderItemsDto.create(req.query)
       const response = await this.orderService.deleteOrderItem(
         orderId,
-        orderItemId
+        deleteMultipleOrderItemsDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {

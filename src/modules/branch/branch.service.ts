@@ -1,10 +1,11 @@
-import { Repository } from 'typeorm'
+import { Equal, Like, Repository } from 'typeorm'
 
 import { Branch } from '@modules/branch/models'
 import {
   RelationsBranchDto,
   CreateBranchDto,
   UpdateBranchDto,
+  FilterBranchDto,
 } from '@modules/branch/dtos'
 import {
   CreateHTTPResponseDto,
@@ -29,48 +30,49 @@ export class BranchService {
     })
   }
 
-  public async getAllBranches(
-    paginationDto: CreatePaginationDto,
-    sortingDto: CreateSortingDto
+  public async getBranchById(
+    branchId: number,
+    relationsDto: RelationsBranchDto
   ): Promise<CreateHTTPResponseDto> {
-    const { limit, skip, page: currentPage } = paginationDto
+    const branchEntity = await this.branchRepository.findOne({
+      where: { id: branchId, isActive: true },
+      relations: [...relationsDto.include],
+    })
+
+    if (!branchEntity) throw new NotFoundException('Branch not found')
+    return CreateHTTPResponseDto.ok(undefined, { branches: [branchEntity] })
+  }
+
+  public async getBranchList(
+    paginationDto: CreatePaginationDto,
+    sortingDto: CreateSortingDto,
+    relationsDto: RelationsBranchDto,
+    filterDto: FilterBranchDto
+  ): Promise<CreateHTTPResponseDto> {
+    const { limit, skip } = paginationDto
     const { sortBy, orderBy } = sortingDto
+
+    let order: any = { [sortBy]: orderBy }
+    if (sortBy === 'order') order = { orders: { id: orderBy } }
+    if (sortBy === 'employee') order = { employees: { name: orderBy } }
 
     const [branches, totalItems] = await this.branchRepository.findAndCount({
       take: limit,
       skip,
-      where: { isActive: true },
-      order: { [sortBy]: orderBy },
+      where: this.createFilter(filterDto),
+      relations: [...relationsDto.include],
+      order,
     })
 
-    const pagination = CalculatePaginationUseCase.execute({
-      currentPage,
+    const pagination = CalculatePaginationUseCase({
+      skip,
       limit,
       totalItems,
     })
 
+    if (branches.length === 0) throw new NotFoundException('Branches not found')
+
     return CreateHTTPResponseDto.ok(undefined, { branches, pagination })
-  }
-
-  public async getBranchByTerm(
-    term: string,
-    relationsDto: RelationsBranchDto
-  ): Promise<CreateHTTPResponseDto> {
-    let branchEntity
-    if (Number(term)) {
-      branchEntity = await this.branchRepository.findOne({
-        where: { id: +term, isActive: true },
-        relations: [...relationsDto.include],
-      })
-    } else {
-      branchEntity = await this.branchRepository.findOne({
-        where: { name: term.toLowerCase(), isActive: true },
-        relations: [...relationsDto.include],
-      })
-    }
-
-    if (!branchEntity) throw new NotFoundException('Branch not found')
-    return CreateHTTPResponseDto.ok(undefined, { branches: [branchEntity] })
   }
 
   public async updateBranch(
@@ -104,5 +106,51 @@ export class BranchService {
       throw new InternalServerErrorException('Error deleting branch')
 
     return CreateHTTPResponseDto.noContent()
+  }
+
+  private createFilter(filterDto: FilterBranchDto) {
+    const where: { [key: string]: any } = {
+      isActive: true,
+    }
+
+    const {
+      equalsCityName,
+      equalsContactEmail,
+      equalsContactPhone,
+      equalsDependantLocality,
+      equalsName,
+      equalsPostalCode,
+      equalsStreetName,
+      likeCityName,
+      likeContactEmail,
+      likeContactPhone,
+      likeDependantLocality,
+      likeName,
+      likeStreetName,
+    } = filterDto
+
+    if (likeCityName) where.cityName = Like(`${likeCityName}`)
+    if (equalsCityName) where.cityName = Equal(equalsCityName)
+
+    if (likeContactEmail) where.contactEmail = Like(`${likeContactEmail}`)
+    if (equalsContactEmail) where.contactEmail = Equal(equalsContactEmail)
+
+    if (likeContactPhone) where.contactPhone = Like(`${likeContactPhone}`)
+    if (equalsContactPhone) where.contactPhone = Equal(equalsContactPhone)
+
+    if (likeDependantLocality)
+      where.dependantLocality = Like(`${likeDependantLocality}`)
+    if (equalsDependantLocality)
+      where.dependantLocality = Equal(equalsDependantLocality)
+
+    if (likeName) where.name = Like(`${likeName}`)
+    if (equalsName) where.name = Equal(equalsName)
+
+    if (likeStreetName) where.streetName = Like(`${likeStreetName}`)
+    if (equalsStreetName) where.streetName = Equal(equalsStreetName)
+
+    if (equalsPostalCode) where.postalCode = Equal(equalsPostalCode)
+
+    return where
   }
 }

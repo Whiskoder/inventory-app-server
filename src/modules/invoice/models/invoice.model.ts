@@ -27,6 +27,13 @@ export class Invoice {
 
   @Column({
     type: 'varchar',
+    length: 10,
+    nullable: false,
+  })
+  folio!: string
+
+  @Column({
+    type: 'varchar',
     length: longNameLength,
     nullable: true,
   })
@@ -47,7 +54,7 @@ export class Invoice {
 
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 10,
     scale: 2,
   })
   totalAmount!: number

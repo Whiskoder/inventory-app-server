@@ -26,13 +26,13 @@ export class ProviderRoutes {
     router.get(
       '/',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.getAllProviders
+      controller.getProviderList
     )
 
     router.get(
-      '/:term',
+      '/:providerId',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.getProviderByTerm
+      controller.getProviderById
     )
 
     router.put(

@@ -27,13 +27,13 @@ export class CategoryRoutes {
     router.get(
       '/',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.searchCategoriesByTerm
+      controller.getCategoryList
     )
 
     router.get(
-      '/:term',
+      '/:categoryId',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.searchCategoriesByTerm
+      controller.getCategoryById
     )
 
     router.put(

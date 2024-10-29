@@ -18,21 +18,20 @@ export class OrderItem {
 
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 10,
     scale: 2,
   })
   basePriceAtOrder!: number
 
   @Column({
     type: 'enum',
-    unique: true,
     enum: MeasureUnit,
   })
   measurementUnit!: MeasureUnit
 
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 10,
     scale: 2,
     default: 0,
   })
@@ -40,13 +39,14 @@ export class OrderItem {
 
   @Column({
     type: 'decimal',
-    precision: 2,
+    precision: 10,
     scale: 2,
   })
   quantityRequested!: number
 
   @ManyToOne(() => Order, (order) => order.orderItems, {
     eager: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   order!: Order

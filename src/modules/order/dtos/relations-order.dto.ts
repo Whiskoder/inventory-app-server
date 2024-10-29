@@ -1,14 +1,18 @@
-import { plainToInstance } from 'class-transformer'
+import { plainToInstance, Transform } from 'class-transformer'
 import { IsEnum, IsOptional, validateOrReject } from 'class-validator'
 
 enum Property {
-  order_item = 'orderItems',
-  invoice = 'invoices',
+  orderItems = 'orderItems',
+  orderItemsProduct = 'orderItems.product',
+  orderItemsProductBrand = 'orderItems.product.brand',
+  orderItemsProductCategory = 'orderItems.product.category',
+  invoices = 'invoices',
   branch = 'branch',
   user = 'user',
 }
 
 export class RelationsOrderDto {
+  @Transform(({ value }) => value.split(','))
   @IsOptional()
   @IsEnum(Property, { each: true })
   include: Property[] = []

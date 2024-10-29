@@ -1,5 +1,11 @@
 import { plainToInstance, Type } from 'class-transformer'
-import { IsInt, IsNumber, IsPositive, validateOrReject } from 'class-validator'
+import {
+  IsArray,
+  IsInt,
+  IsNumber,
+  IsPositive,
+  validateOrReject,
+} from 'class-validator'
 
 export class CreateOrderItemDto {
   @Type(() => Number)

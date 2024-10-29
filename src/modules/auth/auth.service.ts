@@ -16,6 +16,7 @@ export class AuthService {
   private generateToken(userId: number) {
     const tokenOptions = {
       payload: { id: userId },
+      duration: '12h',
     }
     return this.jwt.generateToken(tokenOptions)
   }
@@ -57,6 +58,7 @@ export class AuthService {
         'password',
         'role',
         'contactPhone',
+        'branch',
       ],
     })
 

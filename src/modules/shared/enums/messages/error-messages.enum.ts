@@ -12,4 +12,5 @@ export enum ErrorMessages {
   // UnhandledRejection = 'Unhandled Exception thrown!',
   EmptyBody = 'You need to update at least one property',
   ForbiddenException = 'You do not have permission to perform this action',
+  LikeEqualsConflict = 'Like and equals cannot be present at the same time.',
 }

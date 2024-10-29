@@ -3,6 +3,7 @@ import { IsEnum, IsOptional, validateOrReject } from 'class-validator'
 
 enum Property {
   order = 'orders',
+  employee = 'employees',
 }
 
 export class RelationsBranchDto {

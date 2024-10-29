@@ -5,6 +5,7 @@ import {
   CreateBrandDto,
   UpdateBrandDto,
   RelationsBrandDto,
+  FilterBrandDto,
 } from '@modules/brand/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
 
@@ -26,8 +27,27 @@ export class BrandController {
     }
   }
 
-  // GET '/api/v1/brands/:term'
-  public searchBrandsByTerm = async (
+  //GET '/api/v1/brands/:brandId'
+  public getBrandById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const brandId = +req.params.brandId
+      const relationsDto = await RelationsBrandDto.create(req.query)
+      const response = await this.brandService.getBrandById(
+        brandId,
+        relationsDto
+      )
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  // GET '/api/v1/brands/'
+  public getBrandList = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -37,36 +57,18 @@ export class BrandController {
       const paginationDto = await CreatePaginationDto.create(req.query)
       const relationsDto = await RelationsBrandDto.create(req.query)
       const sortingDto = await CreateSortingDto.create(req.query, sortingProps)
-      const term = req.params.term
-      const response = await this.brandService.searchBrandsByTerm(
-        term,
+      const filterDto = await FilterBrandDto.create(req.query)
+      const response = await this.brandService.getBrandList(
         paginationDto,
         sortingDto,
-        relationsDto
+        relationsDto,
+        filterDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
   }
-
-  // //GET '/api/v1/brands/:term'
-  // public getBrandByTerm = async (
-  //   req: Request,
-  //   res: Response,
-  //   next: NextFunction
-  // ) => {
-  //   try {
-  //     const relationsDto = await RelationsBrandDto.create(req.query)
-  //     const response = await this.brandService.getBrandByTerm(
-  //       req.params.term,
-  //       relationsDto
-  //     )
-  //     res.status(response.statusCode).json(response)
-  //   } catch (e) {
-  //     next(e)
-  //   }
-  // }
 
   //PUT '/api/v1/brands/:brandId'
   public updateBrand = async (

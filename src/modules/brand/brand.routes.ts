@@ -26,13 +26,13 @@ export class BrandRoutes {
     router.get(
       '/',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.searchBrandsByTerm
+      controller.getBrandList
     )
 
     router.get(
-      '/:term',
+      '/:brandId',
       [AuthMiddleware.checkPermission(resource, Actions.READ)],
-      controller.searchBrandsByTerm
+      controller.getBrandById
     )
 
     router.put(
