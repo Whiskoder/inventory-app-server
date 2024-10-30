@@ -49,14 +49,14 @@ export const RoleConfig: IRoleConfig = {
   },
   accountant: {
     permissions: {
-      [Resources.BRANCH]: [],
-      [Resources.BRAND]: [],
+      [Resources.BRANCH]: [Actions.READ],
+      [Resources.BRAND]: [Actions.READ],
       [Resources.CATEGORY]: [],
       [Resources.INVOICE]: [Actions.READ],
       [Resources.ORDER_ITEM]: [],
       [Resources.ORDER]: [],
-      [Resources.PRODUCT]: [],
-      [Resources.PROVIDER]: [],
+      [Resources.PRODUCT]: [Actions.READ],
+      [Resources.PROVIDER]: [Actions.READ],
     },
   },
   employee: {

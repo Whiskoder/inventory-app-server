@@ -8,6 +8,7 @@ import { ProviderRoutes } from '@modules/provider'
 import { OrderRoutes } from '@modules/order'
 import { BrandRoutes } from '@modules/brand'
 import { InvoiceRoutes } from '@modules/invoice'
+import { UserRoutes } from '@modules/user'
 
 export class AppRoutes {
   static get routes(): Router {
@@ -21,6 +22,7 @@ export class AppRoutes {
     router.use('/v1/orders', OrderRoutes.routes)
     router.use('/v1/brands', BrandRoutes.routes)
     router.use('/v1/invoices', InvoiceRoutes.routes)
+    router.use('/v1/users', UserRoutes.routes)
 
     return router
   }

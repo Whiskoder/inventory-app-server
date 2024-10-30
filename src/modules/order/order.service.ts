@@ -136,7 +136,6 @@ export class OrderService {
           folio,
         }
         const htmlBody = await orderUpdateEmail(props)
-        console.log(props)
 
         const options: SendMailOptions = {
           htmlBody,

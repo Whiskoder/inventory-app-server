@@ -5,6 +5,7 @@ import { bcryptAdapter, JWT } from '@config/plugins'
 import { CreateHTTPResponseDto } from '@modules/shared/dtos'
 import { RegisterUserDto, LoginUserDto } from '@modules/auth/dtos'
 import { User } from '@modules/user/models'
+import { RoleConfig } from '@/config/role.config'
 // import { EmailService } from '@presentation/services'
 
 export class AuthService {
@@ -83,6 +84,16 @@ export class AuthService {
       user: userEntity,
       token,
     })
+  }
+
+  public async getUserPermissions(
+    userEntity: User
+  ): Promise<CreateHTTPResponseDto> {
+    const { role } = userEntity
+
+    const permissions = RoleConfig[role]
+
+    return CreateHTTPResponseDto.ok(undefined, permissions)
   }
 
   public async checkAuth(user: User) {
