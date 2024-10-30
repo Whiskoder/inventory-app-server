@@ -82,7 +82,7 @@ export class EmailService {
         html: htmlBody,
         attachments,
       })
-      // console.log(sentInformation)
+      console.log(sentInformation)
       return true
     } catch (error) {
       console.log(error)

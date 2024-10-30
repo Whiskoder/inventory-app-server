@@ -6,7 +6,7 @@ import { RegisterUserDto, LoginUserDto } from '@modules/auth/dtos'
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // POST '/api/v1/auth/login'
+  // POST '/v1/auth/login'
   public loginUser = async (
     req: Request,
     res: Response,
@@ -21,7 +21,7 @@ export class AuthController {
     }
   }
 
-  // POST '/api/v1/auth/register'
+  // POST '/v1/auth/register'
   public registerUser = async (
     req: Request,
     res: Response,
@@ -36,7 +36,22 @@ export class AuthController {
     }
   }
 
-  // GET '/api/v1/auth/check'
+  //GET '/v1/auth/permissions'
+  public getUserPermissions = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const userEntity = res.locals.user
+      const response = await this.authService.getUserPermissions(userEntity)
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  // GET '/v1/auth/check'
   public checkAuth = async (
     req: Request,
     res: Response,

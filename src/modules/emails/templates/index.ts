@@ -1,1 +1,1 @@
-export * from '@modules/emails/templates/order-update'
+export * from '@/modules/emails/templates/created-order.email-template'

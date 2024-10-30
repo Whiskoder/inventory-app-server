@@ -16,7 +16,7 @@ import { DeleteMultipleOrderItemsDto } from './dtos/delete-multiple-order-items.
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  // POST '/api/v1/order/'
+  // POST '/v1/order/'
   public createOrder = async (
     req: Request,
     res: Response,
@@ -32,7 +32,7 @@ export class OrderController {
     }
   }
 
-  // POST '/api/v1/order/:orderId/place/'
+  // POST '/v1/order/:orderId/place/'
   public placeOrder = async (
     req: Request,
     res: Response,
@@ -47,8 +47,55 @@ export class OrderController {
       next(e)
     }
   }
-
-  // POST 'api/v1/order/:orderId/cancel/'
+  // POST '/v1/order/:orderId/accept/'
+  public acceptOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const orderId = +req.params.orderId
+      const user = res.locals.user
+      const response = await this.orderService.acceptOrder(orderId, user)
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+  // POST '/v1/order/:orderId/send/'
+  public notifyOrderDelivery = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const orderId = +req.params.orderId
+      const user = res.locals.user
+      const response = await this.orderService.notifyOrderDelivery(
+        orderId,
+        user
+      )
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+  // POST '/v1/order/:orderId/complete/'
+  public completeOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const orderId = +req.params.orderId
+      const user = res.locals.user
+      const response = await this.orderService.completeOrder(orderId, user)
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+  // POST '/v1/order/:orderId/cancel/'
   public cancelOrder = async (
     req: Request,
     res: Response,
@@ -63,8 +110,23 @@ export class OrderController {
       next(e)
     }
   }
+  // POST '/v1/order/:orderId/reject-cancel/'
+  public rejectCancelOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const orderId = +req.params.orderId
+      const user = res.locals.user
+      const response = await this.orderService.rejectCancelOrder(orderId, user)
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
 
-  // GET '/api/v1/order/'
+  // GET '/v1/order/'
   public getAllOrders = async (
     req: Request,
     res: Response,
@@ -95,7 +157,7 @@ export class OrderController {
     }
   }
 
-  // GET '/api/v1/order/:orderId'
+  // GET '/v1/order/:orderId'
   public getOrderById = async (
     req: Request,
     res: Response,
@@ -114,7 +176,7 @@ export class OrderController {
     }
   }
 
-  // PUT '/api/v1/order/:orderId'
+  // PUT '/v1/order/:orderId'
   public updateOrder = async (
     req: Request,
     res: Response,
@@ -131,7 +193,7 @@ export class OrderController {
     }
   }
 
-  // DELETE '/api/v1/order/:orderId'
+  // DELETE '/v1/order/:orderId'
   public deleteOrder = async (
     req: Request,
     res: Response,
@@ -146,7 +208,7 @@ export class OrderController {
     }
   }
 
-  // POST '/api/v1/order/:orderId/items/'
+  // POST '/v1/order/:orderId/items/'
   public createMultipleOrderItems = async (
     req: Request,
     res: Response,
@@ -167,7 +229,7 @@ export class OrderController {
     }
   }
 
-  // PUT '/api/v1/order/:orderId/items/'
+  // PUT '/v1/order/:orderId/items/'
   public updateMultipleOrderItems = async (
     req: Request,
     res: Response,
@@ -188,7 +250,7 @@ export class OrderController {
     }
   }
 
-  // DELETE '/api/v1/order/:orderId/items/:orderItemId'
+  // DELETE '/v1/order/:orderId/items/:orderItemId'
   public deleteOrderItem = async (
     req: Request,
     res: Response,

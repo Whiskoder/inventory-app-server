@@ -16,7 +16,7 @@ import {
 } from '@react-email/components'
 import * as React from 'react'
 
-export interface OrderUpdateEmailProps {
+export interface CreatedOrderEmailTemplateProps {
   folio: string
   address: string
   deliveryDate: string
@@ -24,7 +24,9 @@ export interface OrderUpdateEmailProps {
   username: string
 }
 
-export const OrderUpdateEmail = (props: OrderUpdateEmailProps) => {
+export const CreatedOrderEmailTemplate = (
+  props: CreatedOrderEmailTemplateProps
+) => {
   const { folio, deliveryDate, address, downloadOrderLink, username } = props
 
   const baseUrl = 'https://sistemasdealimentacion.app'
@@ -99,9 +101,11 @@ export const OrderUpdateEmail = (props: OrderUpdateEmailProps) => {
   )
 }
 
-export const orderUpdateEmail = async (props: OrderUpdateEmailProps) => {
+export const createdOrderEmailTemplate = async (
+  props: CreatedOrderEmailTemplateProps
+) => {
   const emailHtml = await render(
-    <OrderUpdateEmail
+    <CreatedOrderEmailTemplate
       folio={props.folio}
       deliveryDate={props.deliveryDate}
       address={props.address}

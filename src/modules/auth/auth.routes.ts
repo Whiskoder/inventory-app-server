@@ -18,6 +18,11 @@ export class AuthRoutes {
     router.post('/login', controller.loginUser)
     router.post('/register', controller.registerUser)
     router.get('/check', [AuthMiddleware.validateToken], controller.checkAuth)
+    router.get(
+      '/permissions',
+      [AuthMiddleware.validateToken],
+      controller.getUserPermissions
+    )
 
     return router
   }
