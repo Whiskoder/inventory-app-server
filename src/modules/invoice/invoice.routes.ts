@@ -8,13 +8,18 @@ import { InvoiceController, InvoiceService } from '@modules/invoice'
 import { FileUploadMiddleware } from '@core/middlewares/file-upload.middleware'
 import { BucketService } from '@modules/shared/services'
 import { envs } from '@config/plugins'
+import { Order } from '../order/models'
 
 export class InvoiceRoutes {
   static get routes(): Router {
     const router = Router({ caseSensitive: false })
 
     const invoiceRepository = AppDataSource.getRepository(Invoice)
-    const invoiceService = new InvoiceService(invoiceRepository)
+    const orderRepository = AppDataSource.getRepository(Order)
+    const invoiceService = new InvoiceService(
+      invoiceRepository,
+      orderRepository
+    )
     const bucketService = new BucketService(
       envs.BUCKET_ENDPOINT,
       envs.BUCKET_NAME,

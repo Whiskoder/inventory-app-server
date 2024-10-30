@@ -3,6 +3,7 @@ import {
   IsNumber,
   IsOptional,
   IsPositive,
+  IsString,
   validateOrReject,
 } from 'class-validator'
 
@@ -30,11 +31,21 @@ export class FilterInvoiceDto {
   @IsOptional()
   gteTotalAmount?: number
 
+  @IsString()
+  @IsOptional()
+  equalsFolio?: string
+
+  @IsString()
+  @IsOptional()
+  likeFolio?: string
+
   constructor(parsedQuery: { [key: string]: any }) {
     this.ltePaymentDate = +parsedQuery?.paymentDate?.lte || undefined
     this.gtePaymentDate = +parsedQuery?.paymentDate?.gte || undefined
     this.lteTotalAmount = +parsedQuery?.totalAmount?.lte || undefined
     this.gteTotalAmount = +parsedQuery?.totalAmount?.gte || undefined
+    this.equalsFolio = parsedQuery?.folio?.equals
+    this.likeFolio = parsedQuery?.folio?.like
   }
 
   public static async create(obj: {
@@ -43,6 +54,12 @@ export class FilterInvoiceDto {
     const parsedQuery = qs.parse(obj)
     const dto = new FilterInvoiceDto(parsedQuery)
     await validateOrReject(dto)
+
+    if (dto.equalsFolio && dto.likeFolio)
+      throw new BadRequestException(ErrorMessages.LikeEqualsConflict)
+
+    dto.equalsFolio = dto.equalsFolio?.trim().toUpperCase()
+    dto.likeFolio = dto.likeFolio?.trim().toUpperCase()
 
     return dto
   }

@@ -35,9 +35,17 @@ export class Invoice {
   @Column({
     type: 'varchar',
     length: longNameLength,
-    nullable: true,
+    nullable: false,
+    unique: true,
   })
   fileUrl?: string
+
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    nullable: false,
+  })
+  fileExtension?: string
 
   @Column({
     type: 'varchar',
@@ -79,7 +87,6 @@ export class Invoice {
   provider!: Provider
 
   normalizeStrings() {
-    this.fileUrl = this.fileUrl?.trim().toLowerCase()
     this.notes = this.notes?.trim().toLowerCase()
   }
 

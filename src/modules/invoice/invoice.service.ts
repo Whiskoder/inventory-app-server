@@ -24,18 +24,30 @@ import {
   UpdateInvoiceDto,
 } from '@modules/invoice/dtos'
 import { CalculatePaginationUseCase } from '@modules/shared/use-cases'
-import { UUID } from '@config/plugins'
+import { Order } from '@modules/order/models'
 
 export class InvoiceService {
-  constructor(private readonly invoiceRepository: Repository<Invoice>) {}
+  constructor(
+    private readonly invoiceRepository: Repository<Invoice>,
+    private readonly orderRepository: Repository<Order>
+  ) {}
 
   public async createInvoice(
     createInvoiceDto: CreateInvoiceDto
   ): Promise<CreateHTTPResponseDto> {
-    const invoiceEntity = this.invoiceRepository.create(createInvoiceDto)
+    const { folio } = createInvoiceDto
+
+    const orderEntity = await this.orderRepository.findOne({ where: { folio } })
+
+    if (!orderEntity) throw new BadRequestException('Order not found')
+
+    const invoiceEntity = this.invoiceRepository.create({
+      ...createInvoiceDto,
+      order: orderEntity,
+    })
     await this.invoiceRepository.save(invoiceEntity)
 
-    return CreateHTTPResponseDto.created('invoice created succesfully', {
+    return CreateHTTPResponseDto.created('Invoice created succesfully', {
       invoices: [invoiceEntity],
     })
   }
@@ -89,12 +101,12 @@ export class InvoiceService {
     updateInvoiceDto: UpdateInvoiceDto
   ): Promise<CreateHTTPResponseDto> {
     const invoiceEntity = this.invoiceRepository.create(updateInvoiceDto)
-    const updatedinvoice = await this.invoiceRepository.update(
+    const updatedInvoice = await this.invoiceRepository.update(
       { id: invoiceId },
       invoiceEntity
     )
 
-    if (!updatedinvoice.affected)
+    if (!updatedInvoice.affected)
       throw new NotFoundException('Invoice not found')
 
     return CreateHTTPResponseDto.ok('Invoice updated successfully', {
@@ -105,14 +117,23 @@ export class InvoiceService {
   private createFilter(filterDto: FilterInvoiceDto) {
     const where: { [key: string]: any } = {}
 
-    const { ltePaymentDate, lteTotalAmount, gtePaymentDate, gteTotalAmount } =
-      filterDto
+    const {
+      ltePaymentDate,
+      lteTotalAmount,
+      gtePaymentDate,
+      gteTotalAmount,
+      likeFolio,
+      equalsFolio,
+    } = filterDto
 
     if (ltePaymentDate) where.paymentDate = LessThanOrEqual(ltePaymentDate)
     if (gtePaymentDate) where.paymentDate = MoreThanOrEqual(gtePaymentDate)
 
     if (lteTotalAmount) where.totalAmount = LessThanOrEqual(lteTotalAmount)
     if (gteTotalAmount) where.totalAmount = MoreThanOrEqual(gteTotalAmount)
+
+    if (likeFolio) where.folio = Like(`${likeFolio}`)
+    if (equalsFolio) where.folio = Equal(equalsFolio)
 
     return where
   }

@@ -36,15 +36,25 @@ import { User } from '@modules/user/models'
 import { Roles } from '@modules/user/enums'
 import { ErrorMessages } from '@modules/shared/enums/messages'
 import { Product } from '@modules/product/models'
-import { EmailService, SendMailOptions } from '@modules/emails/services'
-import {
-  orderUpdateEmail,
-  OrderUpdateEmailProps,
-} from '@modules/emails/templates'
+import { EmailService } from '@modules/emails/services'
+import { OrderEmailsUseCase } from '@modules/emails/use-cases'
 
 // TODO: move to plugins
 import { format } from 'date-fns'
-import { es as esLocale } from 'date-fns/locale/es'
+
+interface ProcessOrderOptions {
+  orderId: number
+  userEntity: User
+  expectedStatus: OrderStatus
+  nextStatus: OrderStatus
+  emailFunction: (
+    emailService: EmailService,
+    orderEntity: Order,
+    userEntities: User[]
+  ) => void
+  isOwnerAuthRequired: boolean
+  notifyToOwner: boolean
+}
 
 export class OrderService {
   constructor(
@@ -86,70 +96,81 @@ export class OrderService {
     orderId: number,
     userEntity: User
   ): Promise<CreateHTTPResponseDto> {
-    const orderEntity = await this.orderRepository.findOne({
-      where: { id: orderId },
-      relations: ['branch'],
-    })
-    if (!orderEntity) throw new NotFoundException('Order not found')
-
-    const { status: orderStatus } = orderEntity
     const { role: userRole } = userEntity
+    const isAuthorized =
+      userRole === Roles.BRANCH_MANAGER || userRole === Roles.ADMIN
 
-    if (orderStatus > OrderStatus.OPEN)
-      throw new BadRequestException('Order already placed')
+    if (!isAuthorized)
+      throw new ForbiddenException(ErrorMessages.ForbiddenException)
 
-    const isBranchManager = userRole === Roles.BRANCH_MANAGER
-    const isAdmin = userRole === Roles.ADMIN
+    return await this.processOrder({
+      orderId,
+      userEntity,
+      expectedStatus: OrderStatus.OPEN,
+      nextStatus: OrderStatus.SENT,
+      emailFunction: OrderEmailsUseCase.sendCreatedOrderEmail,
+      isOwnerAuthRequired: true,
+      notifyToOwner: false,
+    })
+  }
 
-    if (isBranchManager || isAdmin) {
-      const response = await this.updateOrderStatus(orderId, OrderStatus.SENT)
+  public async acceptOrder(
+    orderId: number,
+    userEntity: User
+  ): Promise<CreateHTTPResponseDto> {
+    const { role: userRole } = userEntity
+    const isAuthorized =
+      userRole === Roles.WAREHOUSE_MANAGER || userRole === Roles.ADMIN
 
-      // Notify users
-      const users = await this.userRepository.find({
-        where: { role: Roles.WAREHOUSE_MANAGER },
-      })
+    if (!isAuthorized)
+      throw new ForbiddenException(ErrorMessages.ForbiddenException)
 
-      const { folio } = orderEntity
+    return await this.processOrder({
+      orderId,
+      userEntity,
+      expectedStatus: OrderStatus.SENT,
+      nextStatus: OrderStatus.PROCESSING,
+      emailFunction: OrderEmailsUseCase.sendCreatedOrderEmail,
+      isOwnerAuthRequired: false,
+      notifyToOwner: true,
+    })
+  }
 
-      users.forEach(async ({ email, firstName }) => {
-        const deliveryDate = format(
-          orderEntity.deliveryDate,
-          'EEEE, MMMM dd, yyyy',
-          { locale: esLocale }
-        )
+  public async notifyOrderDelivery(
+    orderId: number,
+    userEntity: User
+  ): Promise<CreateHTTPResponseDto> {
+    const { role: userRole } = userEntity
+    const isAuthorized =
+      userRole === Roles.WAREHOUSE_MANAGER || userRole === Roles.ADMIN
 
-        const { name, streetName, dependantLocality, cityName, postalCode } =
-          orderEntity.branch
-        const items = [streetName, dependantLocality, cityName, postalCode]
+    if (!isAuthorized)
+      throw new ForbiddenException(ErrorMessages.ForbiddenException)
 
-        const address =
-          items.reduce((address, item) => {
-            if (item) address = `${address}, ${item}`
-            return address
-          }, name) ?? ''
+    return await this.processOrder({
+      orderId,
+      userEntity,
+      expectedStatus: OrderStatus.PROCESSING,
+      nextStatus: OrderStatus.DELIVERED,
+      emailFunction: OrderEmailsUseCase.sendCreatedOrderEmail,
+      isOwnerAuthRequired: false,
+      notifyToOwner: true,
+    })
+  }
 
-        const props: OrderUpdateEmailProps = {
-          address,
-          deliveryDate,
-          username: firstName,
-          downloadOrderLink: `orders/pdf/${folio}`,
-          folio,
-        }
-        const htmlBody = await orderUpdateEmail(props)
-
-        const options: SendMailOptions = {
-          htmlBody,
-          to: email,
-          subject: `Tienes un nuevo pedido - ${orderEntity.folio}`,
-          from: 'no-responder@sistemasdealimentacion.com.mx',
-        }
-        this.emailService.sendEmail(options)
-      })
-
-      return response
-    }
-
-    throw new ForbiddenException(ErrorMessages.ForbiddenException)
+  public async completeOrder(
+    orderId: number,
+    userEntity: User
+  ): Promise<CreateHTTPResponseDto> {
+    return await this.processOrder({
+      orderId,
+      userEntity,
+      expectedStatus: OrderStatus.DELIVERED,
+      nextStatus: OrderStatus.COMPLETED,
+      emailFunction: OrderEmailsUseCase.sendCreatedOrderEmail,
+      isOwnerAuthRequired: true,
+      notifyToOwner: false,
+    })
   }
 
   // An order can only be canceled if it has not been sent by the warehouse.
@@ -161,32 +182,52 @@ export class OrderService {
   ): Promise<CreateHTTPResponseDto> {
     const orderEntity = await this.orderRepository.findOne({
       where: { id: orderId },
+      relations: ['user'],
     })
     if (!orderEntity) throw new NotFoundException('Order not found')
 
     const { status: orderStatus } = orderEntity
 
-    if (orderStatus === OrderStatus.CANCELLED)
-      throw new BadRequestException('Order already cancelled')
-
-    if (orderStatus === OrderStatus.CANCEL_REQUESTED)
-      throw new BadRequestException(
-        'Order aldeady has a cancel request in progress'
-      )
-
-    if (orderStatus >= OrderStatus.DELIVERED)
+    if (
+      orderStatus >= OrderStatus.DELIVERED &&
+      orderStatus !== OrderStatus.CANCEL_REQUESTED
+    )
       throw new BadRequestException('Cannot cancel order')
 
     const { role: userRole } = userEntity
     const isWarehouseManager = userRole === Roles.WAREHOUSE_MANAGER
-    const isBranchManager = userRole === Roles.BRANCH_MANAGER
+    const isOrderOwner = userEntity.id === orderEntity.user.id
     const isAdmin = userRole === Roles.ADMIN
 
     if (isWarehouseManager || isAdmin)
       return await this.updateOrderStatus(orderId, OrderStatus.CANCELLED)
 
-    if (isBranchManager || isAdmin)
-      return await this.updateOrderStatus(orderId, OrderStatus.CANCELLED)
+    if (isOrderOwner || isAdmin)
+      return await this.updateOrderStatus(orderId, OrderStatus.CANCEL_REQUESTED)
+
+    throw new ForbiddenException(ErrorMessages.ForbiddenException)
+  }
+
+  public async rejectCancelOrder(
+    orderId: number,
+    userEntity: User
+  ): Promise<CreateHTTPResponseDto> {
+    const orderEntity = await this.orderRepository.findOne({
+      where: { id: orderId },
+    })
+    if (!orderEntity) throw new NotFoundException('Order not found')
+
+    const { status: orderStatus } = orderEntity
+
+    if (orderStatus !== OrderStatus.CANCEL_REQUESTED)
+      throw new BadRequestException('This action cannot be performed')
+
+    const { role: userRole } = userEntity
+    const isWarehouseManager = userRole === Roles.WAREHOUSE_MANAGER
+    const isAdmin = userRole === Roles.ADMIN
+
+    if (isWarehouseManager || isAdmin)
+      return await this.updateOrderStatus(orderId, OrderStatus.PROCESSING)
 
     throw new ForbiddenException(ErrorMessages.ForbiddenException)
   }
@@ -418,6 +459,59 @@ export class OrderService {
     return existingItems
   }
 
+  private async processOrder(
+    opts: ProcessOrderOptions
+  ): Promise<CreateHTTPResponseDto> {
+    const {
+      emailFunction,
+      expectedStatus,
+      isOwnerAuthRequired,
+      nextStatus,
+      notifyToOwner,
+      orderId,
+      userEntity,
+    } = opts
+
+    const orderEntity = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['branch', 'user'],
+    })
+    if (!orderEntity) throw new NotFoundException('Order not found')
+
+    const { status: orderStatus } = orderEntity
+
+    if (orderStatus !== expectedStatus)
+      throw new BadRequestException('This action cannot be performed')
+
+    let isAuthorized: boolean = false
+    const { role: userRole } = userEntity
+
+    if (isOwnerAuthRequired) {
+      isAuthorized =
+        userEntity.id === orderEntity.user.id || userRole === Roles.ADMIN
+    } else {
+      isAuthorized =
+        userRole === Roles.WAREHOUSE_MANAGER || userRole === Roles.ADMIN
+    }
+
+    if (!isAuthorized)
+      throw new ForbiddenException(ErrorMessages.ForbiddenException)
+
+    let userEntities: User[] = [orderEntity.user]
+    if (!notifyToOwner) {
+      userEntities = await this.userRepository.find({
+        where: { role: Roles.WAREHOUSE_MANAGER },
+      })
+    }
+
+    const response = await this.updateOrderStatus(orderId, nextStatus)
+
+    // Notify users
+    emailFunction(this.emailService, orderEntity, userEntities)
+
+    return response
+  }
+
   private async updateOrderStatus(
     orderId: number,
     orderStatus: OrderStatus
@@ -436,9 +530,9 @@ export class OrderService {
   private generateFolio() {
     const date = new Date()
     const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = String(date.getFullYear()).slice(-2)
+    const day = String(date.getDate()).padStart(2, '0')
     const randomDigits = Math.floor(10 + Math.random() * 90)
-    const folio = `F${randomDigits}-${month}${year}`
+    const folio = `F${randomDigits}-${month}${day}`
     return folio
   }
 

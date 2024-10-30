@@ -1,4 +1,4 @@
-import { validateOrReject } from 'class-validator'
+import { IsString, validateOrReject } from 'class-validator'
 import { plainToInstance } from 'class-transformer'
 
 export class UpdateInvoiceDto {

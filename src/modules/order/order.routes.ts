@@ -54,11 +54,30 @@ export class OrderRoutes {
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.placeOrder
     )
-
+    router.post(
+      '/:orderId/accept',
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
+      controller.acceptOrder
+    )
+    router.post(
+      '/:orderId/send',
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
+      controller.notifyOrderDelivery
+    )
+    router.post(
+      '/:orderId/complete',
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
+      controller.completeOrder
+    )
     router.post(
       '/:orderId/cancel',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.cancelOrder
+    )
+    router.post(
+      '/:orderId/reject-cancel',
+      [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
+      controller.rejectCancelOrder
     )
 
     router.get(
