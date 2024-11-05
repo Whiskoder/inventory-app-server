@@ -3,6 +3,9 @@ import { Request, Response } from 'express'
 import { LoggerPlugin, envs, LoggerTransportPlugin } from '@config/plugins'
 import { IHTTPError } from '@/modules/shared/extensions'
 
+/**
+ * Interfaz para la estructura de los logs HTTP.
+ */
 export interface httpInfo {
   log: {
     service: string
@@ -11,6 +14,9 @@ export interface httpInfo {
   [key: string]: unknown
 }
 
+/**
+ * Enum que define los niveles de severidad para los logs.
+ */
 export enum LogSeverityLevel {
   ERROR = 'ERROR',
   WARN = 'WARN',
@@ -21,6 +27,10 @@ export enum LogSeverityLevel {
   SILLY = 'SILLY',
 }
 
+/**
+ * Clase para gestionar el registro de logs de la aplicación.
+ * Permite generar logs en diferentes niveles de severidad y configuraciones.
+ */
 export class AppLogger {
   constructor(
     private readonly logger: LoggerPlugin,
@@ -28,6 +38,11 @@ export class AppLogger {
     private readonly mode: boolean
   ) {}
 
+  /**
+   * Método estático para crear una instancia de `AppLogger`.
+   * @param {string} service - Nombre del servicio o componente para el que se está generando el log.
+   * @returns {AppLogger} Instancia de `AppLogger`.
+   */
   public static create(service: string): AppLogger {
     const levels = {
       ERROR: 0,
@@ -55,6 +70,7 @@ export class AppLogger {
       colors,
     })
 
+    // Si el modo es desarrollo, se agrega un transporte para consola.
     if (mode) {
       const consoleTransport = LoggerPlugin.createConsoleTransport(
         LogSeverityLevel.SILLY
@@ -65,6 +81,13 @@ export class AppLogger {
     return new AppLogger(logger, service, mode)
   }
 
+  /**
+   * Formatea la información de la respuesta HTTP para los logs.
+   * @param {Request} req - Objeto de la solicitud HTTP.
+   * @param {Response} res - Objeto de la respuesta HTTP.
+   * @param {IHTTPError} error - Error relacionado con la solicitud HTTP.
+   * @returns {object} Información formateada para el log.
+   */
   private formatHttpLoggerResponse = (
     req: Request,
     res: Response,
@@ -93,21 +116,43 @@ export class AppLogger {
     }
   }
 
+  /**
+   * Registra un mensaje de tipo "INFO".
+   * @param {string} message - Mensaje del log.
+   * @param {unknown} [metadata] - Información adicional asociada al log.
+   */
   public info(message: string, metadata?: unknown) {
     this.log(LogSeverityLevel.INFO, message, metadata)
   }
 
+  /**
+   * Registra un mensaje de tipo "ERROR".
+   * @param {unknown} error - El error que se está registrando.
+   * @param {string} [details] - Detalles adicionales sobre el error.
+   */
   public error(error: unknown, details?: string) {
     const message = details || `${error}`
     this.log(LogSeverityLevel.ERROR, message, error)
   }
 
+  /**
+   * Registra un error HTTP.
+   * @param {Request} req - Objeto de la solicitud HTTP.
+   * @param {Response} res - Objeto de la respuesta HTTP.
+   * @param {IHTTPError} error - Error HTTP que se está registrando.
+   */
   public httpError(req: Request, res: Response, error: IHTTPError) {
     const metadata = this.formatHttpLoggerResponse(req, res, error)
     const message = `[${metadata.request.method}] ${metadata.request.url} - ${error.statusCode} ${error.message} `
     this.log(LogSeverityLevel.HTTP, message, metadata)
   }
 
+  /**
+   * Método privado para registrar logs en diferentes niveles de severidad.
+   * @param {LogSeverityLevel} logLevel - Nivel de severidad del log.
+   * @param {string} message - Mensaje del log.
+   * @param {unknown} [metadata] - Información adicional asociada al log.
+   */
   private log(logLevel: LogSeverityLevel, message: string, metadata?: unknown) {
     if (!this.mode) return
 
@@ -122,27 +167,10 @@ export class AppLogger {
     this.logger.log(logLevel, logMessage, args)
   }
 
-  // public httpError(
-  //       req: Request,
-  //   res: Response,
-  //   body: httpError
-  // ) {
-  //   const metadata = this.formatHttpLoggerResponse(req, res, body)
-  //   const message = body.error?.message ?? 'Error request'
-  //   const logMessage = `[${res.statusCode}] [${service}] ${message}`
-  //   const args = this.createArgs(service, message, metadata)
-  //   this.logger.log(LogSeverityLevel.HTTP, logMessage, args)
-  // }
-
-  // public httpInfo(req: Request, res: Response, body: httpInfo) {
-  //   const metadata = this.formatHttpLoggerResponse(req, res, body)
-  //   const message = body?.log?.message ?? 'Info request'
-  //   const origin = body?.log?.service ?? 'unknown'
-  //   const logMessage = `[${res.statusCode}] [${service}] [${origin}] ${message}`
-  //   const args = this.createArgs(service, message, metadata)
-  //   this.logger.log(LogSeverityLevel.HTTP, logMessage, args)
-  // }
-
+  /**
+   * Añade un transporte de log adicional.
+   * @param {LoggerTransportPlugin} transport - El transporte que se agregará.
+   */
   public addTransport(transport: LoggerTransportPlugin) {
     this.logger.addLoggerTransport(transport)
   }
