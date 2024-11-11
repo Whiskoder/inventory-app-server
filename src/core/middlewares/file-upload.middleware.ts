@@ -3,7 +3,8 @@ import { BadRequestException } from '../errors'
 
 /**
  * Middleware que verifica si se han subido archivos en la solicitud.
- * Si no se han subido archivos o si no se encuentran en el formato esperado, lanza una excepción.
+ * Si no se han subido archivos o si no se encuentran en el formato
+ * esperado, lanza una excepción.
  */
 export class FileUploadMiddleware {
   /**
