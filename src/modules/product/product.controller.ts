@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import { ProductService } from '@modules/product'
 import {
+  CreateMultipleProductsDto,
   CreateProductDto,
   FilterProductDto,
   RelationsProductDto,
@@ -21,6 +22,23 @@ export class ProductController {
     try {
       const dto = await CreateProductDto.create(req.body)
       const response = await this.productService.createProduct(dto)
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  // POST 'api/v1/products/excel'
+  public importExcel = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const createProductDtos = await CreateMultipleProductsDto.create(req.body)
+      const response = await this.productService.createOrUpdateMultipleProducts(
+        createProductDtos
+      )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
@@ -56,11 +74,11 @@ export class ProductController {
       const paginationDto = await CreatePaginationDto.create(req.query)
       const relationsDto = await RelationsProductDto.create(req.query)
       const sortingProps = [
+        'code',
         'category',
         'name',
         'brand',
-        'pricePerUnit',
-        'minUnits',
+        'unitPrice',
         'measureUnit',
       ]
       const sortingDto = await CreateSortingDto.create(req.query, sortingProps)

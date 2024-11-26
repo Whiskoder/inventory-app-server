@@ -2,21 +2,19 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   OneToMany,
-  JoinColumn,
   BeforeInsert,
   BeforeUpdate,
   ManyToMany,
+  Index,
+  Unique,
 } from 'typeorm'
 
-import { Category } from '@modules/category/models'
 import { OrderItem } from '@modules/order/models'
-import { longNameLength } from '@/modules/shared/constants'
+import { codeLength, longNameLength } from '@modules/shared/constants'
 import { MeasureUnit } from '@modules/product/enums'
 import { Branch } from '@modules/branch/models'
-import { Brand } from '@modules/brand/models'
-import { Provider } from '@/modules/provider/models'
+import { Provider } from '@modules/provider/models'
 
 @Entity({ name: 'products' })
 export class Product {
@@ -29,6 +27,14 @@ export class Product {
   })
   measureUnit!: MeasureUnit
 
+  @Index('UQ_product_code', ['code'], { unique: true })
+  @Column({
+    type: 'varchar',
+    length: codeLength,
+    nullable: true,
+  })
+  code!: string
+
   @Column({
     type: 'varchar',
     length: longNameLength,
@@ -40,14 +46,7 @@ export class Product {
     precision: 10,
     scale: 2,
   })
-  pricePerUnit!: number
-
-  @Column({
-    type: 'decimal',
-    precision: 10,
-    scale: 2,
-  })
-  minUnits!: number
+  unitPrice!: number
 
   @Column({
     type: 'boolean',
@@ -61,15 +60,19 @@ export class Product {
   })
   orderItems?: OrderItem[]
 
-  @ManyToOne(() => Category, (category) => category.products, {
-    eager: false,
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    default: '',
   })
-  @JoinColumn()
-  category!: Category
+  category!: string
 
-  @ManyToOne(() => Brand, (brand) => brand.products, { eager: false })
-  @JoinColumn()
-  brand!: Brand
+  @Column({
+    type: 'varchar',
+    length: longNameLength,
+    default: '',
+  })
+  brand!: string
 
   @ManyToMany(() => Branch)
   branches?: Branch[]
@@ -79,6 +82,8 @@ export class Product {
 
   normalizeStrings() {
     this.name = this.name.toLowerCase().trim()
+    this.category = this.category ?? ''.toLowerCase().trim()
+    this.brand = this.brand ?? ''.toLowerCase().trim()
   }
 
   @BeforeInsert()

@@ -21,19 +21,19 @@ export class FilterProductDto {
 
   @IsString()
   @IsOptional()
-  likeBrandName?: string
+  likeBrand?: string
 
   @IsString()
   @IsOptional()
-  equalsCategoryName?: string
+  equalsCategory?: string
 
   @IsString()
   @IsOptional()
-  likeCategoryName?: string
+  likeCategory?: string
 
   @IsString()
   @IsOptional()
-  equalsBrandName?: string
+  equalsBrand?: string
 
   @IsString()
   @IsOptional()
@@ -42,40 +42,27 @@ export class FilterProductDto {
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  ltePricePerUnit?: number
+  lteUnitPrice?: number
 
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  gtePricePerUnit?: number
-
-  @IsNumber()
-  @IsPositive()
-  @IsOptional()
-  lteMinUnits?: number
-
-  @IsNumber()
-  @IsPositive()
-  @IsOptional()
-  gteMinUnits?: number
+  gteUnitPrice?: number
 
   constructor(parsedQuery: { [key: string]: any }) {
     this.likeName = parsedQuery?.name?.like
     this.equalsName = parsedQuery?.name?.equals
 
-    this.likeBrandName = parsedQuery?.brand?.like
-    this.equalsBrandName = parsedQuery?.brand?.equals
+    this.likeBrand = parsedQuery?.brand?.like
+    this.equalsBrand = parsedQuery?.brand?.equals
 
-    this.likeCategoryName = parsedQuery?.category?.like
-    this.equalsCategoryName = parsedQuery?.category?.equals
+    this.likeCategory = parsedQuery?.category?.like
+    this.equalsCategory = parsedQuery?.category?.equals
 
     this.equalsMeasureUnit = parsedQuery?.measureUnit?.equals
 
-    this.ltePricePerUnit = +parsedQuery?.pricePerUnit?.lte || undefined
-    this.gtePricePerUnit = +parsedQuery?.pricePerUnit?.gte || undefined
-
-    this.lteMinUnits = +parsedQuery?.minUnits?.lte || undefined
-    this.gteMinUnits = +parsedQuery?.minUnits?.gte || undefined
+    this.lteUnitPrice = +parsedQuery?.pricePerUnit?.lte || undefined
+    this.gteUnitPrice = +parsedQuery?.pricePerUnit?.gte || undefined
   }
 
   public static async create(obj: {
@@ -87,19 +74,19 @@ export class FilterProductDto {
 
     if (
       (dto.likeName && dto.equalsName) ||
-      (dto.likeBrandName && dto.equalsBrandName) ||
-      (dto.likeCategoryName && dto.equalsCategoryName)
+      (dto.likeBrand && dto.equalsBrand) ||
+      (dto.likeCategory && dto.equalsCategory)
     )
       throw new BadRequestException(ErrorMessages.LikeEqualsConflict)
 
     dto.likeName = dto.likeName?.trim().toLowerCase()
     dto.equalsName = dto.equalsName?.trim().toLowerCase()
 
-    dto.likeBrandName = dto.likeBrandName?.trim().toLowerCase()
-    dto.equalsBrandName = dto.equalsBrandName?.trim().toLowerCase()
+    dto.likeBrand = dto.likeBrand?.trim().toLowerCase()
+    dto.equalsBrand = dto.equalsBrand?.trim().toLowerCase()
 
-    dto.likeCategoryName = dto.likeCategoryName?.trim().toLowerCase()
-    dto.equalsCategoryName = dto.equalsCategoryName?.trim().toLowerCase()
+    dto.likeCategory = dto.likeCategory?.trim().toLowerCase()
+    dto.equalsCategory = dto.equalsCategory?.trim().toLowerCase()
 
     dto.equalsMeasureUnit = dto.equalsMeasureUnit?.trim().toLowerCase()
 

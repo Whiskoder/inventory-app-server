@@ -7,11 +7,8 @@ import {
   CreateOrderItemDto,
   UpdateOrderItemDto,
   FilterOrderDto,
-  CreateMultipleOrderItemsDto,
 } from '@modules/order/dtos'
 import { CreatePaginationDto, CreateSortingDto } from '@modules/shared/dtos'
-import { UpdateMultipleOrderItemsDto } from './dtos/update-multiple-order-items.dto'
-import { DeleteMultipleOrderItemsDto } from './dtos/delete-multiple-order-items.dto'
 
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -176,6 +173,21 @@ export class OrderController {
     }
   }
 
+  // GET '/v1/order/budget/:date'
+  public getOrderWeekBudget = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const date = req.params.date
+      const response = await this.orderService.getOrderWeekBudget(date)
+      res.status(response.statusCode).json(response)
+    } catch (e) {
+      next(e)
+    }
+  }
+
   // PUT '/v1/order/:orderId'
   public updateOrder = async (
     req: Request,
@@ -208,20 +220,17 @@ export class OrderController {
     }
   }
 
-  // POST '/v1/order/:orderId/items/'
-  public createMultipleOrderItems = async (
+  public createOrderItem = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const createOrderItemDtos = await CreateMultipleOrderItemsDto.create(
-        req.body
-      )
       const orderId = +req.params.orderId
-      const response = await this.orderService.createMultipleOrderItems(
-        createOrderItemDtos,
-        orderId
+      const createOrderItemDto = await CreateOrderItemDto.create(req.body)
+      const response = await this.orderService.createOrderItem(
+        orderId,
+        createOrderItemDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -229,20 +238,19 @@ export class OrderController {
     }
   }
 
-  // PUT '/v1/order/:orderId/items/'
-  public updateMultipleOrderItems = async (
+  public updateOrderItem = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const updateOrderItemDtos = await UpdateMultipleOrderItemsDto.create(
-        req.body
-      )
       const orderId = +req.params.orderId
-      const response = await this.orderService.updateMultipleOrderItems(
-        updateOrderItemDtos,
-        orderId
+      const orderItemId = +req.params.orderItemId
+      const updateOrderItemDto = await UpdateOrderItemDto.create(req.body)
+      const response = await this.orderService.updateOrderItem(
+        orderId,
+        orderItemId,
+        updateOrderItemDto
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
@@ -250,7 +258,6 @@ export class OrderController {
     }
   }
 
-  // DELETE '/v1/order/:orderId/items/:orderItemId'
   public deleteOrderItem = async (
     req: Request,
     res: Response,
@@ -258,15 +265,76 @@ export class OrderController {
   ) => {
     try {
       const orderId = +req.params.orderId
-      const deleteMultipleOrderItemsDto =
-        await DeleteMultipleOrderItemsDto.create(req.query)
+      const orderItemId = +req.params.orderItemId
       const response = await this.orderService.deleteOrderItem(
         orderId,
-        deleteMultipleOrderItemsDto
+        orderItemId
       )
       res.status(response.statusCode).json(response)
     } catch (e) {
       next(e)
     }
   }
+
+  // // POST '/v1/order/:orderId/items/'
+  // public deleteMultipleOrderItems = async (
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ) => {
+  //   try {
+  //     const createOrderItemDtos = await CreateMultipleOrderItemsDto.create(
+  //       req.body
+  //     )
+  //     const orderId = +req.params.orderId
+  //     const response = await this.orderService.createMultipleOrderItems(
+  //       createOrderItemDtos,
+  //       orderId
+  //     )
+  //     res.status(response.statusCode).json(response)
+  //   } catch (e) {
+  //     next(e)
+  //   }
+  // }
+
+  // // PUT '/v1/order/:orderId/items/'
+  // public updateMultipleOrderItems = async (
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ) => {
+  //   try {
+  //     const updateOrderItemDtos = await UpdateMultipleOrderItemsDto.create(
+  //       req.body
+  //     )
+  //     const orderId = +req.params.orderId
+  //     const response = await this.orderService.updateMultipleOrderItems(
+  //       updateOrderItemDtos,
+  //       orderId
+  //     )
+  //     res.status(response.statusCode).json(response)
+  //   } catch (e) {
+  //     next(e)
+  //   }
+  // }
+
+  // // DELETE '/v1/order/:orderId/items/:orderItemId'
+  // public deleteOrderItem = async (
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ) => {
+  //   try {
+  //     const orderId = +req.params.orderId
+  //     const deleteMultipleOrderItemsDto =
+  //       await DeleteMultipleOrderItemsDto.create(req.query)
+  //     const response = await this.orderService.deleteOrderItem(
+  //       orderId,
+  //       deleteMultipleOrderItemsDto
+  //     )
+  //     res.status(response.statusCode).json(response)
+  //   } catch (e) {
+  //     next(e)
+  //   }
+  // }
 }

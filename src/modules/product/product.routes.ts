@@ -5,22 +5,14 @@ import { Product } from '@modules/product/models'
 import { ProductController, ProductService } from '@modules/product'
 import { Resources, Actions } from '@modules/user/enums'
 import { AuthMiddleware } from '@core/middlewares'
-import { Category } from '@modules/category/models'
-import { Brand } from '@modules/brand/models'
 
 export class ProductRoutes {
   static get routes(): Router {
     const router = Router({ caseSensitive: false })
 
     const productRepository = AppDataSource.getRepository(Product)
-    const brandRepository = AppDataSource.getRepository(Brand)
-    const categoryRepository = AppDataSource.getRepository(Category)
 
-    const productService = new ProductService(
-      productRepository,
-      brandRepository,
-      categoryRepository
-    )
+    const productService = new ProductService(productRepository)
     const controller = new ProductController(productService)
 
     const resource = Resources.PRODUCT
@@ -31,6 +23,15 @@ export class ProductRoutes {
       '/',
       [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
       controller.createProduct
+    )
+
+    router.post(
+      '/excel',
+      [
+        AuthMiddleware.checkPermission(resource, Actions.CREATE),
+        // AuthMiddleware.checkPermission(resource, Actions.UPDATE),
+      ],
+      controller.importExcel
     )
 
     router.get(

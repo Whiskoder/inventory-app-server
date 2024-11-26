@@ -1,5 +1,8 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -16,12 +19,26 @@ export class OrderItem {
   @PrimaryGeneratedColumn()
   id!: number
 
+  @CreateDateColumn({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP(2)',
+    onUpdate: 'CURRENT_TIMESTAMP(2)',
+  })
+  updatedAt!: Date
+
   @Column({
     type: 'decimal',
     precision: 10,
     scale: 2,
   })
   basePriceAtOrder!: number
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  total!: number
 
   @Column({
     type: 'enum',
@@ -62,4 +79,20 @@ export class OrderItem {
   })
   @JoinColumn()
   provider!: Provider
+
+  private setProps() {
+    this.measurementUnit = this.product.measureUnit
+    this.basePriceAtOrder = this.product.unitPrice
+    this.total = this.basePriceAtOrder * this.quantityRequested
+  }
+
+  @BeforeInsert()
+  async beforeInsert() {
+    this.setProps()
+  }
+
+  @BeforeUpdate()
+  async beforeUpdate() {
+    this.setProps()
+  }
 }

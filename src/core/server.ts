@@ -48,7 +48,7 @@ export class Server {
     //* Middlewares
     this.app.use(ThrottlerMiddleware.limit()) // Límite de solicitudes para evitar abuso
     this.app.use(cors()) // Habilita CORS (Compartición de Recursos de Origen Cruzado)
-    this.app.use(express.json()) // Habilita la conversion a JSON en las solicitudes
+    this.app.use(express.json({ limit: '50mb' })) // Habilita la conversion a JSON en las solicitudes
     this.app.use(
       fileUpload({
         limits: { fileSize: 50 * 1024 * 1024 }, // Establece un límite de tamaño de archivo de 50MB

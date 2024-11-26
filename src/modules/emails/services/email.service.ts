@@ -57,6 +57,7 @@ export class EmailService {
     })
 
     this.transporter.verify((error, success) => {
+      console.log(error)
       if (error)
         throw new InternalServerErrorException('Error connecting to mailer')
 

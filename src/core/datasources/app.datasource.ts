@@ -7,8 +7,6 @@ import { Provider } from '@modules/provider/models'
 import { Product } from '@modules/product/models'
 import { Order, OrderItem } from '@modules/order/models'
 import { Invoice } from '@modules/invoice/models'
-import { Category } from '@modules/category/models'
-import { Brand } from '@modules/brand/models'
 import { Branch } from '@modules/branch/models'
 import { AppLogger } from '@core/logger'
 
@@ -29,17 +27,7 @@ export const AppDataSource = new DataSource({
   synchronize: envs.DB_SYNC, // Si debe sincronizarse automáticamente con la base de datos (no recomendado en producción).
   ssl: envs.DB_SSL, // Si debe usar SSL para la conexión.
   logging: false, // Desactiva el registro en consola de SQL generado por TypeORM.
-  entities: [
-    User,
-    Provider,
-    Product,
-    Order,
-    OrderItem,
-    Invoice,
-    Category,
-    Brand,
-    Branch,
-  ], // Entidades que forman el modelo de datos.
+  entities: [User, Provider, Product, Order, OrderItem, Invoice, Branch], // Entidades que forman el modelo de datos.
   migrations: [join(__dirname, '../migrations', '*.ts')], // Rutas de las migraciones.
   subscribers: [], // No se usan suscriptores en este caso.
 })
