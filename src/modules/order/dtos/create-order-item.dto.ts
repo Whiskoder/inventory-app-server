@@ -16,7 +16,7 @@ export class CreateOrderItemDto {
   @Type(() => Number)
   @IsInt()
   @IsPositive()
-  productPriceId!: number
+  productId!: number
 
   public static async create(obj: {
     [key: string]: any

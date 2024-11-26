@@ -1,19 +1,9 @@
-import { plainToInstance, Type } from 'class-transformer'
-import {
-  IsDateString,
-  IsInt,
-  IsPositive,
-  validateOrReject,
-} from 'class-validator'
+import { plainToInstance } from 'class-transformer'
+import { IsDateString, validateOrReject } from 'class-validator'
 
 export class CreateOrderDto {
   @IsDateString()
   deliveryDate!: Date
-
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  branchId!: number
 
   public static async create(obj: {
     [key: string]: any

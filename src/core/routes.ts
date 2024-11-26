@@ -1,12 +1,10 @@
 import { Router } from 'express'
 
 import { AuthRoutes } from '@modules/auth'
-import { CategoryRoutes } from '@modules/category'
 import { BranchRoutes } from '@modules/branch'
 import { ProductRoutes } from '@modules/product'
 import { ProviderRoutes } from '@modules/provider'
 import { OrderRoutes } from '@modules/order'
-import { BrandRoutes } from '@modules/brand'
 import { InvoiceRoutes } from '@modules/invoice'
 import { UserRoutes } from '@modules/user'
 
@@ -29,8 +27,6 @@ export class AppRoutes {
 
     // Rutas relacionadas con la autenticación
     router.use('/v1/auth', AuthRoutes.routes)
-    // Rutas relacionadas con categorías
-    router.use('/v1/categories', CategoryRoutes.routes)
     // Rutas relacionadas con sucursales
     router.use('/v1/branches', BranchRoutes.routes)
     // Rutas relacionadas con productos
@@ -39,8 +35,6 @@ export class AppRoutes {
     router.use('/v1/providers', ProviderRoutes.routes)
     // Rutas relacionadas con órdenes
     router.use('/v1/orders', OrderRoutes.routes)
-    // Rutas relacionadas con marcas
-    router.use('/v1/brands', BrandRoutes.routes)
     // Rutas relacionadas con facturas
     router.use('/v1/invoices', InvoiceRoutes.routes)
     // Rutas relacionadas con usuarios

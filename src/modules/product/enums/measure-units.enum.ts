@@ -10,4 +10,6 @@ export enum MeasureUnit {
   rolls = 'roll',
   packages = 'pkg',
   cans = 'can',
+  meters = 'mt',
+  bunch = 'mjo',
 }

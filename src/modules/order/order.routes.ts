@@ -3,7 +3,6 @@ import { Router } from 'express'
 import { Actions, Resources } from '@modules/user/enums'
 import { AppDataSource } from '@core/datasources'
 import { AuthMiddleware } from '@core/middlewares'
-import { Branch } from '@modules/branch/models'
 import { EmailService } from '@modules/emails/services'
 import { envs } from '@config/plugins'
 import { Order, OrderItem } from '@modules/order/models'
@@ -18,7 +17,6 @@ export class OrderRoutes {
     const orderRepository = AppDataSource.getRepository(Order)
     const orderItemsRepository = AppDataSource.getRepository(OrderItem)
     const productRepository = AppDataSource.getRepository(Product)
-    const branchRepository = AppDataSource.getRepository(Branch)
     const userRepository = AppDataSource.getRepository(User)
 
     const emailService = new EmailService({
@@ -34,7 +32,6 @@ export class OrderRoutes {
       orderRepository,
       orderItemsRepository,
       productRepository,
-      branchRepository,
       userRepository,
       emailService
     )
@@ -54,26 +51,31 @@ export class OrderRoutes {
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.placeOrder
     )
+
     router.post(
       '/:orderId/accept',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.acceptOrder
     )
+
     router.post(
       '/:orderId/send',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.notifyOrderDelivery
     )
+
     router.post(
       '/:orderId/complete',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.completeOrder
     )
+
     router.post(
       '/:orderId/cancel',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
       controller.cancelOrder
     )
+
     router.post(
       '/:orderId/reject-cancel',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
@@ -92,6 +94,12 @@ export class OrderRoutes {
       controller.getOrderById
     )
 
+    router.get(
+      '/budget/:date',
+      [AuthMiddleware.checkPermission(resource, Actions.READ)],
+      controller.getOrderWeekBudget
+    )
+
     router.put(
       '/:orderId',
       [AuthMiddleware.checkPermission(resource, Actions.UPDATE)],
@@ -107,17 +115,17 @@ export class OrderRoutes {
     router.post(
       '/:orderId/items/',
       [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
-      controller.createMultipleOrderItems
+      controller.createOrderItem
     )
 
     router.put(
-      '/:orderId/items/',
+      '/:orderId/items/:orderItemId',
       [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
-      controller.updateMultipleOrderItems
+      controller.updateOrderItem
     )
 
     router.delete(
-      '/:orderId/items/',
+      '/:orderId/items/:orderItemId',
       [AuthMiddleware.checkPermission(resource, Actions.CREATE)],
       controller.deleteOrderItem
     )

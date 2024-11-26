@@ -1,7 +1,6 @@
 import { plainToInstance, Type } from 'class-transformer'
 import {
   IsEnum,
-  IsInt,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -10,7 +9,7 @@ import {
   validateOrReject,
 } from 'class-validator'
 
-import { longNameLength } from '@modules/shared/constants'
+import { codeLength, longNameLength } from '@modules/shared/constants'
 import { MeasureUnit } from '@modules/product/enums'
 export class UpdateProductDto {
   @IsOptional()
@@ -22,28 +21,25 @@ export class UpdateProductDto {
   @Length(1, longNameLength)
   name?: string
 
+  @IsOptional()
+  @IsString()
+  @Length(1, codeLength)
+  code?: string
+
   @Type(() => Number)
   @IsOptional()
   @IsNumber()
-  @IsPositive()
-  pricePerUnit!: number
+  unitPrice!: number
 
-  @Type(() => Number)
-  @IsNumber()
-  @IsPositive()
-  minUnits!: number
-
-  @Type(() => Number)
   @IsOptional()
-  @IsInt()
-  @IsPositive()
-  brandId!: number
+  @IsString()
+  @Length(1, longNameLength)
+  brand!: string
 
-  @Type(() => Number)
   @IsOptional()
-  @IsInt()
-  @IsPositive()
-  categoryId?: number
+  @IsString()
+  @Length(1, longNameLength)
+  category?: string
 
   public static async create(obj: {
     [key: string]: any

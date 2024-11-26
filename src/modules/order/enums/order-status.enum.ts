@@ -18,11 +18,3 @@ export enum OrderStatus {
   // When there is a conflic in the order (e.g., wrong item sent, damaged product, etc.)
   DISCREPANCY = 8,
 }
-
-/*
-send
-accept
-decline
-deliver
-complete
-*/

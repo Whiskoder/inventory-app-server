@@ -3,13 +3,14 @@ import {
   IsEnum,
   IsInt,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   Length,
   validateOrReject,
 } from 'class-validator'
 
-import { longNameLength } from '@modules/shared/constants'
+import { codeLength, longNameLength } from '@modules/shared/constants'
 import { MeasureUnit } from '@modules/product/enums'
 
 export class CreateProductDto {
@@ -20,25 +21,23 @@ export class CreateProductDto {
   @Length(1, longNameLength)
   name!: string
 
-  @Type(() => Number)
-  @IsNumber()
-  @IsPositive()
-  pricePerUnit!: number
+  @IsString()
+  @Length(1, codeLength)
+  code!: string
 
   @Type(() => Number)
   @IsNumber()
-  @IsPositive()
-  minUnits!: number
+  unitPrice!: number
 
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  brandId!: number
+  @Length(1, longNameLength)
+  @IsString()
+  @IsOptional()
+  brand!: string
 
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  categoryId!: number
+  @Length(1, longNameLength)
+  @IsString()
+  @IsOptional()
+  category!: string
 
   public static async create(obj: {
     [key: string]: any
