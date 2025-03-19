@@ -1,7 +1,3 @@
-# Los pepes Backend
-
-grupoDlamaña
-
 # Instalaciones recomendadas
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) - Para manejar contenedores de Docker como base de datos
