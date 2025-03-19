@@ -1,12 +1,12 @@
-import { Router } from 'express'
+import { Router } from "express";
 
-import { AuthRoutes } from '@modules/auth'
-import { BranchRoutes } from '@modules/branch'
-import { ProductRoutes } from '@modules/product'
-import { ProviderRoutes } from '@modules/provider'
-import { OrderRoutes } from '@modules/order'
-import { InvoiceRoutes } from '@modules/invoice'
-import { UserRoutes } from '@modules/user'
+import { AuthRoutes } from "@modules/auth";
+import { BranchRoutes } from "@modules/branch";
+import { ProductRoutes } from "@modules/product";
+import { ProviderRoutes } from "@modules/provider";
+import { OrderRoutes } from "@modules/order";
+import { InvoiceRoutes } from "@modules/invoice";
+import { UserRoutes } from "@modules/user";
 
 /**
  * Clase que define las rutas principales de la aplicación.
@@ -23,23 +23,24 @@ export class AppRoutes {
    * @returns {Router} El objeto Router configurado con las rutas de la API.
    */
   static get routes(): Router {
-    const router = Router({ caseSensitive: false })
+    const router = Router({ caseSensitive: false });
 
     // Rutas relacionadas con la autenticación
-    router.use('/v1/auth', AuthRoutes.routes)
+    // Router va usar la ruta /v1/auth para el modulo AuthRoutes
+    router.use("/v1/auth", AuthRoutes.routes);
     // Rutas relacionadas con sucursales
-    router.use('/v1/branches', BranchRoutes.routes)
+    router.use("/v1/branches", BranchRoutes.routes);
     // Rutas relacionadas con productos
-    router.use('/v1/products', ProductRoutes.routes)
+    router.use("/v1/products", ProductRoutes.routes);
     // Rutas relacionadas con proveedores
-    router.use('/v1/providers', ProviderRoutes.routes)
+    router.use("/v1/providers", ProviderRoutes.routes);
     // Rutas relacionadas con órdenes
-    router.use('/v1/orders', OrderRoutes.routes)
+    router.use("/v1/orders", OrderRoutes.routes);
     // Rutas relacionadas con facturas
-    router.use('/v1/invoices', InvoiceRoutes.routes)
+    router.use("/v1/invoices", InvoiceRoutes.routes);
     // Rutas relacionadas con usuarios
-    router.use('/v1/users', UserRoutes.routes)
+    router.use("/v1/users", UserRoutes.routes);
 
-    return router
+    return router;
   }
 }

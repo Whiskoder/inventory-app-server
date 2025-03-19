@@ -1,5 +1,5 @@
-import { Actions, Resources } from '@modules/user/enums'
-import { IRoleConfig, Permissions } from '@modules/user/interfaces'
+import { Actions, Resources } from "@modules/user/enums";
+import { IRoleConfig, Permissions } from "@modules/user/interfaces";
 
 /**
  * Función que obtiene los permisos de administrador para todas
@@ -9,12 +9,17 @@ import { IRoleConfig, Permissions } from '@modules/user/interfaces'
  * todas las acciones (CREATE, DELETE, READ, UPDATE).
  */
 const getAdminPermissions = (): Permissions => {
-  const actions = [Actions.CREATE, Actions.DELETE, Actions.READ, Actions.UPDATE]
+  const actions = [
+    Actions.CREATE,
+    Actions.DELETE,
+    Actions.READ,
+    Actions.UPDATE,
+  ];
   const permissions = Object.keys(Resources).reduce((acc, resource) => {
-    return { ...acc, [resource]: actions }
-  }, {})
-  return permissions as Permissions
-}
+    return { ...acc, [resource]: actions };
+  }, {});
+  return permissions as Permissions;
+};
 
 /**
  * Configuración de roles y permisos para la aplicación.
@@ -45,7 +50,12 @@ export const RoleConfig: IRoleConfig = {
         Actions.CREATE,
         Actions.DELETE,
       ],
-      [Resources.ORDER]: [Actions.READ, Actions.UPDATE, Actions.CREATE],
+      [Resources.ORDER]: [
+        Actions.READ,
+        Actions.UPDATE,
+        Actions.CREATE,
+        Actions.DELETE,
+      ],
       [Resources.PRODUCT]: [Actions.READ],
       [Resources.PROVIDER]: [Actions.READ],
     },
@@ -104,4 +114,4 @@ export const RoleConfig: IRoleConfig = {
       [Resources.PROVIDER]: [],
     },
   },
-}
+};

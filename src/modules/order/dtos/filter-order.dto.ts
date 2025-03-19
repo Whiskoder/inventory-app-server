@@ -16,9 +16,14 @@ export class FilterOrderDto {
   @IsOptional()
   lteCreatedAt?: string
 
+  
+
   @IsDateString()
   @IsOptional()
   gteCreatedAt?: string
+
+  // Greather Than or Equals >= gte 17 febrero
+  // Lower Than or Equals <= lte 23 febrero
 
   @IsDateString()
   @IsOptional()
